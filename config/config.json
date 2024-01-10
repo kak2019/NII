@@ -1,0 +1,54 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "home-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/homePage/HomePageWebPart.js",
+          "manifest": "./src/webparts/homePage/HomePageWebPart.manifest.json"
+        }
+      ]
+    },
+    "case-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/caseForm/CaseFormWebPart.js",
+          "manifest": "./src/webparts/caseForm/CaseFormWebPart.manifest.json"
+        }
+      ]
+    },
+    "upload-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/uploadPage/UploadPageWebPart.js",
+          "manifest": "./src/webparts/uploadPage/UploadPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "case-list-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/caseList/CaseListWebPart.js",
+          "manifest": "./src/webparts/caseList/CaseListWebPart.manifest.json"
+        }
+      ]
+    },
+    "package-list-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/packageList/PackageListWebPart.js",
+          "manifest": "./src/webparts/packageList/PackageListWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "HomePageWebPartStrings": "lib/webparts/homePage/loc/{locale}.js",
+    "CaseFormWebPartStrings": "lib/webparts/caseForm/loc/{locale}.js",
+    "UploadPageWebPartStrings": "lib/webparts/uploadPage/loc/{locale}.js",
+    "CaseListWebPartStrings": "lib/webparts/caseList/loc/{locale}.js",
+    "PackageListWebPartStrings": "lib/webparts/packageList/loc/{locale}.js"
+  }
+}
