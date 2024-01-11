@@ -1,34 +1,58 @@
-@import '~office-ui-fabric-react/dist/sass/References.scss';
-
-.caseForm {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
-  }
+@import "~@fluentui/react/dist/sass/References.scss";
+.rowContent {
+  margin-top: 12px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
-
-.welcome {
-  text-align: center;
-}
-
-.welcomeImage {
+.fixedWidth {
   width: 100%;
-  max-width: 420px;
 }
-
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
-
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
-  }
+.title {
+  font-weight: 600;
+  font-size: large;
+  margin-bottom: 20px;
+}
+.marginTop {
+  margin-top: 20px;
+}
+.fontBold {
+  font-weight: 600;
+}
+.listWrapper {
+  /* Firefox */
+  min-height: -moz-calc(100vh - 324px);
+  /* WebKit */
+  min-height: -webkit-calc(100vh - 324px);
+  /* Opera */
+  min-height: -o-calc(100vh - 324px);
+  /* Standard */
+  min-height: calc(100vh - 324px);
+  min-width: 50vw;
+  width: fit-content;
+  overflow: inherit;
+}
+.flexWrapper {
+  align-items: flex-start;
+  display: flex;
+  min-width: 100vw;
+}
+.iconPlus {
+  font-size: 20px;
+  font-weight: bolder;
+}
+.iconPlus:hover {
+  cursor: pointer;
+}
+.iconDelete {
+  font-size: 20px;
+  font-weight: bolder;
+  margin-left: 20px;
+}
+.iconDelete:hover {
+  cursor: pointer;
+}
+.inputStyle:disabled {
+  border: 0px;
+  color: black;
+  background-color: transparent;
 }
