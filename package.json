@@ -19,6 +19,7 @@
     "@pnp/sp": "^3.16.0",
     "@pnp/spfx-controls-react": "^3.11.0",
     "@reduxjs/toolkit": "^1.9.5",
+    "antd": "^4.24.15",
     "office-ui-fabric-react": "7.185.7",
     "react": "16.13.1",
     "react-dom": "16.13.1",
