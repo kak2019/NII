@@ -11,6 +11,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'HomePageWebPartStrings';
 import HomePage from './components/HomePage';
 import { IHomePageProps } from './components/IHomePageProps';
+import { getSP } from '../../common/pnpjsConfig';
 
 export interface IHomePageWebPartProps {
   description: string;
@@ -29,7 +30,8 @@ export default class HomePageWebPart extends BaseClientSideWebPart<IHomePageWebP
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+        context:this.context
       }
     );
 
@@ -38,7 +40,7 @@ export default class HomePageWebPart extends BaseClientSideWebPart<IHomePageWebP
 
   protected onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
-
+    getSP(this.context);
     return super.onInit();
   }
 

@@ -49,6 +49,7 @@
     "CaseFormWebPartStrings": "lib/webparts/caseForm/loc/{locale}.js",
     "UploadPageWebPartStrings": "lib/webparts/uploadPage/loc/{locale}.js",
     "CaseListWebPartStrings": "lib/webparts/caseList/loc/{locale}.js",
-    "PackageListWebPartStrings": "lib/webparts/packageList/loc/{locale}.js"
+    "PackageListWebPartStrings": "lib/webparts/packageList/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
   }
 }
