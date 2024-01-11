@@ -36,7 +36,8 @@ stages:
     jobs:
       - template: ./azure-pipelines-build.yml
         parameters:
-          name: 'build_solution'Nii TEST'
+          name: 'build_solution'
+          variable_group_name: 'Nii TEST'
   
   - stage: 'deploy_TEST'
     condition: and(succeeded('build_TEST'), startsWith(variables['Build.SourceBranch'], 'refs/heads/feature') )
