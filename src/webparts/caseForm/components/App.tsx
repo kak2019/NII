@@ -8,6 +8,8 @@ import {
   Radio,
   Divider,
   Input,
+  InputNumber,
+  Table,
 } from "antd";
 import {
   DeleteOutlined,
@@ -19,15 +21,80 @@ import * as React from "react";
 import "antd/dist/antd.css";
 import styles from "./CaseForm.module.scss";
 import { INiiCaseItem } from "../../../common/model/niicase";
+import { IPackagingNeed } from "../../../common/model/packagingneed";
 
 const App: React.FC = () => {
+  //#region interfaces
+  interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+    editing: boolean;
+    dataIndex: string;
+    index: React.Key;
+    title: string;
+    record: IPackagingNeed;
+    children: React.ReactNode;
+  }
+  //#endregion
   //#region fields
-
   const dummyCase: INiiCaseItem = {
     ID: "1",
     Status: "Case Created",
   };
   const [currentCase, setCurrentCase] = React.useState(dummyCase);
+  const columns = [
+    {
+      title: "Packaging",
+      dataIndex: "packaging",
+      width: "20%",
+      editable: false,
+    },
+    {
+      title: "No.(Qty)",
+      dataIndex: "qtyWeekly",
+      width: "40%",
+      editable: false,
+    },
+    {
+      title: "Packaging",
+      dataIndex: "packaging",
+      width: "20%",
+      editable: true,
+    },
+    { title: "No.(Qty)", dataIndex: "qtyYearly", width: "20%", editable: true },
+  ];
+  const packagingColumns = columns.map((col) => {
+    return {
+      ...col,
+      onCell: (record: IPackagingNeed) => ({
+        record,
+        title: col.title,
+        dataIndex: col.dataIndex,
+        editing: currentCase.Status === "Case Created" && col.editable,
+      }),
+    };
+  });
+  const casePackagings: IPackagingNeed[] = [];
+  for (let i = 0; i < 5; i++) {
+    casePackagings.push({
+      key: i,
+      packaging: 20 + 5 * i,
+      qtyWeekly: i + 1,
+      qtyYearly: (i + 1) * 48,
+    });
+  }
+  const [packages, setPackages] = React.useState(casePackagings);
+  const rowSelection = {
+    hideSelectAll: true,
+    onChange: (
+      selectedRowKeys: React.Key[],
+      selectedRows: IPackagingNeed[]
+    ) => {
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        "selectedRows: ",
+        selectedRows
+      );
+    },
+  };
   const props: UploadProps = {
     name: "file",
     action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
@@ -45,12 +112,36 @@ const App: React.FC = () => {
       }
     },
   };
-  const [value, setValue] = React.useState(1);
+  const [radioValue, setradioValue] = React.useState(1);
   //#endregion
   //#region events
+  const onPackagingChange = (
+    e: number,
+    key: React.Key,
+    field: string
+  ): void => {
+    casePackagings
+      .filter((casePackage) => casePackage.key === key)
+      .forEach((item) => {
+        switch (field) {
+          case "packaging": {
+            item.packaging = e;
+            break;
+          }
+          case "qtyYearly": {
+            item.qtyYearly = e;
+            item.qtyWeekly = Math.ceil(e / 48);
+            break;
+          }
+        }
+      });
+    console.log(casePackagings);
+    setPackages(casePackagings);
+    console.log(packages);
+  };
   const onApprovalChange = (e: RadioChangeEvent): void => {
     console.log("radio checked", e.target.value);
-    setValue(e.target.value);
+    setradioValue(e.target.value);
   };
   const onAdd = (): void => {
     console.log("add cliked");
@@ -66,12 +157,67 @@ const App: React.FC = () => {
   };
   //#endregion
   //#region methods
-  const isEditableCommon = React.useCallback(
-    (currentCase): boolean => {
-      return currentCase.Status === "Case Created";
-    },
-    [currentCase]
-  );
+  const isEditableCommon = React.useCallback((): boolean => {
+    return !(currentCase.Status === "Case Created");
+  }, [currentCase]);
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const cellInput = (
+    field: string,
+    record: IPackagingNeed,
+    editable: boolean
+  ) => {
+    switch (field) {
+      case "packaging":
+        return (
+          <InputNumber
+            controls={false}
+            value={record.packaging}
+            onChange={(e) => onPackagingChange(e, record.key, "packaging")}
+            disabled={!editable}
+          />
+        );
+      case "qtyWeekly":
+        return (
+          <InputNumber
+            controls={false}
+            value={record.qtyWeekly}
+            onChange={(e) => onPackagingChange(e, record.key, "qtyWeekly")}
+            disabled={!editable}
+          />
+        );
+      case "qtyYearly":
+        return (
+          <InputNumber
+            controls={false}
+            value={record.qtyYearly}
+            onChange={(e) => onPackagingChange(e, record.key, "qtyYearly")}
+            disabled={!editable}
+          />
+        );
+    }
+  };
+  const fields = ["packaging", "qtyWeekly", "qtyYearly"];
+  //#endregion
+  //#region components
+  const EditableCell: React.FC<EditableCellProps> = ({
+    editing,
+    dataIndex,
+    index,
+    title,
+    record,
+    children,
+    ...restProps
+  }) => {
+    return (
+      <td {...restProps}>
+        {fields.indexOf(dataIndex) !== -1 ? (
+          <div>{cellInput(dataIndex, record, editing)}</div>
+        ) : (
+          children
+        )}
+      </td>
+    );
+  };
   //#endregion
   return (
     <div className={styles.listWrapper}>
@@ -134,7 +280,7 @@ const App: React.FC = () => {
         <Row className={styles.rowContent}>
           <Col span={6}>Approval:</Col>
           <Col span={10}>
-            <Radio.Group onChange={onApprovalChange} value={value}>
+            <Radio.Group onChange={onApprovalChange} value={radioValue}>
               <Radio value={1}>Approve</Radio>
               <Radio value={0}>Reject</Radio>
             </Radio.Group>
@@ -148,11 +294,12 @@ const App: React.FC = () => {
             <Tabs.TabPane tab="Supplier Information" key="1">
               <Row className={styles.marginTop}>
                 <Col span={6}>Company Name:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={200}
                     className={styles.inputStyle}
                     defaultValue={"FOMECO NV"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
@@ -161,31 +308,34 @@ const App: React.FC = () => {
               </Row>
               <Row>
                 <Col span={6}>Street/P.O. Box:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={150}
                     className={styles.inputStyle}
                     defaultValue={"Blockellestreet 121"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Postal Code and City:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={50}
                     className={styles.inputStyle}
                     defaultValue={"8550 Zwevegem"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Country Code:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={20}
                     className={styles.inputStyle}
                     defaultValue={"BELGIUM"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
@@ -196,31 +346,34 @@ const App: React.FC = () => {
               </Row>
               <Row>
                 <Col span={6}>Street/P.O. Box:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={150}
                     className={styles.inputStyle}
                     defaultValue={"Blockellestreet 121"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Postal Code and City:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={50}
                     className={styles.inputStyle}
                     defaultValue={"8550 Zwevegem"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Country Code:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={20}
                     className={styles.inputStyle}
                     defaultValue={"BELGIUM"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
@@ -231,61 +384,67 @@ const App: React.FC = () => {
               </Row>
               <Row>
                 <Col span={6}>Street/P.O. Box:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={150}
                     className={styles.inputStyle}
                     defaultValue={"Blockellestreet 121"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Postal Code and City:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={50}
                     className={styles.inputStyle}
                     defaultValue={"8550 Zwevegem"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Country Code:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={20}
                     className={styles.inputStyle}
                     defaultValue={"BELGIUM"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row className={styles.marginTop}>
                 <Col span={6}>VAT No:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={20}
                     className={styles.inputStyle}
                     defaultValue={"BE0450254796"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row className={styles.marginTop}>
                 <Col span={6}>Supplier No:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={7}
                     className={styles.inputStyle}
                     defaultValue={"4662"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>GSDB ID:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={10}
                     className={styles.inputStyle}
                     defaultValue={"XXX"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
@@ -296,43 +455,48 @@ const App: React.FC = () => {
               </Row>
               <Row>
                 <Col span={6}>First and Last Name:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={50}
                     className={styles.inputStyle}
                     defaultValue={"Kris Lootens + Maika Vergote"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Email:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={50}
                     className={styles.inputStyle}
                     defaultValue={
                       "Kris.lootens@fomeco.be;maika.vergote@fomeco.be"
                     }
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Phone No:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    type="tel"
+                    maxLength={20}
                     className={styles.inputStyle}
                     defaultValue={"+32(0)56 650 620"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Fax No:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={20}
                     className={styles.inputStyle}
                     defaultValue={"xxxxxx"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
@@ -341,41 +505,45 @@ const App: React.FC = () => {
               </Row>
               <Row>
                 <Col span={6}>Packaging account no:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={10}
                     className={styles.inputStyle}
                     defaultValue={"BKKA-04"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Company Name:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={200}
                     className={styles.inputStyle}
                     defaultValue={"Thai Swedish Assembly Co LTD"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>City:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={50}
                     className={styles.inputStyle}
                     defaultValue={"Samutprakam"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
               <Row>
                 <Col span={6}>Country Code:</Col>
-                <Col>
+                <Col span={8}>
                   <Input
+                    maxLength={5}
                     className={styles.inputStyle}
                     defaultValue={"Thailand"}
-                    disabled={isEditableCommon(currentCase)}
+                    disabled={isEditableCommon()}
                   />
                 </Col>
               </Row>
@@ -447,8 +615,22 @@ const App: React.FC = () => {
                 </Col>
               </Row>
               <Row className={styles.marginTop}>
-                <Col span={12}>Two Weekly need:</Col>
+                <Col span={11} offset={1}>
+                  Weekly need:
+                </Col>
                 <Col>Yearly need:</Col>
+              </Row>
+              <Row>
+                <Col span={20}>
+                  <Table
+                    pagination={false}
+                    rowSelection={rowSelection}
+                    components={{ body: { cell: EditableCell } }}
+                    dataSource={packages}
+                    columns={packagingColumns}
+                    bordered={false}
+                  />
+                </Col>
               </Row>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Issuer Information" key="5">

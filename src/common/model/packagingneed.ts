@@ -1,6 +1,6 @@
 export interface IPackagingNeed {
-  key: string;
+  key: React.Key;
   packaging: number;
-  qtyTwoWeekly: number;
+  qtyWeekly: number;
   qtyYearly: number;
 }
