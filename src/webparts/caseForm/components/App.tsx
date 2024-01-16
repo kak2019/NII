@@ -13,7 +13,7 @@ import {
 } from "antd";
 import {
   DeleteOutlined,
-  PlusCircleOutlined,
+  PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import type { RadioChangeEvent, UploadProps } from "antd";
@@ -22,6 +22,7 @@ import "antd/dist/antd.css";
 import styles from "./CaseForm.module.scss";
 import { INiiCaseItem } from "../../../common/model/niicase";
 import { IPackagingNeed } from "../../../common/model/packagingneed";
+import { IAppProps } from "./IAppProps";
 
 const App: React.FC = () => {
   //#region interfaces
@@ -39,7 +40,25 @@ const App: React.FC = () => {
     ID: "1",
     Status: "Case Created",
   };
-  const [currentCase, setCurrentCase] = React.useState(dummyCase);
+  const casePackagings: IPackagingNeed[] = [];
+  for (let i = 0; i < 5; i++) {
+    casePackagings.push({
+      key: i,
+      packaging: 20 + 5 * i,
+      qtyWeekly: i + 1,
+      qtyYearly: (i + 1) * 48,
+    });
+  }
+  const packageArray: IPackagingNeed[] = [];
+  const initialState: IAppProps = {
+    currentCase: dummyCase,
+    packages: casePackagings,
+    packageYear: new Date().getFullYear(),
+    packageEditable: true,
+    selectedPackages: packageArray,
+    radioValue: 1,
+  };
+  const [states, setStates] = React.useState(initialState);
   const columns = [
     {
       title: "Packaging",
@@ -68,20 +87,11 @@ const App: React.FC = () => {
         record,
         title: col.title,
         dataIndex: col.dataIndex,
-        editing: currentCase.Status === "Case Created" && col.editable,
+        editing: states.currentCase.Status === "Case Created" && col.editable,
       }),
     };
   });
-  const casePackagings: IPackagingNeed[] = [];
-  for (let i = 0; i < 5; i++) {
-    casePackagings.push({
-      key: i,
-      packaging: 20 + 5 * i,
-      qtyWeekly: i + 1,
-      qtyYearly: (i + 1) * 48,
-    });
-  }
-  const [packages, setPackages] = React.useState(casePackagings);
+
   const rowSelection = {
     hideSelectAll: true,
     onChange: (
@@ -93,6 +103,7 @@ const App: React.FC = () => {
         "selectedRows: ",
         selectedRows
       );
+      setStates({ ...states, selectedPackages: selectedRows });
     },
   };
   const props: UploadProps = {
@@ -112,16 +123,20 @@ const App: React.FC = () => {
       }
     },
   };
-  const [radioValue, setradioValue] = React.useState(1);
   //#endregion
   //#region events
+  const onApprovalChange = (e: RadioChangeEvent): void => {
+    console.log("radio checked", e.target.value);
+    setStates({ ...states, radioValue: e.target.value });
+  };
   const onPackagingChange = (
     e: number,
     key: React.Key,
     field: string
   ): void => {
-    casePackagings
-      .filter((casePackage) => casePackage.key === key)
+    const packagesDup = [...states.packages];
+    packagesDup
+      .filter((packageDup) => packageDup.key === key)
       .forEach((item) => {
         switch (field) {
           case "packaging": {
@@ -135,31 +150,45 @@ const App: React.FC = () => {
           }
         }
       });
-    console.log(casePackagings);
-    setPackages(casePackagings);
-    console.log(packages);
+    console.log("Dup:", packagesDup);
+    console.log("State:", states.packages);
   };
-  const onApprovalChange = (e: RadioChangeEvent): void => {
-    console.log("radio checked", e.target.value);
-    setradioValue(e.target.value);
+  const onPackagingBlur = (): void => {
+    setStates({ ...states });
   };
   const onAdd = (): void => {
-    console.log("add cliked");
+    const packagesDup = [...states.packages];
+    console.log(packagesDup);
+    packagesDup.push({
+      key: Number(packagesDup[packagesDup.length - 1].key) + 1,
+    });
+    setStates({ ...states, packages: packagesDup });
   };
   const onDelete = (): void => {
-    console.log("delete clicked");
+    const packagesDup = [...states.packages];
+    states.selectedPackages.forEach((selectedPackage) => {
+      packagesDup.splice(packagesDup.indexOf(selectedPackage), 1);
+    });
+    setStates({ ...states, packages: packagesDup });
   };
   const onStatusChange = (statusValue: string): void => {
-    const caseTemp = currentCase;
+    const caseTemp = states.currentCase;
     caseTemp.Status = statusValue;
-    setCurrentCase(caseTemp);
-    console.log(currentCase);
+    setStates({ ...states, currentCase: caseTemp });
+    console.log(states.currentCase);
+  };
+  const onPackageYearChange = (year: number): void => {
+    setStates({
+      ...states,
+      packageYear: year,
+      packageEditable: year === new Date().getFullYear(),
+    });
   };
   //#endregion
   //#region methods
   const isEditableCommon = React.useCallback((): boolean => {
-    return !(currentCase.Status === "Case Created");
-  }, [currentCase]);
+    return !(states.currentCase.Status === "Case Created");
+  }, [states.currentCase]);
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const cellInput = (
     field: string,
@@ -173,7 +202,8 @@ const App: React.FC = () => {
             controls={false}
             value={record.packaging}
             onChange={(e) => onPackagingChange(e, record.key, "packaging")}
-            disabled={!editable}
+            disabled={!(editable && states.packageEditable)}
+            onBlur={onPackagingBlur}
           />
         );
       case "qtyWeekly":
@@ -182,7 +212,7 @@ const App: React.FC = () => {
             controls={false}
             value={record.qtyWeekly}
             onChange={(e) => onPackagingChange(e, record.key, "qtyWeekly")}
-            disabled={!editable}
+            disabled={!(editable && states.packageEditable)}
           />
         );
       case "qtyYearly":
@@ -191,7 +221,8 @@ const App: React.FC = () => {
             controls={false}
             value={record.qtyYearly}
             onChange={(e) => onPackagingChange(e, record.key, "qtyYearly")}
-            disabled={!editable}
+            disabled={!(editable && states.packageEditable)}
+            onBlur={onPackagingBlur}
           />
         );
     }
@@ -280,7 +311,7 @@ const App: React.FC = () => {
         <Row className={styles.rowContent}>
           <Col span={6}>Approval:</Col>
           <Col span={10}>
-            <Radio.Group onChange={onApprovalChange} value={radioValue}>
+            <Radio.Group onChange={onApprovalChange} value={states.radioValue}>
               <Radio value={1}>Approve</Radio>
               <Radio value={0}>Reject</Radio>
             </Radio.Group>
@@ -567,8 +598,9 @@ const App: React.FC = () => {
                 </Col>
                 <Col span={3}>
                   <Select
-                    defaultValue={2024}
+                    defaultValue={states.packageYear}
                     className={styles.fixedWidth}
+                    onChange={onPackageYearChange}
                     options={[
                       {
                         value: 2020,
@@ -602,15 +634,19 @@ const App: React.FC = () => {
                   />
                 </Col>
                 <Col span={4} offset={2}>
-                  <PlusCircleOutlined
-                    rev={undefined}
-                    onSelect={onAdd}
+                  <Button
+                    shape="circle"
                     className={styles.iconPlus}
+                    icon={<PlusOutlined rev={undefined} />}
+                    onClick={onAdd}
+                    disabled={!states.packageEditable}
                   />
-                  <DeleteOutlined
-                    rev={undefined}
-                    onSelect={onDelete}
+                  <Button
+                    shape="circle"
                     className={styles.iconDelete}
+                    icon={<DeleteOutlined rev={undefined} />}
+                    onClick={onDelete}
+                    disabled={!states.packageEditable}
                   />
                 </Col>
               </Row>
@@ -626,7 +662,7 @@ const App: React.FC = () => {
                     pagination={false}
                     rowSelection={rowSelection}
                     components={{ body: { cell: EditableCell } }}
-                    dataSource={packages}
+                    dataSource={states.packages}
                     columns={packagingColumns}
                     bordered={false}
                   />
