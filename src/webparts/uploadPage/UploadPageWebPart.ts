@@ -11,7 +11,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'UploadPageWebPartStrings';
 import UploadPage from './components/UploadPage';
 import { IUploadPageProps } from './components/IUploadPageProps';
-
+import { getSP } from '../../common/pnpjsConfig';
 export interface IUploadPageWebPartProps {
   description: string;
 }
@@ -29,7 +29,8 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+        context:this.context
       }
     );
 
@@ -38,7 +39,7 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
 
   protected onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
-
+    getSP(this.context);
     return super.onInit();
   }
 
