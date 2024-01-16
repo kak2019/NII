@@ -32,3 +32,28 @@
     }
   }
 }
+.section {
+  margin-bottom: 35px;
+}
+.homePageButton{
+  background-color:white;
+  color: Black;
+  margin-bottom: 8px;
+  display: block;
+  width: 240px;
+  height: 60px;
+  font-size: 14px;
+  border-radius: 4px;
+  border-color: rgb(214, 214, 214);
+  margin-right: 17px;
+  box-shadow: rgba(189, 190, 190, 0.3) 0px 1px 1px 0px, rgba(60, 64, 67, 0.15) 0px 2px 3px 2px;
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+.parttitle{
+  font-Weight: bold;
+  margin-bottom:10px;
+  font-size: 16px;
+}
