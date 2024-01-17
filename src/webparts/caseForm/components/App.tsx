@@ -38,7 +38,24 @@ const App: React.FC = () => {
   //#region fields
   const dummyCase: INiiCaseItem = {
     ID: "1",
+    Creator: "Rodger",
+    CaseID: "24001",
+    Created: "1/16/2024",
     Status: "Case Created",
+    Approval: 1,
+    CompanyName: "FOMECO NV",
+    ASNStreet: "Blockellestreet 121",
+    ASNPostCode: "8550 Zwevegem",
+    ASNCountryCode: "BELGIUM",
+    BillStreet: "Blockellestreet 121",
+    BillPostCode: "8550 Zwevegem",
+    BillCountryCode: "BELGIUM",
+    ShipStreet: "Blockellestreet 121",
+    ShipPostCode: "8550 Zwevegem",
+    ShipCountryCode: "BELGIUM",
+    VatNo: "BE0450254796",
+    PARMANo: "4662",
+    GSDBID: "",
   };
   const casePackagings: IPackagingNeed[] = [];
   for (let i = 0; i < 5; i++) {
@@ -49,16 +66,16 @@ const App: React.FC = () => {
       qtyYearly: (i + 1) * 48,
     });
   }
-  const packageArray: IPackagingNeed[] = [];
   const initialState: IAppProps = {
     currentCase: dummyCase,
     packages: casePackagings,
     packageYear: new Date().getFullYear(),
     packageEditable: true,
-    selectedPackages: packageArray,
-    radioValue: 1,
+    selectedPackages: [],
   };
   const [states, setStates] = React.useState(initialState);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [debouncedStates, setDebouncedStates] = React.useState(initialState);
   const columns = [
     {
       title: "Packaging",
@@ -91,7 +108,6 @@ const App: React.FC = () => {
       }),
     };
   });
-
   const rowSelection = {
     hideSelectAll: true,
     onChange: (
@@ -125,9 +141,21 @@ const App: React.FC = () => {
   };
   //#endregion
   //#region events
+  const onTextChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof typeof states.currentCase
+  ): void => {
+    const currentCaseDup = { ...states.currentCase };
+    (currentCaseDup[field] as string) = e.target.value;
+    setStates({ ...states, currentCase: currentCaseDup });
+  };
   const onApprovalChange = (e: RadioChangeEvent): void => {
     console.log("radio checked", e.target.value);
-    setStates({ ...states, radioValue: e.target.value });
+    setStates({
+      ...states,
+      currentCase: { ...states.currentCase, Approval: e.target.value },
+    });
+    console.log(states.currentCase.CompanyName);
   };
   const onPackagingChange = (
     e: number,
@@ -150,8 +178,6 @@ const App: React.FC = () => {
           }
         }
       });
-    console.log("Dup:", packagesDup);
-    console.log("State:", states.packages);
   };
   const onPackagingBlur = (): void => {
     setStates({ ...states });
@@ -186,6 +212,12 @@ const App: React.FC = () => {
   };
   //#endregion
   //#region methods
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedStates(states);
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [states, 500]);
   const isEditableCommon = React.useCallback((): boolean => {
     return !(states.currentCase.Status === "Case Created");
   }, [states.currentCase]);
@@ -258,18 +290,18 @@ const App: React.FC = () => {
         </Row>
         <Row className={styles.rowContent}>
           <Col span={6}>Case ID:</Col>
-          <Col>24001</Col>
+          <Col>{states.currentCase.CaseID}</Col>
         </Row>
         <Row className={styles.rowContent}>
           <Col span={6}>Creation Date:</Col>
-          <Col>data</Col>
+          <Col>{states.currentCase.Created}</Col>
         </Row>
         <Row className={styles.rowContent} align="middle">
           <Col span={6}>Status</Col>
           <Col span={8}>
             <Select
               onChange={onStatusChange}
-              defaultValue="Case Created"
+              defaultValue={states.currentCase.Status}
               className={styles.fixedWidth}
               options={[
                 {
@@ -311,7 +343,10 @@ const App: React.FC = () => {
         <Row className={styles.rowContent}>
           <Col span={6}>Approval:</Col>
           <Col span={10}>
-            <Radio.Group onChange={onApprovalChange} value={states.radioValue}>
+            <Radio.Group
+              onChange={onApprovalChange}
+              value={states.currentCase.Approval}
+            >
               <Radio value={1}>Approve</Radio>
               <Radio value={0}>Reject</Radio>
             </Radio.Group>
@@ -329,8 +364,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={200}
                     className={styles.inputStyle}
-                    defaultValue={"FOMECO NV"}
+                    defaultValue={states.currentCase.CompanyName}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "CompanyName");
+                    }}
                   />
                 </Col>
               </Row>
@@ -343,8 +381,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={150}
                     className={styles.inputStyle}
-                    defaultValue={"Blockellestreet 121"}
+                    defaultValue={states.currentCase.ASNStreet}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNStreet");
+                    }}
                   />
                 </Col>
               </Row>
@@ -354,8 +395,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={50}
                     className={styles.inputStyle}
-                    defaultValue={"8550 Zwevegem"}
+                    defaultValue={states.currentCase.ASNPostCode}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNPostCode");
+                    }}
                   />
                 </Col>
               </Row>
@@ -365,8 +409,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={20}
                     className={styles.inputStyle}
-                    defaultValue={"BELGIUM"}
+                    defaultValue={states.currentCase.ASNCountryCode}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNCountryCode");
+                    }}
                   />
                 </Col>
               </Row>
@@ -381,8 +428,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={150}
                     className={styles.inputStyle}
-                    defaultValue={"Blockellestreet 121"}
+                    defaultValue={states.currentCase.BillStreet}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillStreet");
+                    }}
                   />
                 </Col>
               </Row>
@@ -392,8 +442,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={50}
                     className={styles.inputStyle}
-                    defaultValue={"8550 Zwevegem"}
+                    defaultValue={states.currentCase.BillPostCode}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillPostCode");
+                    }}
                   />
                 </Col>
               </Row>
@@ -403,8 +456,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={20}
                     className={styles.inputStyle}
-                    defaultValue={"BELGIUM"}
+                    defaultValue={states.currentCase.BillCountryCode}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillCountryCode");
+                    }}
                   />
                 </Col>
               </Row>
@@ -419,8 +475,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={150}
                     className={styles.inputStyle}
-                    defaultValue={"Blockellestreet 121"}
+                    defaultValue={states.currentCase.ShipStreet}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipStreet");
+                    }}
                   />
                 </Col>
               </Row>
@@ -430,8 +489,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={50}
                     className={styles.inputStyle}
-                    defaultValue={"8550 Zwevegem"}
+                    defaultValue={states.currentCase.ShipPostCode}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipPostCode");
+                    }}
                   />
                 </Col>
               </Row>
@@ -441,8 +503,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={20}
                     className={styles.inputStyle}
-                    defaultValue={"BELGIUM"}
+                    defaultValue={states.currentCase.ShipCountryCode}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipCountryCode");
+                    }}
                   />
                 </Col>
               </Row>
@@ -452,8 +517,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={20}
                     className={styles.inputStyle}
-                    defaultValue={"BE0450254796"}
+                    defaultValue={states.currentCase.VatNo}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "VatNo");
+                    }}
                   />
                 </Col>
               </Row>
@@ -463,8 +531,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={7}
                     className={styles.inputStyle}
-                    defaultValue={"4662"}
+                    defaultValue={states.currentCase.PARMANo}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "PARMANo");
+                    }}
                   />
                 </Col>
               </Row>
@@ -474,8 +545,11 @@ const App: React.FC = () => {
                   <Input
                     maxLength={10}
                     className={styles.inputStyle}
-                    defaultValue={"XXX"}
+                    defaultValue={states.currentCase.GSDBID}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "GSDBID");
+                    }}
                   />
                 </Col>
               </Row>

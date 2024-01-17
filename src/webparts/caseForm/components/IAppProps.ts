@@ -7,5 +7,4 @@ export interface IAppProps {
   packageYear: number;
   packageEditable: boolean;
   selectedPackages: IPackagingNeed[];
-  radioValue: number;
 }
