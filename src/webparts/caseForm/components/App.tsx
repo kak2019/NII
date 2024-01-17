@@ -61,7 +61,7 @@ const App: React.FC = () => {
   for (let i = 0; i < 5; i++) {
     casePackagings.push({
       key: i,
-      packaging: 20 + 5 * i,
+      packaging: "21",
       qtyWeekly: i + 1,
       qtyYearly: (i + 1) * 48,
     });
@@ -74,8 +74,6 @@ const App: React.FC = () => {
     selectedPackages: [],
   };
   const [states, setStates] = React.useState(initialState);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [debouncedStates, setDebouncedStates] = React.useState(initialState);
   const columns = [
     {
       title: "Packaging",
@@ -158,7 +156,7 @@ const App: React.FC = () => {
     console.log(states.currentCase.CompanyName);
   };
   const onPackagingChange = (
-    e: number,
+    e: number | string,
     key: React.Key,
     field: string
   ): void => {
@@ -168,16 +166,18 @@ const App: React.FC = () => {
       .forEach((item) => {
         switch (field) {
           case "packaging": {
-            item.packaging = e;
+            item.packaging = e.toString();
+            setStates({ ...states, packages: packagesDup });
             break;
           }
           case "qtyYearly": {
-            item.qtyYearly = e;
-            item.qtyWeekly = Math.ceil(e / 48);
+            item.qtyYearly = Number(e);
+            item.qtyWeekly = Math.ceil(Number(e) / 48);
             break;
           }
         }
       });
+    console.log(states);
   };
   const onPackagingBlur = (): void => {
     setStates({ ...states });
@@ -212,12 +212,6 @@ const App: React.FC = () => {
   };
   //#endregion
   //#region methods
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebouncedStates(states);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [states, 500]);
   const isEditableCommon = React.useCallback((): boolean => {
     return !(states.currentCase.Status === "Case Created");
   }, [states.currentCase]);
@@ -230,23 +224,17 @@ const App: React.FC = () => {
     switch (field) {
       case "packaging":
         return (
-          <InputNumber
-            controls={false}
+          <Input
             value={record.packaging}
-            onChange={(e) => onPackagingChange(e, record.key, "packaging")}
+            onChange={(e) =>
+              onPackagingChange(e.target.value, record.key, "packaging")
+            }
             disabled={!(editable && states.packageEditable)}
             onBlur={onPackagingBlur}
           />
         );
       case "qtyWeekly":
-        return (
-          <InputNumber
-            controls={false}
-            value={record.qtyWeekly}
-            onChange={(e) => onPackagingChange(e, record.key, "qtyWeekly")}
-            disabled={!(editable && states.packageEditable)}
-          />
-        );
+        return <InputNumber value={record.qtyWeekly} disabled={true} />;
       case "qtyYearly":
         return (
           <InputNumber
