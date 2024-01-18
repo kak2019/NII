@@ -10,19 +10,23 @@ import {
   Input,
   InputNumber,
   Table,
+  DatePicker,
 } from "antd";
 import {
   DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import type { RadioChangeEvent, UploadProps } from "antd";
+import type { DatePickerProps, RadioChangeEvent, UploadProps } from "antd";
 import * as React from "react";
 import "antd/dist/antd.css";
 import styles from "./CaseForm.module.scss";
 import { INiiCaseItem } from "../../../common/model/niicase";
 import { IPackagingNeed } from "../../../common/model/packagingneed";
 import { IAppProps } from "./IAppProps";
+import { IReceiverPlant } from "../../../common/model/receiverplant";
+import { IConsequense } from "../../../common/model/consequense";
+import * as moment from "moment";
 
 const App: React.FC = () => {
   //#region interfaces
@@ -56,14 +60,38 @@ const App: React.FC = () => {
     VatNo: "BE0450254796",
     PARMANo: "4662",
     GSDBID: "",
+    Constatus: "Yes",
+    RequestDate: new Date(),
   };
   const casePackagings: IPackagingNeed[] = [];
   for (let i = 0; i < 5; i++) {
     casePackagings.push({
       key: i,
-      packaging: "21",
+      packaging: 20 + i,
       qtyWeekly: i + 1,
       qtyYearly: (i + 1) * 48,
+      packagingName: `package${20 + i}`,
+    });
+  }
+  const caseReceiving: IReceiverPlant[] = [];
+  for (let i = 0; i < 5; i++) {
+    caseReceiving.push({
+      key: i,
+      MasterID: i.toString(),
+      PackagingAccountNo: i.toString(),
+      CompanyName: `Company${i}`,
+      City: "Tian Jin",
+      CountryCode: "China",
+    });
+  }
+  const caseConsequense: IConsequense[] = [];
+  for (let i = 0; i < 5; i++) {
+    caseConsequense.push({
+      key: i,
+      MasterID: i.toString(),
+      Packaging: i.toString(),
+      PackagingName: `package${i}`,
+      Demand: i * 10,
     });
   }
   const initialState: IAppProps = {
@@ -72,30 +100,77 @@ const App: React.FC = () => {
     packageYear: new Date().getFullYear(),
     packageEditable: true,
     selectedPackages: [],
+    receivingPlant: caseReceiving,
+    consequenses: caseConsequense,
   };
   const [states, setStates] = React.useState(initialState);
-  const columns = [
+  const packagingColumnBase = [
     {
       title: "Packaging",
       dataIndex: "packaging",
-      width: "20%",
+      width: "15%",
       editable: false,
     },
     {
       title: "No.(Qty)",
       dataIndex: "qtyWeekly",
-      width: "40%",
+      width: "30%",
       editable: false,
     },
     {
       title: "Packaging",
       dataIndex: "packaging",
-      width: "20%",
+      width: "15%",
       editable: true,
     },
-    { title: "No.(Qty)", dataIndex: "qtyYearly", width: "20%", editable: true },
+    {
+      title: "Packaging Name",
+      dataIndex: "packagingName",
+      width: "25%",
+      editable: false,
+    },
+    { title: "No.(Qty)", dataIndex: "qtyYearly", width: "15%", editable: true },
   ];
-  const packagingColumns = columns.map((col) => {
+  const receivingColumns = [
+    {
+      title: "Packaging account no.",
+      dataIndex: "PackagingAccountNo",
+      width: "28%",
+    },
+    {
+      title: "Company name",
+      dataIndex: "CompanyName",
+      width: "28%",
+    },
+    {
+      title: "City",
+      dataIndex: "City",
+      width: "16%",
+    },
+    {
+      title: "Country Code",
+      dataIndex: "CountryCode",
+      width: "28%",
+    },
+  ];
+  const consequenseColumns = [
+    {
+      title: "Packaging",
+      dataIndex: "Packaging",
+      width: "33%",
+    },
+    {
+      title: "Packaging Name",
+      dataIndex: "PackagingName",
+      width: "33%",
+    },
+    {
+      title: "No.(QTY) Yearly Need",
+      dataIndex: "Demand",
+      width: "34%",
+    },
+  ];
+  const packagingColumns = packagingColumnBase.map((col) => {
     return {
       ...col,
       onCell: (record: IPackagingNeed) => ({
@@ -137,6 +212,7 @@ const App: React.FC = () => {
       }
     },
   };
+  const dateFormat = "DD/MM/YYYY";
   //#endregion
   //#region events
   const onTextChange = (
@@ -153,10 +229,15 @@ const App: React.FC = () => {
       ...states,
       currentCase: { ...states.currentCase, Approval: e.target.value },
     });
-    console.log(states.currentCase.CompanyName);
+  };
+  const onConsequenseChange = (e: RadioChangeEvent): void => {
+    setStates({
+      ...states,
+      currentCase: { ...states.currentCase, Constatus: e.target.value },
+    });
   };
   const onPackagingChange = (
-    e: number | string,
+    e: number,
     key: React.Key,
     field: string
   ): void => {
@@ -166,13 +247,12 @@ const App: React.FC = () => {
       .forEach((item) => {
         switch (field) {
           case "packaging": {
-            item.packaging = e.toString();
-            setStates({ ...states, packages: packagesDup });
+            item.packaging = e;
             break;
           }
           case "qtyYearly": {
-            item.qtyYearly = Number(e);
-            item.qtyWeekly = Math.ceil(Number(e) / 48);
+            item.qtyYearly = e;
+            item.qtyWeekly = Math.ceil(e / 48);
             break;
           }
         }
@@ -210,6 +290,19 @@ const App: React.FC = () => {
       packageEditable: year === new Date().getFullYear(),
     });
   };
+  const onRequestDateChange: DatePickerProps["onChange"] = (
+    date,
+    dateString
+  ) => {
+    setStates({
+      ...states,
+      currentCase: {
+        ...states.currentCase,
+        RequestDate: moment(dateString, dateFormat).toDate(),
+      },
+    });
+    console.log(states.currentCase.RequestDate);
+  };
   //#endregion
   //#region methods
   const isEditableCommon = React.useCallback((): boolean => {
@@ -221,28 +314,36 @@ const App: React.FC = () => {
     record: IPackagingNeed,
     editable: boolean
   ) => {
+    const fieldEditable = !(editable && states.packageEditable);
     switch (field) {
       case "packaging":
         return (
-          <Input
+          <InputNumber
+            controls={false}
             value={record.packaging}
-            onChange={(e) =>
-              onPackagingChange(e.target.value, record.key, "packaging")
-            }
-            disabled={!(editable && states.packageEditable)}
+            onChange={(e) => onPackagingChange(e, record.key, "packaging")}
+            readOnly={fieldEditable}
             onBlur={onPackagingBlur}
+            bordered={!fieldEditable}
           />
         );
       case "qtyWeekly":
-        return <InputNumber value={record.qtyWeekly} disabled={true} />;
+        return (
+          <InputNumber
+            value={record.qtyWeekly}
+            readOnly={fieldEditable}
+            bordered={!fieldEditable}
+          />
+        );
       case "qtyYearly":
         return (
           <InputNumber
             controls={false}
             value={record.qtyYearly}
             onChange={(e) => onPackagingChange(e, record.key, "qtyYearly")}
-            disabled={!(editable && states.packageEditable)}
+            readOnly={fieldEditable}
             onBlur={onPackagingBlur}
+            bordered={!fieldEditable}
           />
         );
     }
@@ -340,184 +441,24 @@ const App: React.FC = () => {
             </Radio.Group>
           </Col>
         </Row>
+        <Row className={styles.rowContent}>
+          <Col span={3}>
+            <Button className={styles.fixedWidth}>Save</Button>
+          </Col>
+          <Col span={3} offset={2}>
+            <Button className={styles.fixedWidth}>Cancel</Button>
+          </Col>
+        </Row>
       </div>
       <Divider />
       <Row className={styles.rowContent}>
         <Col span={24}>
           <Tabs defaultActiveKey="1">
             <Tabs.TabPane tab="Supplier Information" key="1">
-              <Row className={styles.marginTop}>
-                <Col span={6}>Company Name:</Col>
+              <Row className={styles.marginTop} align="middle">
+                <Col span={6}>Supplier Parma Code:</Col>
                 <Col span={8}>
                   <Input
-                    maxLength={200}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.CompanyName}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "CompanyName");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row className={styles.marginTop}>
-                <Col className={styles.fontBold}>Address(administrative):</Col>
-              </Row>
-              <Row>
-                <Col span={6}>Street/P.O. Box:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={150}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.ASNStreet}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "ASNStreet");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Postal Code and City:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={50}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.ASNPostCode}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "ASNPostCode");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Country Code:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={20}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.ASNCountryCode}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "ASNCountryCode");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row className={styles.marginTop}>
-                <Col className={styles.fontBold}>
-                  Invoice address(if other than above):
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Street/P.O. Box:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={150}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.BillStreet}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "BillStreet");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Postal Code and City:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={50}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.BillPostCode}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "BillPostCode");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Country Code:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={20}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.BillCountryCode}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "BillCountryCode");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row className={styles.marginTop}>
-                <Col className={styles.fontBold}>
-                  Delivery address(empty packaging):
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Street/P.O. Box:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={150}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.ShipStreet}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "ShipStreet");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Postal Code and City:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={50}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.ShipPostCode}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "ShipPostCode");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Country Code:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={20}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.ShipCountryCode}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "ShipCountryCode");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row className={styles.marginTop}>
-                <Col span={6}>VAT No:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={20}
-                    className={styles.inputStyle}
-                    defaultValue={states.currentCase.VatNo}
-                    disabled={isEditableCommon()}
-                    onChange={(e) => {
-                      onTextChange(e, "VatNo");
-                    }}
-                  />
-                </Col>
-              </Row>
-              <Row className={styles.marginTop}>
-                <Col span={6}>Supplier No:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={7}
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.PARMANo}
                     disabled={isEditableCommon()}
@@ -527,11 +468,231 @@ const App: React.FC = () => {
                   />
                 </Col>
               </Row>
-              <Row>
+              <Row align="middle">
+                <Col span={6}>Company Name:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.CompanyName}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "CompanyName");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row className={styles.marginTop} align="middle">
+                <Col className={styles.fontBold}>Address(administrative):</Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Street/P.O. Box:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ASNStreet}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNStreet");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Postal Code and City:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ASNPostCode}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNPostCode");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Country Code:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ASNCountryCode}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNCountryCode");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Phone No:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ASNPhone}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ASNPhone");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row className={styles.marginTop} align="middle">
+                <Col className={styles.fontBold}>
+                  Invoice address(if other than above):
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Supplier Parma Code:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.BilltoNo}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BilltoNo");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Street/P.O. Box:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.BillStreet}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillStreet");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Postal Code and City:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.BillPostCode}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillPostCode");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Country Code:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.BillCountryCode}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillCountryCode");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Phone No:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.BillPhone}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "BillPhone");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row className={styles.marginTop} align="middle">
+                <Col className={styles.fontBold}>
+                  Delivery address(empty packaging):
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Supplier Parma Code:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ShipToNo}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipToNo");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Street/P.O. Box:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ShipStreet}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipStreet");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Postal Code and City:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ShipPostCode}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipPostCode");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Country Code:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ShipCountryCode}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipCountryCode");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Phone No:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.ShipPhone}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ShipPhone");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row className={styles.marginTop} align="middle">
+                <Col span={6}>VAT No:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.VatNo}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "VatNo");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
                 <Col span={6}>GSDB ID:</Col>
                 <Col span={8}>
                   <Input
-                    maxLength={10}
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.GSDBID}
                     disabled={isEditableCommon()}
@@ -546,50 +707,42 @@ const App: React.FC = () => {
               <Row className={styles.marginTop}>
                 <Col className={styles.fontBold}>Packaging Contact Person:</Col>
               </Row>
-              <Row>
+              <Row align="middle">
                 <Col span={6}>First and Last Name:</Col>
                 <Col span={8}>
                   <Input
-                    maxLength={50}
                     className={styles.inputStyle}
-                    defaultValue={"Kris Lootens + Maika Vergote"}
+                    defaultValue={states.currentCase.ContractName}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ContractName");
+                    }}
                   />
                 </Col>
               </Row>
-              <Row>
+              <Row align="middle">
                 <Col span={6}>Email:</Col>
                 <Col span={8}>
                   <Input
-                    maxLength={50}
                     className={styles.inputStyle}
-                    defaultValue={
-                      "Kris.lootens@fomeco.be;maika.vergote@fomeco.be"
-                    }
+                    defaultValue={states.currentCase.ContractEmail}
                     disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ContractEmail");
+                    }}
                   />
                 </Col>
               </Row>
-              <Row>
+              <Row align="middle">
                 <Col span={6}>Phone No:</Col>
                 <Col span={8}>
                   <Input
-                    type="tel"
-                    maxLength={20}
                     className={styles.inputStyle}
-                    defaultValue={"+32(0)56 650 620"}
+                    defaultValue={states.currentCase.ContractPhoneno}
                     disabled={isEditableCommon()}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Fax No:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={20}
-                    className={styles.inputStyle}
-                    defaultValue={"xxxxxx"}
-                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "ContractPhoneno");
+                    }}
                   />
                 </Col>
               </Row>
@@ -597,52 +750,100 @@ const App: React.FC = () => {
                 <Col className={styles.fontBold}>Receiving PLANT/RECEIVER:</Col>
               </Row>
               <Row>
-                <Col span={6}>Packaging account no:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={10}
-                    className={styles.inputStyle}
-                    defaultValue={"BKKA-04"}
-                    disabled={isEditableCommon()}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Company Name:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={200}
-                    className={styles.inputStyle}
-                    defaultValue={"Thai Swedish Assembly Co LTD"}
-                    disabled={isEditableCommon()}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>City:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={50}
-                    className={styles.inputStyle}
-                    defaultValue={"Samutprakam"}
-                    disabled={isEditableCommon()}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6}>Country Code:</Col>
-                <Col span={8}>
-                  <Input
-                    maxLength={5}
-                    className={styles.inputStyle}
-                    defaultValue={"Thailand"}
-                    disabled={isEditableCommon()}
+                <Col span={22}>
+                  <Table
+                    pagination={false}
+                    dataSource={states.receivingPlant}
+                    columns={receivingColumns}
+                    size="small"
                   />
                 </Col>
               </Row>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Consequences for other supplier" key="3">
-              Content of Tab Pane 3
+              <Row className={styles.marginTop}>
+                <Col span={6}>Consequenses:</Col>
+                <Col span={8}>
+                  <Radio.Group
+                    onChange={onConsequenseChange}
+                    value={states.currentCase.Constatus}
+                  >
+                    <Radio value={"Yes"}>Yes</Radio>
+                    <Radio value={"No"}>No</Radio>
+                  </Radio.Group>
+                </Col>
+              </Row>
+              <div
+                style={{
+                  visibility:
+                    states.currentCase.Constatus === "Yes"
+                      ? "visible"
+                      : "hidden",
+                }}
+              >
+                <Row align="middle" className={styles.marginTop}>
+                  <Col span={6}>Packaging account no:</Col>
+                  <Col span={8}>
+                    <Input
+                      className={styles.inputStyle}
+                      defaultValue={states.currentCase.ConPackagingAccno}
+                      disabled={isEditableCommon()}
+                      onChange={(e) => {
+                        onTextChange(e, "ConPackagingAccno");
+                      }}
+                    />
+                  </Col>
+                </Row>
+                <Row align="middle">
+                  <Col span={6}>Company Name:</Col>
+                  <Col span={8}>
+                    <Input
+                      className={styles.inputStyle}
+                      defaultValue={states.currentCase.ConCompanyName}
+                      disabled={isEditableCommon()}
+                      onChange={(e) => {
+                        onTextChange(e, "ConCompanyName");
+                      }}
+                    />
+                  </Col>
+                </Row>
+                <Row align="middle">
+                  <Col span={6}>City:</Col>
+                  <Col span={8}>
+                    <Input
+                      className={styles.inputStyle}
+                      defaultValue={states.currentCase.ConCity}
+                      disabled={isEditableCommon()}
+                      onChange={(e) => {
+                        onTextChange(e, "ConCity");
+                      }}
+                    />
+                  </Col>
+                </Row>
+                <Row align="middle">
+                  <Col span={6}>Country Code:</Col>
+                  <Col span={8}>
+                    <Input
+                      className={styles.inputStyle}
+                      defaultValue={states.currentCase.ConCountryCode}
+                      disabled={isEditableCommon()}
+                      onChange={(e) => {
+                        onTextChange(e, "ConCountryCode");
+                      }}
+                    />
+                  </Col>
+                </Row>
+                <Row className={styles.marginTop}>
+                  <Col span={15}>
+                    <Table
+                      pagination={false}
+                      dataSource={states.consequenses}
+                      columns={consequenseColumns}
+                      size="small"
+                    />
+                  </Col>
+                </Row>
+              </div>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Packaging Need" key="4">
               <Row className={styles.marginTop}>
@@ -713,13 +914,13 @@ const App: React.FC = () => {
                 </Col>
               </Row>
               <Row className={styles.marginTop}>
-                <Col span={11} offset={1}>
+                <Col span={9} className={styles.fontBold}>
                   Weekly need:
                 </Col>
-                <Col>Yearly need:</Col>
+                <Col className={styles.fontBold}>Yearly need:</Col>
               </Row>
               <Row>
-                <Col span={20}>
+                <Col span={22}>
                   <Table
                     pagination={false}
                     rowSelection={rowSelection}
@@ -727,12 +928,81 @@ const App: React.FC = () => {
                     dataSource={states.packages}
                     columns={packagingColumns}
                     bordered={false}
+                    size="small"
+                  />
+                </Col>
+              </Row>
+              <Row align="middle" className={styles.marginTop}>
+                <Col span={6}>Requested start date:</Col>
+                <Col span={8}>
+                  <DatePicker
+                    defaultValue={moment(
+                      states.currentCase.RequestDate,
+                      dateFormat
+                    )}
+                    format={dateFormat}
+                    onChange={onRequestDateChange}
+                    allowClear={false}
                   />
                 </Col>
               </Row>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Issuer Information" key="5">
-              Content of Tab Pane 5
+              <Row className={styles.marginTop} align="middle">
+                <Col className={styles.fontBold}>ISSUER:</Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Company:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.IssuCompName}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "IssuCompName");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>First and Last Name:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.IssuName}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "IssuName");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>Phone No:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.IssuPhoneNo}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "IssuPhoneNo");
+                    }}
+                  />
+                </Col>
+              </Row>
+              <Row align="middle">
+                <Col span={6}>E-mail:</Col>
+                <Col span={8}>
+                  <Input
+                    className={styles.inputStyle}
+                    defaultValue={states.currentCase.IssuEmail}
+                    disabled={isEditableCommon()}
+                    onChange={(e) => {
+                      onTextChange(e, "IssuEmail");
+                    }}
+                  />
+                </Col>
+              </Row>
             </Tabs.TabPane>
           </Tabs>
         </Col>
