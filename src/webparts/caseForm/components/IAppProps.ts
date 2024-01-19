@@ -1,7 +1,7 @@
 import { IConsequense } from "../../../common/model/consequense";
 import { INiiCaseItem } from "../../../common/model/niicase";
 import { IPackagingNeed } from "../../../common/model/packagingneed";
-import { IReceiverPlant } from "../../../common/model/receiverplant";
+import { IReceivingPlant } from "../../../common/model/receivingplant";
 
 export interface IAppProps {
   currentCase: INiiCaseItem;
@@ -9,6 +9,6 @@ export interface IAppProps {
   packageYear: number;
   packageEditable: boolean;
   selectedPackages: IPackagingNeed[];
-  receivingPlant: IReceiverPlant[];
+  receivingPlant: IReceivingPlant[];
   consequenses: IConsequense[];
 }

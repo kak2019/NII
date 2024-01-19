@@ -1,4 +1,4 @@
-export interface IReceiverPlant {
+export interface IReceivingPlant {
   key?: React.Key;
   MasterID?: string;
   PackagingAccountNo?: string;

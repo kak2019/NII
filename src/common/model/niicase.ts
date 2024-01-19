@@ -1,6 +1,6 @@
 export interface INiiCaseItem {
   ID?: string;
-  Creator?: string;
+  Title?: string;
   Created?: string;
   Approval?: number;
   CaseID?: string;
@@ -18,7 +18,7 @@ export interface INiiCaseItem {
   BillPhone?: string;
   ShipToNo?: string;
   ShipStreet?: string;
-  ShipPostCode?: string;
+  ShipPostcode?: string;
   ShipCountryCode?: string;
   ShipPhone?: string;
   VatNo?: string;
@@ -31,7 +31,7 @@ export interface INiiCaseItem {
   ConCompanyName?: string;
   ConCity?: string;
   ConCountryCode?: string;
-  RequestDate?: Date;
+  RequestDate?: string | Date;
   IssuCompName?: string;
   IssuName?: string;
   IssuPhoneNo?: string;
