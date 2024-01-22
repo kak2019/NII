@@ -1,12 +1,6 @@
-export interface IPackagingNeed {
-  key: React.Key;
-  packaging?: number;
-  packagingName?: string;
-  qtyWeekly?: number;
-  qtyYearly?: number;
-}
-
-export interface IPackagingList {
+export interface IPackaging {
+  key?: React.Key;
+  ID?: string;
   MasterID?: string;
   CaseID?: string;
   Year?: string;

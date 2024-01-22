@@ -20,18 +20,6 @@ export const packagesSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.packages
 );
-export const packageYearSelector = createSelector(
-  featureStateSelector,
-  (state: ICaseState) => state?.packageYear
-);
-export const packageEditableSelector = createSelector(
-  featureStateSelector,
-  (state: ICaseState) => state?.packageEditable
-);
-export const selectedPackagesSelector = createSelector(
-  featureStateSelector,
-  (state: ICaseState) => state?.selectedPackages
-);
 export const receivingPlantSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.receivingPlant

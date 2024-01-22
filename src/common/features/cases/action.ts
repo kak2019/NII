@@ -115,7 +115,7 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
     return item;
   } catch (err) {
     console.log(err);
-    return Promise.reject("Error when fetch request by Id");
+    return Promise.reject("Error when fetch Case by Id");
   }
 };
 
@@ -180,7 +180,7 @@ const fetchConsequensesByCase = async (arg: {
     return result;
   } catch (err) {
     console.log(err);
-    return Promise.reject("Error when fetch request by Sender");
+    return Promise.reject("Error when fetch Consequenses by Case");
   }
 };
 //Thunk function

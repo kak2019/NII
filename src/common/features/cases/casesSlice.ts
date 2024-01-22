@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../../store";
-import { IPackagingNeed } from "../../model/packagingneed";
 import { INiiCaseItem } from "../../model/niicase";
 import { IReceivingPlant } from "../../model/receivingplant";
 import { IConsequense } from "../../model/consequense";
@@ -9,6 +8,7 @@ import {
   fetchByIdAction,
   fetchConsequensesByCaseAction,
 } from "./action";
+import { IPackaging } from "../../model/packagingneed";
 
 export enum CaseStatus {
   Idle,
@@ -19,10 +19,7 @@ export enum CaseStatus {
 export interface ICaseState {
   currentCaseId: string;
   currentCase: INiiCaseItem;
-  packages: IPackagingNeed[];
-  packageYear: number;
-  packageEditable: boolean;
-  selectedPackages: IPackagingNeed[];
+  packages: IPackaging[];
   receivingPlant: IReceivingPlant[];
   consequenses: IConsequense[];
   statue: CaseStatus;
@@ -34,9 +31,6 @@ const initialState: ICaseState = {
   currentCaseId: "-1",
   currentCase: {},
   packages: [],
-  packageYear: new Date().getFullYear(),
-  packageEditable: true,
-  selectedPackages: [],
   receivingPlant: [],
   consequenses: [],
   statue: CaseStatus.Idle,

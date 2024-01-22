@@ -23,12 +23,12 @@ import * as React from "react";
 import "antd/dist/antd.css";
 import styles from "../CaseForm.module.scss";
 import { INiiCaseItem } from "../../../../common/model/niicase";
-import { IPackagingNeed } from "../../../../common/model/packagingneed";
 import { IAppProps } from "../IAppProps";
 import { IReceivingPlant } from "../../../../common/model/receivingplant";
 import { IConsequense } from "../../../../common/model/consequense";
 import * as moment from "moment";
 import { useCases } from "../../../../common/hooks/useCases";
+import { IPackaging } from "../../../../common/model/packagingneed";
 
 const CaseFormView: React.FC = () => {
   //#region interfaces
@@ -37,7 +37,7 @@ const CaseFormView: React.FC = () => {
     dataIndex: string;
     index: React.Key;
     title: string;
-    record: IPackagingNeed;
+    record: IPackaging;
     children: React.ReactNode;
   }
   //#endregion
@@ -48,26 +48,14 @@ const CaseFormView: React.FC = () => {
     currentCase,
     currentCaseId,
     packages,
-    packageYear,
-    packageEditable,
-    selectedPackages,
     receivingPlant,
     consequenses,
-    changeCaseId,
-    fetchCaseById,
+    ,
+    ,
     editCase,
-    fetchConsequensesByCase,
+    ,
   ] = useCases();
-  const casePackagings: IPackagingNeed[] = [];
-  for (let i = 0; i < 5; i++) {
-    casePackagings.push({
-      key: i,
-      packaging: 20 + i,
-      qtyWeekly: i + 1,
-      qtyYearly: (i + 1) * 48,
-      packagingName: `package${20 + i}`,
-    });
-  }
+  const casePackagings: IPackaging[] = [];
   const caseReceiving: IReceivingPlant[] = [];
   for (let i = 0; i < 5; i++) {
     caseReceiving.push({
@@ -82,11 +70,11 @@ const CaseFormView: React.FC = () => {
   const initialState: IAppProps = {
     currentCase: currentCase,
     packages: casePackagings,
+    receivingPlant: caseReceiving,
+    consequenses: consequenses,
     packageYear: new Date().getFullYear(),
     packageEditable: true,
     selectedPackages: [],
-    receivingPlant: caseReceiving,
-    consequenses: consequenses,
   };
   const [states, setStates] = React.useState(initialState);
   const packagingColumnBase = [
@@ -158,7 +146,7 @@ const CaseFormView: React.FC = () => {
   const packagingColumns = packagingColumnBase.map((col) => {
     return {
       ...col,
-      onCell: (record: IPackagingNeed) => ({
+      onCell: (record: IPackaging) => ({
         record,
         title: col.title,
         dataIndex: col.dataIndex,
@@ -168,10 +156,7 @@ const CaseFormView: React.FC = () => {
   });
   const rowSelection = {
     hideSelectAll: true,
-    onChange: (
-      selectedRowKeys: React.Key[],
-      selectedRows: IPackagingNeed[]
-    ) => {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: IPackaging[]) => {
       console.log(
         `selectedRowKeys: ${selectedRowKeys}`,
         "selectedRows: ",
@@ -222,7 +207,7 @@ const CaseFormView: React.FC = () => {
     });
   };
   const onPackagingChange = (
-    e: number,
+    e: number | string,
     key: React.Key,
     field: string
   ): void => {
@@ -232,17 +217,16 @@ const CaseFormView: React.FC = () => {
       .forEach((item) => {
         switch (field) {
           case "packaging": {
-            item.packaging = e;
+            item.Packaging = e.toString();
             break;
           }
           case "qtyYearly": {
-            item.qtyYearly = e;
-            item.qtyWeekly = Math.ceil(e / 48);
+            item.YearlyDemand = Number(e);
+            item.WeeklyDemand = Math.ceil(Number(e) / 48);
             break;
           }
         }
       });
-    console.log(states);
   };
   const onPackagingBlur = (): void => {
     setStates({ ...states });
@@ -294,13 +278,6 @@ const CaseFormView: React.FC = () => {
       caseUpdate.RequestDate,
       dateFormat
     ).toDate();
-    console.log(
-      "Divider--------------------------------------------------------"
-    );
-    console.log(caseUpdate);
-    console.log(
-      "Divider--------------------------------------------------------"
-    );
     await editCase({ niiCase: caseUpdate });
   };
   //#endregion
@@ -309,19 +286,16 @@ const CaseFormView: React.FC = () => {
     return !(states.currentCase.Status === "Case Created");
   }, [states.currentCase]);
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const cellInput = (
-    field: string,
-    record: IPackagingNeed,
-    editable: boolean
-  ) => {
+  const cellInput = (field: string, record: IPackaging, editable: boolean) => {
     const fieldEditable = !(editable && states.packageEditable);
     switch (field) {
       case "packaging":
         return (
-          <InputNumber
-            controls={false}
-            value={record.packaging}
-            onChange={(e) => onPackagingChange(e, record.key, "packaging")}
+          <Input
+            value={record.Packaging}
+            onChange={(e) =>
+              onPackagingChange(e.target.value, record.key, "packaging")
+            }
             readOnly={fieldEditable}
             onBlur={onPackagingBlur}
             bordered={!fieldEditable}
@@ -330,16 +304,16 @@ const CaseFormView: React.FC = () => {
       case "qtyWeekly":
         return (
           <InputNumber
-            value={record.qtyWeekly}
-            readOnly={fieldEditable}
-            bordered={!fieldEditable}
+            value={record.WeeklyDemand}
+            readOnly={true}
+            bordered={false}
           />
         );
       case "qtyYearly":
         return (
           <InputNumber
             controls={false}
-            value={record.qtyYearly}
+            value={record.YearlyDemand}
             onChange={(e) => onPackagingChange(e, record.key, "qtyYearly")}
             readOnly={fieldEditable}
             onBlur={onPackagingBlur}

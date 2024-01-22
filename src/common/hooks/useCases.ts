@@ -6,15 +6,11 @@ import {
   currentCaseSelector,
   isFetchingSelector,
   messageSelector,
-  packageEditableSelector,
-  packageYearSelector,
   packagesSelector,
   receivingPlantSelector,
-  selectedPackagesSelector,
 } from "../features/cases/selector";
 import { IConsequense } from "../model/consequense";
 import { INiiCaseItem } from "../model/niicase";
-import { IPackagingNeed } from "../model/packagingneed";
 import { IReceivingPlant } from "../model/receivingplant";
 import { useAppDispatch, useAppSelector } from "./useApp";
 import {
@@ -22,16 +18,14 @@ import {
   fetchByIdAction,
   fetchConsequensesByCaseAction,
 } from "../features/cases/action";
+import { IPackaging } from "../model/packagingneed";
 
 type CasesOperators = [
   isFetching: CaseStatus,
   errorMessage: string,
   currentCase: INiiCaseItem,
   currentCaseId: string,
-  packages: IPackagingNeed[],
-  packageYear: number,
-  packageEditable: boolean,
-  selectedPackages: IPackagingNeed[],
+  packages: IPackaging[],
   receivingPlant: IReceivingPlant[],
   consequenses: IConsequense[],
   changeCaseId: (Id: string) => void,
@@ -45,9 +39,6 @@ export const useCases = (): Readonly<CasesOperators> => {
   const currentCase = useAppSelector(currentCaseSelector);
   const currentCaseId = useAppSelector(currentCaseIdSelector);
   const packages = useAppSelector(packagesSelector);
-  const packageYear = useAppSelector(packageYearSelector);
-  const packageEditable = useAppSelector(packageEditableSelector);
-  const selectedPackages = useAppSelector(selectedPackagesSelector);
   const receivingPlant = useAppSelector(receivingPlantSelector);
   const consequenses = useAppSelector(consequensesSelector);
   const isFetching = useAppSelector(isFetchingSelector);
@@ -91,9 +82,6 @@ export const useCases = (): Readonly<CasesOperators> => {
     currentCase,
     currentCaseId,
     packages,
-    packageYear,
-    packageEditable,
-    selectedPackages,
     receivingPlant,
     consequenses,
     changeCaseId,

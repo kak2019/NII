@@ -6,27 +6,23 @@ import { Alert, Spin } from "antd";
 import * as React from "react";
 import CaseFormView from "./caseformview/index";
 import styles from "./CaseForm.module.scss";
+import { usePackagings } from "../../../common/hooks/usePackagings";
 
 export default memo(function App() {
   const [
     isFetching,
     errorMessage,
-    currentCase,
+    ,
     currentCaseId,
     ,
     ,
     ,
-    ,
-    ,
-    consequenses,
     changeCaseId,
     fetchCaseById,
     ,
     fetchConsequensesByCase,
   ] = useCases();
-  useEffect(() => {
-    changeCaseId("1");
-  }, []);
+  const [, , , , , removePackagingById] = usePackagings();
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     function delay(ms: number) {
@@ -43,9 +39,10 @@ export default memo(function App() {
     waitForData().catch(console.error);
   }, [currentCaseId]);
   const isLoading = isFetching === CaseStatus.Loading;
-  const onClickButton = (): void => {
+  const onClickButton = async (): Promise<void> => {
     changeCaseId("1");
     console.log(currentCaseId);
+    await removePackagingById({ Id: 5 });
   };
   return (
     <>
