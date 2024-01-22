@@ -3,6 +3,7 @@ import { getSP } from "../../pnpjsConfig";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FeatureKey } from "../../featureKey";
 import { INiiCaseItem } from "../../model/niicase";
+import { IConsequense } from "../../model/consequense";
 
 const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
   const sp = spfi(getSP());
@@ -53,7 +54,7 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
                         <FieldRef Name="ASNPhone"/>
                         <FieldRef Name="BillPhone"/>
                         <FieldRef Name="ShipPhone"/>
-                        <FieldRef Name="Case ID"/>
+                        <FieldRef Name="CaseID"/>
                       </ViewFields>
                       <RowLimit>1</RowLimit>
                     </View>`,
@@ -134,6 +135,54 @@ const editCase = async (arg: {
     return Promise.reject("Error when update Nii Case");
   }
 };
+const fetchConsequensesByCase = async (arg: {
+  CaseId: number;
+}): Promise<IConsequense[]> => {
+  const sp = spfi(getSP());
+  try {
+    const result = await sp.web.lists
+      .getByTitle("Consequenses List")
+      .renderListDataAsStream({
+        ViewXml: `<View>
+	                        <Query>
+		                        <Where>
+			                        <Eq>
+				                        <FieldRef Name="MasterID"/>
+				                        <Value Type="Text">${arg.CaseId}</Value>
+			                        </Eq>
+		                        </Where>
+	                        </Query>
+	                        <ViewFields>
+		                        <FieldRef Name="Packaging"/>
+		                        <FieldRef Name="PackagingName"/>
+		                        <FieldRef Name="Demand"/>
+	                        </ViewFields>
+	                        <RowLimit>5000</RowLimit>
+                        </View>`,
+      })
+      .then((response) => {
+        if (response.Row.length > 0) {
+          console.log(response);
+          return response.Row.map(
+            (item) =>
+              ({
+                key: item.ID,
+                ID: item.ID,
+                Packaging: item.Packaging,
+                PackagingName: item.PackagingName,
+                Demand: item.Demand,
+              } as IConsequense)
+          );
+        } else {
+          return [] as IConsequense[];
+        }
+      });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when fetch request by Sender");
+  }
+};
 //Thunk function
 export const fetchByIdAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchById`,
@@ -143,4 +192,9 @@ export const fetchByIdAction = createAsyncThunk(
 export const editCaseAction = createAsyncThunk(
   `${FeatureKey.CASES}/editCase`,
   editCase
+);
+
+export const fetchConsequensesByCaseAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchConsequensesByCase`,
+  fetchConsequensesByCase
 );

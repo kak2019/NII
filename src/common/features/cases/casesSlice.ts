@@ -4,7 +4,11 @@ import { IPackagingNeed } from "../../model/packagingneed";
 import { INiiCaseItem } from "../../model/niicase";
 import { IReceivingPlant } from "../../model/receivingplant";
 import { IConsequense } from "../../model/consequense";
-import { editCaseAction, fetchByIdAction } from "./action";
+import {
+  editCaseAction,
+  fetchByIdAction,
+  fetchConsequensesByCaseAction,
+} from "./action";
 
 export enum CaseStatus {
   Idle,
@@ -68,6 +72,17 @@ export const caseSlice = createSlice({
         state.currentCase = action.payload as INiiCaseItem;
       })
       .addCase(editCaseAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+        state.message = action.error?.message;
+      })
+      .addCase(fetchConsequensesByCaseAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchConsequensesByCaseAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.consequenses = action.payload as IConsequense[];
+      })
+      .addCase(fetchConsequensesByCaseAction.rejected, (state, action) => {
         state.statue = CaseStatus.Failed;
         state.message = action.error?.message;
       });

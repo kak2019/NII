@@ -56,6 +56,7 @@ const CaseFormView: React.FC = () => {
     changeCaseId,
     fetchCaseById,
     editCase,
+    fetchConsequensesByCase,
   ] = useCases();
   const casePackagings: IPackagingNeed[] = [];
   for (let i = 0; i < 5; i++) {
@@ -78,16 +79,6 @@ const CaseFormView: React.FC = () => {
       CountryCode: "China",
     });
   }
-  const caseConsequense: IConsequense[] = [];
-  for (let i = 0; i < 5; i++) {
-    caseConsequense.push({
-      key: i,
-      MasterID: i.toString(),
-      Packaging: i.toString(),
-      PackagingName: `package${i}`,
-      Demand: i * 10,
-    });
-  }
   const initialState: IAppProps = {
     currentCase: currentCase,
     packages: casePackagings,
@@ -95,7 +86,7 @@ const CaseFormView: React.FC = () => {
     packageEditable: true,
     selectedPackages: [],
     receivingPlant: caseReceiving,
-    consequenses: caseConsequense,
+    consequenses: consequenses,
   };
   const [states, setStates] = React.useState(initialState);
   const packagingColumnBase = [

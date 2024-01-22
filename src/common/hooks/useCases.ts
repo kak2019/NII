@@ -17,7 +17,11 @@ import { INiiCaseItem } from "../model/niicase";
 import { IPackagingNeed } from "../model/packagingneed";
 import { IReceivingPlant } from "../model/receivingplant";
 import { useAppDispatch, useAppSelector } from "./useApp";
-import { editCaseAction, fetchByIdAction } from "../features/cases/action";
+import {
+  editCaseAction,
+  fetchByIdAction,
+  fetchConsequensesByCaseAction,
+} from "../features/cases/action";
 
 type CasesOperators = [
   isFetching: CaseStatus,
@@ -33,7 +37,8 @@ type CasesOperators = [
   changeCaseId: (Id: string) => void,
   fetchCaseById: (Id: number) => void,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  editCase: (arg: { niiCase: any }) => Promise<number>
+  editCase: (arg: { niiCase: any }) => Promise<number>,
+  fetchConsequensesByCase: (Id: number) => void
 ];
 export const useCases = (): Readonly<CasesOperators> => {
   const dispatch = useAppDispatch();
@@ -73,7 +78,13 @@ export const useCases = (): Readonly<CasesOperators> => {
     },
     [dispatch]
   );
-
+  const fetchConsequensesByCase = useCallback(
+    (CaseId: number) => {
+      dispatch(CaseItemIdChanged(CaseId));
+      return dispatch(fetchConsequensesByCaseAction({ CaseId }));
+    },
+    [dispatch]
+  );
   return [
     isFetching,
     errorMessage,
@@ -88,5 +99,6 @@ export const useCases = (): Readonly<CasesOperators> => {
     changeCaseId,
     fetchCaseById,
     editCase,
+    fetchConsequensesByCase,
   ];
 };

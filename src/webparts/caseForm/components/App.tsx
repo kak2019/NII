@@ -11,17 +11,18 @@ export default memo(function App() {
   const [
     isFetching,
     errorMessage,
-    ,
+    currentCase,
     currentCaseId,
     ,
     ,
     ,
     ,
     ,
-    ,
+    consequenses,
     changeCaseId,
     fetchCaseById,
     ,
+    fetchConsequensesByCase,
   ] = useCases();
   useEffect(() => {
     changeCaseId("1");
@@ -34,12 +35,11 @@ export default memo(function App() {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async function waitForData() {
       // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const item = fetchCaseById(Number(currentCaseId));
-        console.log(item);
-        break;
-      }
+      fetchCaseById(Number(currentCaseId));
+      await delay(1000);
+      fetchConsequensesByCase(Number(currentCaseId));
     }
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     waitForData().catch(console.error);
   }, [currentCaseId]);
   const isLoading = isFetching === CaseStatus.Loading;
