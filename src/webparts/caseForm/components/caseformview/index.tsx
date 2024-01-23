@@ -25,7 +25,6 @@ import styles from "../CaseForm.module.scss";
 import { INiiCaseItem } from "../../../../common/model/niicase";
 import { IAppProps } from "../IAppProps";
 import { IReceivingPlant } from "../../../../common/model/receivingplant";
-import { IConsequense } from "../../../../common/model/consequense";
 import * as moment from "moment";
 import { useCases } from "../../../../common/hooks/useCases";
 import { IPackaging } from "../../../../common/model/packagingneed";
@@ -43,19 +42,21 @@ const CaseFormView: React.FC = () => {
   //#endregion
   //#region fields
   const [
-    isFetching,
-    errorMessage,
+    ,
+    ,
     currentCase,
-    currentCaseId,
-    packages,
+    ,
+    packagingNeeds,
     receivingPlant,
     consequenses,
     ,
     ,
     editCase,
     ,
+    ,
+    editPackagingNeed,
+    removePackagingNeedsById,
   ] = useCases();
-  const casePackagings: IPackaging[] = [];
   const caseReceiving: IReceivingPlant[] = [];
   for (let i = 0; i < 5; i++) {
     caseReceiving.push({
@@ -69,12 +70,13 @@ const CaseFormView: React.FC = () => {
   }
   const initialState: IAppProps = {
     currentCase: currentCase,
-    packages: casePackagings,
+    packagingNeeds: packagingNeeds,
     receivingPlant: caseReceiving,
     consequenses: consequenses,
     packageYear: new Date().getFullYear(),
     packageEditable: true,
     selectedPackages: [],
+    removePackagingIds: [],
   };
   const [states, setStates] = React.useState(initialState);
   const packagingColumnBase = [
@@ -157,11 +159,6 @@ const CaseFormView: React.FC = () => {
   const rowSelection = {
     hideSelectAll: true,
     onChange: (selectedRowKeys: React.Key[], selectedRows: IPackaging[]) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        "selectedRows: ",
-        selectedRows
-      );
       setStates({ ...states, selectedPackages: selectedRows });
     },
   };
@@ -194,7 +191,6 @@ const CaseFormView: React.FC = () => {
     setStates({ ...states, currentCase: currentCaseDup });
   };
   const onApprovalChange = (e: RadioChangeEvent): void => {
-    console.log("radio checked", e.target.value);
     setStates({
       ...states,
       currentCase: { ...states.currentCase, Approval: e.target.value },
@@ -211,7 +207,7 @@ const CaseFormView: React.FC = () => {
     key: React.Key,
     field: string
   ): void => {
-    const packagesDup = [...states.packages];
+    const packagesDup = [...states.packagingNeeds];
     packagesDup
       .filter((packageDup) => packageDup.key === key)
       .forEach((item) => {
@@ -232,25 +228,37 @@ const CaseFormView: React.FC = () => {
     setStates({ ...states });
   };
   const onAdd = (): void => {
-    const packagesDup = [...states.packages];
-    console.log(packagesDup);
-    packagesDup.push({
-      key: Number(packagesDup[packagesDup.length - 1].key) + 1,
-    });
-    setStates({ ...states, packages: packagesDup });
+    const packagingDup = [...states.packagingNeeds];
+    if (packagingDup.length > 0) {
+      packagingDup.push({
+        key: Number(packagingDup[packagingDup.length - 1].key) + 1,
+      });
+    } else {
+      packagingDup.push({
+        key: 0,
+      });
+    }
+    setStates({ ...states, packagingNeeds: packagingDup });
   };
   const onDelete = (): void => {
-    const packagesDup = [...states.packages];
+    const packagesDup = [...states.packagingNeeds];
+    const removePackagingIdsDup = [...states.removePackagingIds];
     states.selectedPackages.forEach((selectedPackage) => {
       packagesDup.splice(packagesDup.indexOf(selectedPackage), 1);
+      if (!!selectedPackage.ID) {
+        removePackagingIdsDup.push(Number(selectedPackage.ID));
+      }
     });
-    setStates({ ...states, packages: packagesDup });
+    setStates({
+      ...states,
+      packagingNeeds: packagesDup,
+      removePackagingIds: removePackagingIdsDup,
+    });
   };
   const onStatusChange = (statusValue: string): void => {
     const caseTemp = states.currentCase;
     caseTemp.Status = statusValue;
     setStates({ ...states, currentCase: caseTemp });
-    console.log(states.currentCase);
   };
   const onPackageYearChange = (year: number): void => {
     setStates({
@@ -270,7 +278,6 @@ const CaseFormView: React.FC = () => {
         RequestDate: dateString,
       },
     });
-    console.log(states.currentCase.RequestDate);
   };
   const onSave = async (): Promise<void> => {
     const caseUpdate: INiiCaseItem = { ...states.currentCase };
@@ -899,7 +906,7 @@ const CaseFormView: React.FC = () => {
                     pagination={false}
                     rowSelection={rowSelection}
                     components={{ body: { cell: EditableCell } }}
-                    dataSource={states.packages}
+                    dataSource={states.packagingNeeds}
                     columns={packagingColumns}
                     bordered={false}
                     size="small"

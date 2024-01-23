@@ -5,10 +5,11 @@ import { IReceivingPlant } from "../../../common/model/receivingplant";
 
 export interface IAppProps {
   currentCase: INiiCaseItem;
-  packages: IPackaging[];
+  packagingNeeds: IPackaging[];
   receivingPlant: IReceivingPlant[];
   consequenses: IConsequense[];
   packageYear: number;
   packageEditable: boolean;
   selectedPackages: IPackaging[];
+  removePackagingIds: number[];
 }

@@ -16,9 +16,9 @@ export const currentCaseSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.currentCase
 );
-export const packagesSelector = createSelector(
+export const packagingNeedsSelector = createSelector(
   featureStateSelector,
-  (state: ICaseState) => state?.packages
+  (state: ICaseState) => state?.packagingNeeds
 );
 export const receivingPlantSelector = createSelector(
   featureStateSelector,

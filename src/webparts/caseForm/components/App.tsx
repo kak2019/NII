@@ -6,23 +6,25 @@ import { Alert, Spin } from "antd";
 import * as React from "react";
 import CaseFormView from "./caseformview/index";
 import styles from "./CaseForm.module.scss";
-import { usePackagings } from "../../../common/hooks/usePackagings";
 
 export default memo(function App() {
   const [
     isFetching,
     errorMessage,
-    ,
+    currentCase,
     currentCaseId,
-    ,
-    ,
-    ,
+    packagingNeeds,
+    receivingPlant,
+    consequenses,
     changeCaseId,
     fetchCaseById,
-    ,
+    editCase,
     fetchConsequensesByCase,
+    fetchPackagingNeedsByCase,
+    editPackagingNeed,
+    removePackagingNeedsById,
   ] = useCases();
-  const [, , , , , removePackagingById] = usePackagings();
+  const [initial, setInitial] = React.useState(false);
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     function delay(ms: number) {
@@ -30,24 +32,26 @@ export default memo(function App() {
     }
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async function waitForData() {
-      // eslint-disable-next-line no-constant-condition
+      setInitial(true);
       fetchCaseById(Number(currentCaseId));
       await delay(1000);
       fetchConsequensesByCase(Number(currentCaseId));
+      await delay(1000);
+      fetchPackagingNeedsByCase(Number(currentCaseId));
+      await delay(1000);
+      setInitial(false);
     }
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     waitForData().catch(console.error);
   }, [currentCaseId]);
-  const isLoading = isFetching === CaseStatus.Loading;
+  const isLoadingCase = isFetching === CaseStatus.Loading;
   const onClickButton = async (): Promise<void> => {
     changeCaseId("1");
-    console.log(currentCaseId);
-    await removePackagingById({ Id: 5 });
   };
   return (
     <>
       <button onClick={onClickButton}>Test</button>
-      {isLoading && (
+      {(isLoadingCase || initial) && (
         <Spin tip="Loading...">
           <Alert
             className={styles.alertStyle}
@@ -65,7 +69,9 @@ export default memo(function App() {
           showIcon
         />
       )}
-      {!(errorMessage?.length !== 0) && !isLoading && <CaseFormView />}
+      {errorMessage?.length === 0 && !isLoadingCase && !initial && (
+        <CaseFormView />
+      )}
     </>
   );
 });

@@ -4,6 +4,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FeatureKey } from "../../featureKey";
 import { INiiCaseItem } from "../../model/niicase";
 import { IConsequense } from "../../model/consequense";
+import { IPackaging } from "../../model/packagingneed";
 
 const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
   const sp = spfi(getSP());
@@ -111,14 +112,12 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
           return {} as INiiCaseItem;
         }
       });
-    console.log(item);
     return item;
   } catch (err) {
     console.log(err);
     return Promise.reject("Error when fetch Case by Id");
   }
 };
-
 const editCase = async (arg: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   niiCase: any;
@@ -162,7 +161,6 @@ const fetchConsequensesByCase = async (arg: {
       })
       .then((response) => {
         if (response.Row.length > 0) {
-          console.log(response);
           return response.Row.map(
             (item) =>
               ({
@@ -183,18 +181,118 @@ const fetchConsequensesByCase = async (arg: {
     return Promise.reject("Error when fetch Consequenses by Case");
   }
 };
+const fetchPackagingNeedsByCase = async (arg: {
+  CaseId: number;
+}): Promise<IPackaging[]> => {
+  const sp = spfi(getSP());
+  try {
+    const result = await sp.web.lists
+      .getByTitle("Packaging List")
+      .renderListDataAsStream({
+        ViewXml: `<View>
+	                        <Query>
+		                        <Where>
+			                        <Eq>
+				                        <FieldRef Name="MasterID"/>
+				                        <Value Type="Text">${arg.CaseId}</Value>
+			                        </Eq>
+		                        </Where>
+	                        </Query>
+	                        <ViewFields>
+		                        <FieldRef Name="ID"/>
+		                        <FieldRef Name="CaseID"/>
+		                        <FieldRef Name="Packaging"/>
+                            <FieldRef Name="PackagingName"/>
+                            <FieldRef Name="SupplierNo"/>
+                            <FieldRef Name="SupplierName"/>
+                            <FieldRef Name="Year"/>
+                            <FieldRef Name="WeeklyDemand"/>
+                            <FieldRef Name="YearlyDemand"/>
+                            <FieldRef Name="MasterID"/>
+	                        </ViewFields>
+	                        <RowLimit>5000</RowLimit>
+                        </View>`,
+      })
+      .then((response) => {
+        if (response.Row.length > 0) {
+          return response.Row.map(
+            (item) =>
+              ({
+                key: item.ID,
+                ID: item.ID,
+                CaseID: item.CaseID,
+                Packaging: item.Packaging,
+                PackagingName: item.PackagingName,
+                WeeklyDemand: item.WeeklyDemand,
+                YearlyDemand: item.YearlyDemand,
+                SupplierNo: item.SupplierNo,
+                SupplierName: item.SupplierName,
+                MasterID: item.MasterID,
+              } as IPackaging)
+          );
+        } else {
+          return [] as IPackaging[];
+        }
+      });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when fetch Packagings by Case");
+  }
+};
+const editPackagingNeed = async (arg: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Packaging: any;
+}): Promise<IPackaging> => {
+  const { Packaging } = arg;
+  const sp = spfi(getSP());
+  try {
+    const list = sp.web.lists.getByTitle("Packaging List");
+    await list.items.getById(+Packaging.ID).update(Packaging);
+    const result = await fetchById({ Id: +Packaging.ID });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when update Packging Need");
+  }
+};
+const removePackagingNeedsById = async (arg: {
+  Id: number;
+}): Promise<IPackaging> => {
+  const sp = spfi(getSP());
+  try {
+    await sp.web.lists
+      .getByTitle("Packaging List")
+      .items.getById(arg.Id)
+      .delete();
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when removing Packagings");
+  }
+};
+
 //Thunk function
 export const fetchByIdAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchById`,
   fetchById
 );
-
 export const editCaseAction = createAsyncThunk(
   `${FeatureKey.CASES}/editCase`,
   editCase
 );
-
 export const fetchConsequensesByCaseAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchConsequensesByCase`,
   fetchConsequensesByCase
+);
+export const fetchPackagingNeedsByCaseAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchPackagingNeedsByCase`,
+  fetchPackagingNeedsByCase
+);
+export const editPackagingNeedAction = createAsyncThunk(
+  `${FeatureKey.CASES}/editPackagingNeed`,
+  editPackagingNeed
+);
+export const removePackagingNeedsByIdAction = createAsyncThunk(
+  `${FeatureKey.CASES}/removePackagingNeedsById`,
+  removePackagingNeedsById
 );

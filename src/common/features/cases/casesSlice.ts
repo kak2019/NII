@@ -5,8 +5,11 @@ import { IReceivingPlant } from "../../model/receivingplant";
 import { IConsequense } from "../../model/consequense";
 import {
   editCaseAction,
+  editPackagingNeedAction,
   fetchByIdAction,
   fetchConsequensesByCaseAction,
+  fetchPackagingNeedsByCaseAction,
+  removePackagingNeedsByIdAction,
 } from "./action";
 import { IPackaging } from "../../model/packagingneed";
 
@@ -19,7 +22,7 @@ export enum CaseStatus {
 export interface ICaseState {
   currentCaseId: string;
   currentCase: INiiCaseItem;
-  packages: IPackaging[];
+  packagingNeeds: IPackaging[];
   receivingPlant: IReceivingPlant[];
   consequenses: IConsequense[];
   statue: CaseStatus;
@@ -30,7 +33,7 @@ export interface ICaseState {
 const initialState: ICaseState = {
   currentCaseId: "-1",
   currentCase: {},
-  packages: [],
+  packagingNeeds: [],
   receivingPlant: [],
   consequenses: [],
   statue: CaseStatus.Idle,
@@ -79,6 +82,35 @@ export const caseSlice = createSlice({
       .addCase(fetchConsequensesByCaseAction.rejected, (state, action) => {
         state.statue = CaseStatus.Failed;
         state.message = action.error?.message;
+      })
+      .addCase(fetchPackagingNeedsByCaseAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchPackagingNeedsByCaseAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.packagingNeeds = action.payload as IPackaging[];
+      })
+      .addCase(fetchPackagingNeedsByCaseAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+        state.message = action.error?.message;
+      })
+      .addCase(editPackagingNeedAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(editPackagingNeedAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+      })
+      .addCase(editPackagingNeedAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+      })
+      .addCase(removePackagingNeedsByIdAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(removePackagingNeedsByIdAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+      })
+      .addCase(removePackagingNeedsByIdAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
       });
   },
 });
