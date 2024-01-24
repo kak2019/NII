@@ -15,6 +15,7 @@ import { Icon, Link } from "office-ui-fabric-react";
 import { Upload, Alert, Space } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { AadHttpClient, HttpClientResponse } from '@microsoft/sp-http';
+import { useEffect } from "react";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
 // interface IexcelData {
@@ -56,7 +57,18 @@ export default memo(function App() {
     const [items, setItems] = useState([]);
     const [data, setData] = useState({})
     const [error, setError] = useState('')
-
+    const [apiResponse, setApiResponse] = useState<any>(null);
+    useEffect(() => {
+        this.aadHttpClient
+          .get('https://<your-api-endpoint>', AadHttpClient.configurations.v1)
+          .then((response: HttpClientResponse) => response.json())
+          .then((jsonResponse: any) => {
+            setApiResponse(jsonResponse);
+          })
+          .catch((error: any) => {
+            console.error(error);
+          });
+      }, [this.aadHttpClient]);
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleFileUpload = (info: any) => {
         if (info.file) {

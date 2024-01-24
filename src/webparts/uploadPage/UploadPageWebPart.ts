@@ -21,7 +21,8 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-
+  protected token: any = null;
+  protected aadClient: any = null;
   public render(): void {
     const element: React.ReactElement<IUploadPageProps> = React.createElement(
       UploadPage,
@@ -31,7 +32,9 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
-        context:this.context
+        context:this.context,
+        token: this.token,
+        aadClient: this.aadClient,
       }
     );
 
@@ -41,7 +44,34 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
   protected onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
     getSP(this.context);
-    
+    this.context.aadTokenProviderFactory.getTokenProvider().then((provider): void => {
+      provider.getToken('b407b2b3-b500-4ea9-92f1-ca4c28558347').then((token): void => {
+        this.token = token;
+        console.log("tokenAAD:" + token);
+      }, err => console.log("errorTokenAAD:" + err));
+    }, err => console.log("errorGetProvider:" + err));
+    return new Promise<void>((resolve: () => void, reject: (error: any) => void): void => {
+      const clientPromises = [];
+
+      clientPromises.push(
+        this.context.aadHttpClientFactory
+          .getClient('b407b2b3-b500-4ea9-92f1-ca4c28558347')
+          .then((client: AadHttpClient): void => {
+            this.aadClient = client;
+            //console.log("aadClient:" + this.aadClient);
+            return this.aadClient;
+          }, err => console.log("errorGetaadClient:" + err))
+      );
+          
+      // Promise.all(clientPromises).then(
+      //   response => {
+      //     // console.log(response[0]);
+      //     // console.log(response[1]);
+      //     resolve();
+      //   }
+      // );
+
+    });
     return super.onInit();
   }
 
