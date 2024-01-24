@@ -14,6 +14,7 @@ import { Label } from '@fluentui/react/lib/Label';
 import { Icon, Link } from "office-ui-fabric-react";
 import { Upload, Alert, Space } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import { AadHttpClient, HttpClientResponse } from '@microsoft/sp-http';
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
 // interface IexcelData {
@@ -153,6 +154,15 @@ export default memo(function App() {
         // console.log("Phone No:",items[15]?.__EMPTY_2);
 
 
+    }
+    function getResponseFromAzureFunction(apiUri: string,aadClient:AadHttpClient): Promise<any> {
+        return aadClient.get(apiUri, AadHttpClient.configurations.v1)
+            .then((rawResponse: HttpClientResponse) => {
+                return rawResponse.json();
+            })
+            .then((jsonResponse) => {
+                return jsonResponse;
+            }) as Promise<any>;
     }
     const submitFunction = async (): Promise<void> => {
         const request = {

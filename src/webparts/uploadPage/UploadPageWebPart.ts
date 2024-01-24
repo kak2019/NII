@@ -12,6 +12,7 @@ import * as strings from 'UploadPageWebPartStrings';
 import UploadPage from './components/UploadPage';
 import { IUploadPageProps } from './components/IUploadPageProps';
 import { getSP } from '../../common/pnpjsConfig';
+import { AadHttpClient } from '@microsoft/sp-http';
 export interface IUploadPageWebPartProps {
   description: string;
 }
@@ -40,6 +41,7 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
   protected onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
     getSP(this.context);
+    
     return super.onInit();
   }
 
