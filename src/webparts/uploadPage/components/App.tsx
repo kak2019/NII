@@ -58,17 +58,7 @@ export default memo(function App() {
     const [data, setData] = useState({})
     const [error, setError] = useState('')
     const [apiResponse, setApiResponse] = useState<any>(null);
-    useEffect(() => {
-        this.aadHttpClient
-          .get('https://<your-api-endpoint>', AadHttpClient.configurations.v1)
-          .then((response: HttpClientResponse) => response.json())
-          .then((jsonResponse: any) => {
-            setApiResponse(jsonResponse);
-          })
-          .catch((error: any) => {
-            console.error(error);
-          });
-      }, [this.aadHttpClient]);
+    
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleFileUpload = (info: any) => {
         if (info.file) {

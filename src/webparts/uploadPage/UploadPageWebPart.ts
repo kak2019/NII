@@ -63,13 +63,13 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
           }, err => console.log("errorGetaadClient:" + err))
       );
           
-      // Promise.all(clientPromises).then(
-      //   response => {
-      //     // console.log(response[0]);
-      //     // console.log(response[1]);
-      //     resolve();
-      //   }
-      // );
+      Promise.all(clientPromises).then(
+        response => {
+          // console.log(response[0]);
+          // console.log(response[1]);
+          resolve();
+        }
+      );
 
     });
     return super.onInit();
