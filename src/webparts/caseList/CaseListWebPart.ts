@@ -20,7 +20,7 @@ export default class CaseListWebPart extends BaseClientSideWebPart<ICaseListWebP
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-
+  
   public render(): void {
     const element: React.ReactElement<ICaseListProps> = React.createElement(
       CaseList,
@@ -30,7 +30,7 @@ export default class CaseListWebPart extends BaseClientSideWebPart<ICaseListWebP
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
-        context:this.context
+        context:this.context,
       }
     );
 
@@ -38,6 +38,7 @@ export default class CaseListWebPart extends BaseClientSideWebPart<ICaseListWebP
   }
 
   protected onInit(): Promise<void> {
+    
     this._environmentMessage = this._getEnvironmentMessage();
     getSP(this.context);
     return super.onInit();

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable dot-notation */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { memo } from "react";
@@ -9,7 +11,10 @@ import { addRequest } from "./utils/request";
 import 'antd/dist/antd.css';
 import { Stack } from '@fluentui/react/lib/Stack';
 import { Label } from '@fluentui/react/lib/Label';
-import { Link } from "office-ui-fabric-react";
+import { Icon, Link } from "office-ui-fabric-react";
+import { Upload, Alert, Space } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+// import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
 // interface IexcelData {
 //     PARMANo: string;
@@ -20,26 +25,77 @@ import { Link } from "office-ui-fabric-react";
 //     ASNPhone: string
 // }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const getArrayKey = (arr: Array<{ [key in string]: any }>, key: string) => {
+    for(let i =0; i< arr.length; i++) {
+        if(arr[i]['UD-KMP'] === key) {
+            return arr[i]
+        }
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const getSubTableData = (arr: Array<{ [key in string]: any }>) => {
+    let i = 30
+    const res = []
+    while(arr[i]['UD-KMP'] !== "CONSEQUENSES FOR OTHER SUPPLIERS?:") {
+        res.push(arr[i])
+        i++
+    }
+    return res
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const validate = (json: any) => {
+    if(!json['Supplier parma code']) return '请输入parma code'
+    // if(!json['Supplier']) return '请输入Supplier'
+}
+
 export default memo(function App() {
     const [items, setItems] = useState([]);
+    const [data, setData] = useState({})
+    const [error, setError] = useState('')
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const file = e.target.files[0];
-        if (!file) return;
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const handleFileUpload = (info: any) => {
+        if (info.file) {
+            const file = info.file
+            if (!file) return;
+    
+            const reader = new FileReader();
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+                const binaryStr = e.target?.result;
+                if (typeof binaryStr === 'string') {
+                    const workbook = XLSX.read(binaryStr, { type: 'binary' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    setItems(jsonData);
+                    console.log("Json", jsonData)
 
-        const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            const binaryStr = e.target?.result;
-            if (typeof binaryStr === 'string') {
-                const workbook = XLSX.read(binaryStr, { type: 'binary' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                setItems(jsonData);
-                console.log("Json", jsonData)
-            }
-        };
-        reader.readAsBinaryString(file);
+                    const json = {
+                        'Supplier parma code': getArrayKey(jsonData, 'Supplier parma code :')?.__EMPTY_2
+                    }
 
+                    setData(json)
+                    setError(validate(json))
+
+                    if(json['Supplier parma code']) {
+                        // const url = 'https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/getparma/'+ json['Supplier parma code']
+                        // helpers.getResponseFromAzureFunction(url, this.props.aadClient).then(data => {
+                        //     console.log(data)
+                        // }).catch(err => {
+                        //     console.log(err)
+                        // })
+                        fetch('https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/GetParma/'+ json['Supplier parma code']).then(res => res.json()).then(res => {
+                            console.log(res)
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    }
+                }
+            };
+            reader.readAsBinaryString(file);
+        }
     };
     if (items.length > 0) {
         console.log('Supplier parma code: ', items[3]?.__EMPTY_2);
@@ -64,6 +120,24 @@ export default memo(function App() {
         console.log("E-mail:", items[26]?.__EMPTY_2);
         console.log("Line1", items[30]["UD-KMP"], items[30]?.__EMPTY_1, items[30]?.__EMPTY_2, items[30]?.__EMPTY_3);
         console.log("Line2", items[31]["UD-KMP"], items[30]?.__EMPTY_1, items[30]?.__EMPTY_2, items[30]?.__EMPTY_3);
+
+        // 获取子表数据项
+        console.log(getSubTableData(items))
+        // 获取普通数据项
+        console.log(getArrayKey(items, 'E-mail:'))
+
+        // 子表后面的数据
+        let index = 0
+        for(let i =0; i< items.length; i++) {
+            if(items[i]['UD-KMP'] === 'CONSEQUENSES FOR OTHER SUPPLIERS?:') {
+                index = i
+                break
+            }
+        }
+        // 获取不固定子表后面的数据
+        const secItems = items.slice(index)
+        console.log('Packaging account no', secItems[3].__EMPTY_2)
+        
         // 一共固定是十行 到时候在考虑怎么拿取数据
         // console.log("Line3",items[32]["UD-KMP"],items[30]?.__EMPTY_1,items[30]?.__EMPTY_2, items[30]?.__EMPTY_3);
         // console.log("Line4",items[30]["UD-KMP"],items[30]?.__EMPTY_1,items[30]?.__EMPTY_2, items[30]?.__EMPTY_3);
@@ -117,25 +191,27 @@ export default memo(function App() {
 
     return (
         <>
-        <Stack>
-            <Label>Create New Case</Label> <Link rel="www.baidu.com">GO to Home Page</Link>
-            <Divider/>
+        <Stack horizontal>
+            <Label style={{width:"70%",fontSize:20}}>Create New Case</Label> <Icon style={{fontSize:"25px"}} iconName="HomeSolid"/><Link rel="www.baidu.com" style={{textAlign:"right"}}>GO to Home Page</Link>
+            {/* <Divider/> */}
             </Stack>
-           
+           <hr/>
             <div>
-                {/* <Upload 
-                beforeUpload={() => false}
+                <Upload 
+                    beforeUpload={() => false}
                     accept=".xlsx, .xls"
                     onChange={handleFileUpload}
-                    > */}
-                    {/* <Button onChange={handleFileUpload}>Click to Upload</Button> */}
-                    <input type="file" onChange={handleFileUpload} />
-                    {/* <Button onChange={handleFileUpload}>Click to Upload</Button> */}
-                    {/* <Button >Click to Upload</Button> */}
-               
-                {/* </Upload> */}
+                    maxCount={1}
+                >
+                    <Button icon={<UploadOutlined rev={'form'} />}>Click to Upload</Button>
+                </Upload>
                 <Stack>
-                <Button onClick={() => submitFunction()}>Submit</Button>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                    {
+                        error && <Alert message={error} type="error" />
+                    }
+                </Space>
+                <Button style={{width:150}} onClick={() => submitFunction()}>Submit</Button>
                 </Stack>
                 
             </div>
