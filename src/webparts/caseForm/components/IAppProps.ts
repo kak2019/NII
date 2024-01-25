@@ -12,4 +12,5 @@ export interface IAppProps {
   packageEditable: boolean;
   selectedPackages: IPackaging[];
   removePackagingIds: number[];
+  isEditableCommon: boolean;
 }

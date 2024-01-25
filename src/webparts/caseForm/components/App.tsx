@@ -16,13 +16,17 @@ export default memo(function App() {
     packagingNeeds,
     receivingPlant,
     consequenses,
+    packagingData,
     changeCaseId,
     fetchCaseById,
     editCase,
     fetchConsequensesByCase,
     fetchPackagingNeedsByCase,
     editPackagingNeed,
+    addPackagingNeed,
     removePackagingNeedsById,
+    fetchReceivingPlantByCase,
+    fetchPackagingData,
   ] = useCases();
   const [initial, setInitial] = React.useState(false);
   useEffect(() => {
@@ -39,6 +43,9 @@ export default memo(function App() {
       await delay(1000);
       fetchPackagingNeedsByCase(Number(currentCaseId));
       await delay(1000);
+      fetchReceivingPlantByCase(Number(currentCaseId));
+      await delay(1000);
+      fetchPackagingData();
       setInitial(false);
     }
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

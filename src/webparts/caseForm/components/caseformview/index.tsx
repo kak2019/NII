@@ -12,6 +12,8 @@ import {
   InputNumber,
   Table,
   DatePicker,
+  message,
+  Alert,
 } from "antd";
 import {
   DeleteOutlined,
@@ -24,10 +26,11 @@ import "antd/dist/antd.css";
 import styles from "../CaseForm.module.scss";
 import { INiiCaseItem } from "../../../../common/model/niicase";
 import { IAppProps } from "../IAppProps";
-import { IReceivingPlant } from "../../../../common/model/receivingplant";
 import * as moment from "moment";
 import { useCases } from "../../../../common/hooks/useCases";
 import { IPackaging } from "../../../../common/model/packagingneed";
+import { useRef } from "react";
+import DebouncedInput from "./debounceinput";
 
 const CaseFormView: React.FC = () => {
   //#region interfaces
@@ -42,70 +45,37 @@ const CaseFormView: React.FC = () => {
   //#endregion
   //#region fields
   const [
-    ,
-    ,
+    isFetching,
+    errorMessage,
     currentCase,
-    ,
+    currentCaseId,
     packagingNeeds,
     receivingPlant,
     consequenses,
-    ,
-    ,
+    packagingData,
+    changeCaseId,
+    fetchCaseById,
     editCase,
-    ,
-    ,
+    fetchConsequensesByCase,
+    fetchPackagingNeedsByCase,
     editPackagingNeed,
+    addPackagingNeed,
     removePackagingNeedsById,
+    fetchReceivingPlantByCase,
+    fetchPackagingData,
   ] = useCases();
-  const caseReceiving: IReceivingPlant[] = [];
-  for (let i = 0; i < 5; i++) {
-    caseReceiving.push({
-      key: i,
-      MasterID: i.toString(),
-      PackagingAccountNo: i.toString(),
-      CompanyName: `Company${i}`,
-      City: "Tian Jin",
-      CountryCode: "China",
-    });
-  }
   const initialState: IAppProps = {
     currentCase: currentCase,
     packagingNeeds: packagingNeeds,
-    receivingPlant: caseReceiving,
+    receivingPlant: receivingPlant,
     consequenses: consequenses,
     packageYear: new Date().getFullYear(),
     packageEditable: true,
     selectedPackages: [],
     removePackagingIds: [],
+    isEditableCommon: currentCase.Status === "Case Created",
   };
   const [states, setStates] = React.useState(initialState);
-  const packagingColumnBase = [
-    {
-      title: "Packaging",
-      dataIndex: "packaging",
-      width: "15%",
-      editable: false,
-    },
-    {
-      title: "No.(Qty)",
-      dataIndex: "qtyWeekly",
-      width: "30%",
-      editable: false,
-    },
-    {
-      title: "Packaging",
-      dataIndex: "packaging",
-      width: "15%",
-      editable: true,
-    },
-    {
-      title: "Packaging Name",
-      dataIndex: "packagingName",
-      width: "25%",
-      editable: false,
-    },
-    { title: "No.(Qty)", dataIndex: "qtyYearly", width: "15%", editable: true },
-  ];
   const receivingColumns = [
     {
       title: "Packaging account no.",
@@ -145,6 +115,38 @@ const CaseFormView: React.FC = () => {
       width: "34%",
     },
   ];
+  const packagingColumnBase = [
+    {
+      title: "Packaging",
+      dataIndex: "Packaging",
+      width: "15%",
+      editable: false,
+    },
+    {
+      title: "No.(Qty)",
+      dataIndex: "WeeklyDemand",
+      width: "30%",
+      editable: false,
+    },
+    {
+      title: "Packaging",
+      dataIndex: "Packaging",
+      width: "15%",
+      editable: true,
+    },
+    {
+      title: "Packaging Name",
+      dataIndex: "PackagingName",
+      width: "25%",
+      editable: false,
+    },
+    {
+      title: "No.(Qty)",
+      dataIndex: "YearlyDemand",
+      width: "15%",
+      editable: true,
+    },
+  ];
   const packagingColumns = packagingColumnBase.map((col) => {
     return {
       ...col,
@@ -179,7 +181,7 @@ const CaseFormView: React.FC = () => {
       }
     },
   };
-  const dateFormat = "DD/MM/YYYY";
+  const dateFormat = "DD-MM-YYYY";
   //#endregion
   //#region events
   const onTextChange = (
@@ -207,31 +209,45 @@ const CaseFormView: React.FC = () => {
     key: React.Key,
     field: string
   ): void => {
-    const packagesDup = [...states.packagingNeeds];
-    packagesDup
-      .filter((packageDup) => packageDup.key === key)
+    console.log(e);
+    console.log(key);
+    console.log(field);
+    const packagingDups: IPackaging[] = JSON.parse(
+      JSON.stringify([...states.packagingNeeds])
+    );
+    packagingDups
+      .filter((packagingDup) => packagingDup.key === key)
       .forEach((item) => {
         switch (field) {
-          case "packaging": {
+          case "Packaging": {
             item.Packaging = e.toString();
+            const packagingDataFiltered = packagingData.filter(
+              (i) => i.ItemNumber === e.toString()
+            );
+            if (packagingDataFiltered.length > 0) {
+              item.PackagingName = packagingDataFiltered[0].Description;
+            } else {
+              item.PackagingName = "";
+            }
             break;
           }
-          case "qtyYearly": {
+          case "YearlyDemand": {
             item.YearlyDemand = Number(e);
             item.WeeklyDemand = Math.ceil(Number(e) / 48);
             break;
           }
         }
       });
-  };
-  const onPackagingBlur = (): void => {
-    setStates({ ...states });
+    setStates({ ...states, packagingNeeds: packagingDups });
   };
   const onAdd = (): void => {
     const packagingDup = [...states.packagingNeeds];
     if (packagingDup.length > 0) {
       packagingDup.push({
         key: Number(packagingDup[packagingDup.length - 1].key) + 1,
+        Year: states.packageYear.toString(),
+        MasterID: states.currentCase.ID,
+        CaseID: states.currentCase.CaseID,
       });
     } else {
       packagingDup.push({
@@ -280,35 +296,110 @@ const CaseFormView: React.FC = () => {
     });
   };
   const onSave = async (): Promise<void> => {
-    const caseUpdate: INiiCaseItem = { ...states.currentCase };
-    caseUpdate.RequestDate = moment(
-      caseUpdate.RequestDate,
-      dateFormat
-    ).toDate();
+    const currentCaseDup = { ...states.currentCase };
+    const caseUpdate: INiiCaseItem = {
+      ID: currentCaseDup.ID,
+      Title: currentCaseDup.Title,
+      CaseID: currentCaseDup.CaseID,
+      PARMANo: currentCaseDup.PARMANo,
+      CompanyName: currentCaseDup.CompanyName,
+      Status: currentCaseDup.Status,
+      ASNStreet: currentCaseDup.ASNStreet,
+      ASNPostCode: currentCaseDup.ASNPostCode,
+      ASNCountryCode: currentCaseDup.ASNCountryCode,
+      ASNPhone: currentCaseDup.ASNPhone,
+      BilltoNo: currentCaseDup.BilltoNo,
+      BillStreet: currentCaseDup.BillStreet,
+      BillPostCode: currentCaseDup.BillPostCode,
+      BillCountryCode: currentCaseDup.BillCountryCode,
+      BillPhone: currentCaseDup.BillPhone,
+      ShipToNo: currentCaseDup.ShipToNo,
+      ShipStreet: currentCaseDup.ShipStreet,
+      ShipPostcode: currentCaseDup.ShipPostcode,
+      ShipCountryCode: currentCaseDup.ShipCountryCode,
+      ShipPhone: currentCaseDup.ShipPhone,
+      VatNo: currentCaseDup.VatNo,
+      GSDBID: currentCaseDup.GSDBID,
+      ContractName: currentCaseDup.ContractName,
+      ContractEmail: currentCaseDup.ContractEmail,
+      ContractPhoneno: currentCaseDup.ContractPhoneno,
+      Constatus: currentCaseDup.Constatus,
+      ConPackagingAccno: currentCaseDup.ConPackagingAccno,
+      ConCompanyName: currentCaseDup.ConCompanyName,
+      ConCity: currentCaseDup.ConCity,
+      ConCountryCode: currentCaseDup.ConCountryCode,
+      RequestDate: moment(currentCaseDup.RequestDate, dateFormat).toDate(),
+      IssuCompName: currentCaseDup.IssuCompName,
+      IssuName: currentCaseDup.IssuName,
+      IssuPhoneNo: currentCaseDup.IssuPhoneNo,
+      IssuEmail: currentCaseDup.IssuEmail,
+    };
+    const packagingNeedsDup = [...states.packagingNeeds];
+    if (packagingNeedsDup.filter((i) => i.PackagingName === "").length > 0) {
+      await message.error("Invalid Packaging included in Packaging Needs");
+      return;
+    }
+    const packagingNeedsUpdate = packagingNeedsDup.map((item) => {
+      return {
+        ID: item.ID,
+        MasterID: states.currentCase.ID,
+        CaseID: states.currentCase.CaseID,
+        Year: item.Year,
+        Packaging: item.Packaging,
+        PackagingName: item.PackagingName,
+        WeeklyDemand: item.WeeklyDemand,
+        YearlyDemand: item.YearlyDemand,
+        SupplierNo: states.currentCase.PARMANo,
+        SupplierName: states.currentCase.ConCompanyName,
+      } as IPackaging;
+    });
+    packagingNeedsUpdate.forEach((packaging) => {
+      if (!!packaging.ID) {
+        editPackagingNeed({ Packaging: packaging });
+      } else {
+        console.log(packaging);
+        addPackagingNeed({ Packaging: packaging });
+      }
+    });
+    const removePackagingIdsDup = [...states.removePackagingIds];
+    removePackagingIdsDup.forEach((id) => {
+      removePackagingNeedsById(id);
+    });
     await editCase({ niiCase: caseUpdate });
+  };
+  const onCancel = (): void => {
+    console.log(packagingData);
   };
   //#endregion
   //#region methods
-  const isEditableCommon = React.useCallback((): boolean => {
-    return !(states.currentCase.Status === "Case Created");
-  }, [states.currentCase]);
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const cellInput = (field: string, record: IPackaging, editable: boolean) => {
     const fieldEditable = !(editable && states.packageEditable);
     switch (field) {
-      case "packaging":
+      case "Packaging":
         return (
-          <Input
-            value={record.Packaging}
-            onChange={(e) =>
-              onPackagingChange(e.target.value, record.key, "packaging")
-            }
-            readOnly={fieldEditable}
-            onBlur={onPackagingBlur}
-            bordered={!fieldEditable}
-          />
+          <>
+            <Row>
+              <DebouncedInput
+                value={record.Packaging}
+                readOnly={fieldEditable}
+                onBlur={(e) => onPackagingChange(e, record.key, "Packaging")}
+                bordered={!fieldEditable}
+              />
+            </Row>
+            {!!!record.PackagingName && (
+              <Row>
+                <Input
+                  className={styles.inputAlert}
+                  defaultValue={"invalid"}
+                  readOnly={true}
+                  bordered={false}
+                />
+              </Row>
+            )}
+          </>
         );
-      case "qtyWeekly":
+      case "WeeklyDemand":
         return (
           <InputNumber
             value={record.WeeklyDemand}
@@ -316,20 +407,21 @@ const CaseFormView: React.FC = () => {
             bordered={false}
           />
         );
-      case "qtyYearly":
+      case "YearlyDemand":
         return (
           <InputNumber
             controls={false}
             value={record.YearlyDemand}
-            onChange={(e) => onPackagingChange(e, record.key, "qtyYearly")}
             readOnly={fieldEditable}
-            onBlur={onPackagingBlur}
+            onBlur={(e) =>
+              onPackagingChange(e.target.value, record.key, "YearlyDemand")
+            }
             bordered={!fieldEditable}
           />
         );
     }
   };
-  const fields = ["packaging", "qtyWeekly", "qtyYearly"];
+  const fields = ["Packaging", "WeeklyDemand", "YearlyDemand"];
   //#endregion
   //#region components
   const EditableCell: React.FC<EditableCellProps> = ({
@@ -361,6 +453,10 @@ const CaseFormView: React.FC = () => {
         <Row className={styles.rowContent}>
           <Col span={6}>Case ID:</Col>
           <Col>{states.currentCase.CaseID}</Col>
+        </Row>
+        <Row className={styles.rowContent}>
+          <Col span={6}>Created By:</Col>
+          <Col>{states.currentCase.Author}</Col>
         </Row>
         <Row className={styles.rowContent}>
           <Col span={6}>Creation Date:</Col>
@@ -429,7 +525,9 @@ const CaseFormView: React.FC = () => {
             </Button>
           </Col>
           <Col span={3} offset={2}>
-            <Button className={styles.fixedWidth}>Cancel</Button>
+            <Button className={styles.fixedWidth} onClick={onCancel}>
+              Cancel
+            </Button>
           </Col>
         </Row>
       </div>
@@ -444,7 +542,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.PARMANo}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "PARMANo");
                     }}
@@ -457,7 +555,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.CompanyName}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "CompanyName");
                     }}
@@ -473,7 +571,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ASNStreet}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ASNStreet");
                     }}
@@ -486,7 +584,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ASNPostCode}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ASNPostCode");
                     }}
@@ -499,7 +597,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ASNCountryCode}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ASNCountryCode");
                     }}
@@ -512,7 +610,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ASNPhone}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ASNPhone");
                     }}
@@ -530,7 +628,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.BilltoNo}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "BilltoNo");
                     }}
@@ -543,7 +641,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.BillStreet}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "BillStreet");
                     }}
@@ -556,7 +654,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.BillPostCode}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "BillPostCode");
                     }}
@@ -569,7 +667,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.BillCountryCode}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "BillCountryCode");
                     }}
@@ -582,7 +680,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.BillPhone}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "BillPhone");
                     }}
@@ -600,7 +698,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ShipToNo}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ShipToNo");
                     }}
@@ -613,7 +711,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ShipStreet}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ShipStreet");
                     }}
@@ -626,7 +724,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ShipPostcode}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ShipPostcode");
                     }}
@@ -639,7 +737,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ShipCountryCode}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ShipCountryCode");
                     }}
@@ -652,7 +750,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ShipPhone}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ShipPhone");
                     }}
@@ -665,7 +763,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.VatNo}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "VatNo");
                     }}
@@ -678,7 +776,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.GSDBID}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "GSDBID");
                     }}
@@ -696,7 +794,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ContractName}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ContractName");
                     }}
@@ -709,7 +807,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ContractEmail}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ContractEmail");
                     }}
@@ -722,7 +820,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.ContractPhoneno}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "ContractPhoneno");
                     }}
@@ -748,6 +846,7 @@ const CaseFormView: React.FC = () => {
                 <Col span={6}>Consequenses:</Col>
                 <Col span={8}>
                   <Radio.Group
+                    disabled={true}
                     onChange={onConsequenseChange}
                     value={states.currentCase.Constatus}
                   >
@@ -768,7 +867,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.ConPackagingAccno}
-                      disabled={isEditableCommon()}
+                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "ConPackagingAccno");
                       }}
@@ -781,7 +880,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.ConCompanyName}
-                      disabled={isEditableCommon()}
+                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "ConCompanyName");
                       }}
@@ -794,7 +893,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.ConCity}
-                      disabled={isEditableCommon()}
+                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "ConCity");
                       }}
@@ -807,7 +906,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.ConCountryCode}
-                      disabled={isEditableCommon()}
+                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "ConCountryCode");
                       }}
@@ -883,14 +982,18 @@ const CaseFormView: React.FC = () => {
                     className={styles.iconPlus}
                     icon={<PlusOutlined rev={undefined} />}
                     onClick={onAdd}
-                    disabled={!states.packageEditable}
+                    disabled={
+                      !states.packageEditable || !states.isEditableCommon
+                    }
                   />
                   <Button
                     shape="circle"
                     className={styles.iconDelete}
                     icon={<DeleteOutlined rev={undefined} />}
                     onClick={onDelete}
-                    disabled={!states.packageEditable}
+                    disabled={
+                      !states.packageEditable || !states.isEditableCommon
+                    }
                   />
                 </Col>
               </Row>
@@ -906,7 +1009,9 @@ const CaseFormView: React.FC = () => {
                     pagination={false}
                     rowSelection={rowSelection}
                     components={{ body: { cell: EditableCell } }}
-                    dataSource={states.packagingNeeds}
+                    dataSource={states.packagingNeeds.filter(
+                      (i) => i.Year.toString() === states.packageYear.toString()
+                    )}
                     columns={packagingColumns}
                     bordered={false}
                     size="small"
@@ -924,6 +1029,7 @@ const CaseFormView: React.FC = () => {
                     format={dateFormat}
                     onChange={onRequestDateChange}
                     allowClear={false}
+                    disabled={!states.isEditableCommon}
                   />
                 </Col>
               </Row>
@@ -938,7 +1044,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.IssuCompName}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "IssuCompName");
                     }}
@@ -951,7 +1057,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.IssuName}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "IssuName");
                     }}
@@ -964,7 +1070,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.IssuPhoneNo}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "IssuPhoneNo");
                     }}
@@ -977,7 +1083,7 @@ const CaseFormView: React.FC = () => {
                   <Input
                     className={styles.inputStyle}
                     defaultValue={states.currentCase.IssuEmail}
-                    disabled={isEditableCommon()}
+                    disabled={!states.isEditableCommon}
                     onChange={(e) => {
                       onTextChange(e, "IssuEmail");
                     }}
