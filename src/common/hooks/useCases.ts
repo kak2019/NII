@@ -6,6 +6,7 @@ import {
   currentCaseSelector,
   isFetchingSelector,
   messageSelector,
+  packagingDataSelector,
   packagingNeedsSelector,
   receivingPlantSelector,
 } from "../features/cases/selector";
@@ -14,14 +15,18 @@ import { INiiCaseItem } from "../model/niicase";
 import { IReceivingPlant } from "../model/receivingplant";
 import { useAppDispatch, useAppSelector } from "./useApp";
 import {
+  addPackagingNeedAction,
   editCaseAction,
   editPackagingNeedAction,
   fetchByIdAction,
   fetchConsequensesByCaseAction,
+  fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
+  fetchReceivingPlantByCaseAction,
   removePackagingNeedsByIdAction,
 } from "../features/cases/action";
 import { IPackaging } from "../model/packagingneed";
+import { IPackagingData } from "../model/packagingdata";
 
 type CasesOperators = [
   isFetching: CaseStatus,
@@ -31,6 +36,7 @@ type CasesOperators = [
   packagingNeeds: IPackaging[],
   receivingPlant: IReceivingPlant[],
   consequenses: IConsequense[],
+  packagingData: IPackagingData[],
   changeCaseId: (Id: string) => void,
   fetchCaseById: (Id: number) => void,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,7 +44,10 @@ type CasesOperators = [
   fetchConsequensesByCase: (Id: number) => void,
   fetchPackagingNeedsByCase: (CaseId: number) => void,
   editPackagingNeed: (arg: { Packaging: IPackaging }) => void,
-  removePackagingNeedsById: (Id: number) => void
+  addPackagingNeed: (arg: { Packaging: IPackaging }) => void,
+  removePackagingNeedsById: (Id: number) => void,
+  fetchReceivingPlantByCase: (Id: number) => void,
+  fetchPackagingData: () => void
 ];
 export const useCases = (): Readonly<CasesOperators> => {
   const dispatch = useAppDispatch();
@@ -47,6 +56,7 @@ export const useCases = (): Readonly<CasesOperators> => {
   const packagingNeeds = useAppSelector(packagingNeedsSelector);
   const receivingPlant = useAppSelector(receivingPlantSelector);
   const consequenses = useAppSelector(consequensesSelector);
+  const packagingData = useAppSelector(packagingDataSelector);
   const isFetching = useAppSelector(isFetchingSelector);
   const errorMessage = useAppSelector(messageSelector);
 
@@ -95,12 +105,28 @@ export const useCases = (): Readonly<CasesOperators> => {
     },
     [dispatch]
   );
+  const addPackagingNeed = useCallback(
+    (arg: { Packaging: IPackaging }) => {
+      return dispatch(addPackagingNeedAction(arg));
+    },
+    [dispatch]
+  );
   const removePackagingNeedsById = useCallback(
     (Id: number) => {
       return dispatch(removePackagingNeedsByIdAction({ Id }));
     },
     [dispatch]
   );
+  const fetchReceivingPlantByCase = useCallback(
+    (CaseId: number) => {
+      dispatch(CaseItemIdChanged(CaseId));
+      return dispatch(fetchReceivingPlantByCaseAction({ CaseId }));
+    },
+    [dispatch]
+  );
+  const fetchPackagingData = useCallback(() => {
+    return dispatch(fetchPackagingDataAction());
+  }, [dispatch]);
   return [
     isFetching,
     errorMessage,
@@ -109,12 +135,16 @@ export const useCases = (): Readonly<CasesOperators> => {
     packagingNeeds,
     receivingPlant,
     consequenses,
+    packagingData,
     changeCaseId,
     fetchCaseById,
     editCase,
     fetchConsequensesByCase,
     fetchPackagingNeedsByCase,
     editPackagingNeed,
+    addPackagingNeed,
     removePackagingNeedsById,
+    fetchReceivingPlantByCase,
+    fetchPackagingData,
   ];
 };

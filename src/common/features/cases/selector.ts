@@ -32,3 +32,7 @@ export const messageSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.message
 );
+export const packagingDataSelector = createSelector(
+  featureStateSelector,
+  (state: ICaseState) => state?.packagingData
+);

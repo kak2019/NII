@@ -5,6 +5,8 @@ import { FeatureKey } from "../../featureKey";
 import { INiiCaseItem } from "../../model/niicase";
 import { IConsequense } from "../../model/consequense";
 import { IPackaging } from "../../model/packagingneed";
+import { IReceivingPlant } from "../../model/receivingplant";
+import { IPackagingData } from "../../model/packagingdata";
 
 const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
   const sp = spfi(getSP());
@@ -56,6 +58,8 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
                         <FieldRef Name="BillPhone"/>
                         <FieldRef Name="ShipPhone"/>
                         <FieldRef Name="CaseID"/>
+                        <FieldRef Name="Created"/>
+                        <FieldRef Name="Author"/>
                       </ViewFields>
                       <RowLimit>1</RowLimit>
                     </View>`,
@@ -65,15 +69,39 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
           let dateWebPart = "";
           if (response.Row[0].RequestDate.length > 0) {
             const dateSP = response.Row[0].RequestDate.split("/");
+            let month = dateSP[0];
+            if (month.length === 1) {
+              month = `0${month}`;
+            }
+            dateSP[0] = dateSP[1];
+            dateSP[1] = month;
+            dateWebPart = dateSP.join("-");
+          }
+          console.log(response);
+          let dateCreated = "";
+          if (response.Row[0].Created.length > 0) {
+            const dateSP = response.Row[0].Created.split("/");
             const month = dateSP[0];
             dateSP[0] = dateSP[1];
             dateSP[1] = month;
-            dateWebPart = dateSP.join("/");
+            dateCreated = dateSP.join("-").split(/(\s+)/)[0];
+          }
+          let approval: number = null;
+          switch (response.Row[0].Status) {
+            case "Case Approved": {
+              approval = 1;
+              break;
+            }
+            case "Case Rejected": {
+              approval = 0;
+              break;
+            }
           }
           return {
             ID: response.Row[0].ID,
-            Created: response.Row[0].Created,
-            Approval: response.Row[0].Approval,
+            Created: dateCreated,
+            Author: response.Row[0].Author[0].title,
+            Approval: approval,
             CaseID: response.Row[0].CaseID,
             PARMANo: response.Row[0].PARMANo,
             CompanyName: response.Row[0].CompanyName,
@@ -228,6 +256,7 @@ const fetchPackagingNeedsByCase = async (arg: {
                 SupplierNo: item.SupplierNo,
                 SupplierName: item.SupplierName,
                 MasterID: item.MasterID,
+                Year: item.Year,
               } as IPackaging)
           );
         } else {
@@ -245,15 +274,59 @@ const editPackagingNeed = async (arg: {
   Packaging: any;
 }): Promise<IPackaging> => {
   const { Packaging } = arg;
+  const PackagingEdit = {
+    ID: Packaging.ID,
+    MasterID: Packaging.MasterID,
+    CaseID: Packaging.CaseID,
+    Year: Packaging.Year,
+    Packaging: Packaging.Packaging,
+    PackagingName: Packaging.PackagingName,
+    WeeklyDemand: Packaging.WeeklyDemand.toString(),
+    YearlyDemand: Packaging.YearlyDemand.toString(),
+    SupplierNo: Packaging.SupplierNo,
+    SupplierName: Packaging.SupplierName,
+  };
   const sp = spfi(getSP());
   try {
-    const list = sp.web.lists.getByTitle("Packaging List");
-    await list.items.getById(+Packaging.ID).update(Packaging);
+    await sp.web.lists
+      .getByTitle("Packaging List")
+      .items.getById(+Packaging.ID)
+      .update(PackagingEdit);
     const result = await fetchById({ Id: +Packaging.ID });
     return result;
   } catch (err) {
     console.log(err);
     return Promise.reject("Error when update Packging Need");
+  }
+};
+const addPackagingNeed = async (arg: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Packaging: any;
+}): Promise<IPackaging> => {
+  const { Packaging } = arg;
+  const sp = spfi(getSP());
+  const PackagingAdd = {
+    MasterID: Packaging.MasterID,
+    CaseID: Packaging.CaseID,
+    Year: Packaging.Year,
+    Packaging: Packaging.Packaging,
+    PackagingName: Packaging.PackagingName,
+    WeeklyDemand: Packaging.WeeklyDemand.toString(),
+    YearlyDemand: Packaging.YearlyDemand.toString(),
+    SupplierNo: Packaging.SupplierNo,
+    SupplierName: Packaging.SupplierName,
+  };
+  try {
+    await sp.web.lists
+      .getByTitle("Packaging List")
+      .items.add(PackagingAdd)
+      .then((response) => {
+        console.log("add successfully");
+        console.log(response);
+      });
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when add Packging Need");
   }
 };
 const removePackagingNeedsById = async (arg: {
@@ -268,6 +341,88 @@ const removePackagingNeedsById = async (arg: {
   } catch (err) {
     console.log(err);
     return Promise.reject("Error when removing Packagings");
+  }
+};
+const fetchReceivingPlantByCase = async (arg: {
+  CaseId: number;
+}): Promise<IReceivingPlant[]> => {
+  const sp = spfi(getSP());
+  try {
+    const result = await sp.web.lists
+      .getByTitle("Receiving Plant/Receiver")
+      .renderListDataAsStream({
+        ViewXml: `<View>
+	                        <Query>
+		                        <Where>
+			                        <Eq>
+				                        <FieldRef Name="MasterID"/>
+				                        <Value Type="Text">${arg.CaseId}</Value>
+			                        </Eq>
+		                        </Where>
+	                        </Query>
+	                        <ViewFields>
+		                        <FieldRef Name="PackagingAccountNo"/>
+		                        <FieldRef Name="CompanyName"/>
+		                        <FieldRef Name="City"/>
+                            <FieldRef Name="CountryCode"/>
+	                        </ViewFields>
+	                        <RowLimit>5000</RowLimit>
+                        </View>`,
+      })
+      .then((response) => {
+        if (response.Row.length > 0) {
+          return response.Row.map(
+            (item) =>
+              ({
+                key: item.ID,
+                ID: item.ID,
+                PackagingAccountNo: item.PackagingAccountNo,
+                CompanyName: item.CompanyName,
+                City: item.City,
+                CountryCode: item.CountryCode,
+              } as IReceivingPlant)
+          );
+        } else {
+          return [] as IReceivingPlant[];
+        }
+      });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when fetch Consequenses by Case");
+  }
+};
+const fetchPackagingData = async (): Promise<IPackagingData[]> => {
+  const sp = spfi(getSP());
+  try {
+    const result = await sp.web.lists
+      .getByTitle("Packaging Data")
+      .renderListDataAsStream({
+        ViewXml: `<View>
+	                        <ViewFields>
+		                        <FieldRef Name="ItemNumber"/>
+		                        <FieldRef Name="Description"/>
+	                        </ViewFields>
+	                        <RowLimit>5000</RowLimit>
+                        </View>`,
+      })
+      .then((response) => {
+        if (response.Row.length > 0) {
+          return response.Row.map(
+            (item) =>
+              ({
+                ItemNumber: item.ItemNumber,
+                Description: item.Description,
+              } as IPackagingData)
+          );
+        } else {
+          return [] as IPackagingData[];
+        }
+      });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when fetch Packaging Data");
   }
 };
 
@@ -292,7 +447,19 @@ export const editPackagingNeedAction = createAsyncThunk(
   `${FeatureKey.CASES}/editPackagingNeed`,
   editPackagingNeed
 );
+export const addPackagingNeedAction = createAsyncThunk(
+  `${FeatureKey.CASES}/addPackagingNeed`,
+  addPackagingNeed
+);
 export const removePackagingNeedsByIdAction = createAsyncThunk(
   `${FeatureKey.CASES}/removePackagingNeedsById`,
   removePackagingNeedsById
+);
+export const fetchReceivingPlantByCaseAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchReceivingPlantByCase`,
+  fetchReceivingPlantByCase
+);
+export const fetchPackagingDataAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchPackagingData`,
+  fetchPackagingData
 );

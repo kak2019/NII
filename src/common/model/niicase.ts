@@ -1,6 +1,7 @@
 export interface INiiCaseItem {
   ID?: string;
   Title?: string;
+  Author?: string;
   Created?: string;
   Approval?: number;
   CaseID?: string;

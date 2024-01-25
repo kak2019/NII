@@ -4,14 +4,18 @@ import { INiiCaseItem } from "../../model/niicase";
 import { IReceivingPlant } from "../../model/receivingplant";
 import { IConsequense } from "../../model/consequense";
 import {
+  addPackagingNeedAction,
   editCaseAction,
   editPackagingNeedAction,
   fetchByIdAction,
   fetchConsequensesByCaseAction,
+  fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
+  fetchReceivingPlantByCaseAction,
   removePackagingNeedsByIdAction,
 } from "./action";
 import { IPackaging } from "../../model/packagingneed";
+import { IPackagingData } from "../../model/packagingdata";
 
 export enum CaseStatus {
   Idle,
@@ -27,6 +31,7 @@ export interface ICaseState {
   consequenses: IConsequense[];
   statue: CaseStatus;
   message: string;
+  packagingData: IPackagingData[];
 }
 
 // Define the initial state using that type
@@ -38,6 +43,7 @@ const initialState: ICaseState = {
   consequenses: [],
   statue: CaseStatus.Idle,
   message: "",
+  packagingData: [],
 };
 
 export const caseSlice = createSlice({
@@ -110,6 +116,36 @@ export const caseSlice = createSlice({
         state.statue = CaseStatus.Idle;
       })
       .addCase(removePackagingNeedsByIdAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+      })
+      .addCase(fetchReceivingPlantByCaseAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchReceivingPlantByCaseAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.receivingPlant = action.payload as IReceivingPlant[];
+      })
+      .addCase(fetchReceivingPlantByCaseAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+        state.message = action.error?.message;
+      })
+      .addCase(addPackagingNeedAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(addPackagingNeedAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+      })
+      .addCase(addPackagingNeedAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+      })
+      .addCase(fetchPackagingDataAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchPackagingDataAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.packagingData = action.payload;
+      })
+      .addCase(fetchPackagingDataAction.rejected, (state, action) => {
         state.statue = CaseStatus.Failed;
       });
   },
