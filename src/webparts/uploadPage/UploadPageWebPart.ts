@@ -17,11 +17,14 @@ export interface IUploadPageWebPartProps {
   description: string;
 }
 
+export let mytoken = ""
+
 export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPageWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-  protected token: any = null;
+  protected token: string = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected aadClient: any = null;
   public render(): void {
     const element: React.ReactElement<IUploadPageProps> = React.createElement(
@@ -47,9 +50,11 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
     this.context.aadTokenProviderFactory.getTokenProvider().then((provider): void => {
       provider.getToken('b407b2b3-b500-4ea9-92f1-ca4c28558347').then((token): void => {
         this.token = token;
+        mytoken = token
         console.log("tokenAAD:" + token);
       }, err => console.log("errorTokenAAD:" + err));
     }, err => console.log("errorGetProvider:" + err));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Promise<void>((resolve: () => void, reject: (error: any) => void): void => {
       const clientPromises = [];
 
@@ -69,7 +74,7 @@ export default class UploadPageWebPart extends BaseClientSideWebPart<IUploadPage
           // console.log(response[1]);
           resolve();
         }
-      );
+      ).catch(err => console.log(err))
 
     });
     return super.onInit();

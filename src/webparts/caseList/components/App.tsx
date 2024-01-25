@@ -14,7 +14,7 @@ import "@pnp/sp/items/get-all";
 import { spfi } from "@pnp/sp";
 import { getSP } from '../../../common/pnpjsConfig'
 import { DatePicker, TextField, defaultDatePickerStrings} from '@fluentui/react';
-
+import "@pnp/sp/webs"; 
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -130,6 +130,7 @@ export default memo(function App() {
             //   <Text>{item.Material}</Text>
             // ),
         }]
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [items, setItems] = React.useState([{
         "Case ID": "1223",
         "Parma": "110",
@@ -140,16 +141,16 @@ export default memo(function App() {
         "Status": "OK"
 
     }]);
-    setItems([{
-        "Case ID": "1223",
-        "Parma": "110",
-        "Supplier Name": "FLynt",
-        "GSDBID": "001",
-        "Creation Date": "09-02-1999",
-        "Start Date": "04-09-2032",
-        "Status": "OK"
+    // setItems([{
+    //     "Case ID": "1223",
+    //     "Parma": "110",
+    //     "Supplier Name": "FLynt",
+    //     "GSDBID": "001",
+    //     "Creation Date": "09-02-1999",
+    //     "Start Date": "04-09-2032",
+    //     "Status": "OK"
 
-    }])
+    // }])
     const Statusoptions: IDropdownOption[] = [
         { key: 'Case Created', text: 'Case Created' },
         { key: 'In Contract Sign Off Process', text: 'In Contract Sign Off Process' },

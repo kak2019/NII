@@ -8,7 +8,7 @@ import store from "../../../common/store";
 
 export default class UploadPage extends React.Component<IUploadPageProps, {}> {
   public render(): React.ReactElement<IUploadPageProps> {
-    const { context ,token,aadClient} = this.props;
+    const { context} = this.props;
 
     return (
       <AppContext.Provider value={{ context }}>
