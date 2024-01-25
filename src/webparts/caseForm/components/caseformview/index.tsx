@@ -29,7 +29,6 @@ import { IAppProps } from "../IAppProps";
 import * as moment from "moment";
 import { useCases } from "../../../../common/hooks/useCases";
 import { IPackaging } from "../../../../common/model/packagingneed";
-import { useRef } from "react";
 import DebouncedInput from "./debounceinput";
 
 const CaseFormView: React.FC = () => {
@@ -226,8 +225,17 @@ const CaseFormView: React.FC = () => {
             );
             if (packagingDataFiltered.length > 0) {
               item.PackagingName = packagingDataFiltered[0].Description;
+              item.ErrorMessage = "";
             } else {
               item.PackagingName = "";
+              item.ErrorMessage = "Invalid";
+            }
+            if (
+              packagingDups.filter(
+                (i) => i.Packaging === e.toString() && i.Year === item.Year
+              ).length > 1
+            ) {
+              item.ErrorMessage = "Duplicate";
             }
             break;
           }
@@ -272,7 +280,7 @@ const CaseFormView: React.FC = () => {
     });
   };
   const onStatusChange = (statusValue: string): void => {
-    const caseTemp = states.currentCase;
+    const caseTemp = JSON.parse(JSON.stringify({ ...states.currentCase }));
     caseTemp.Status = statusValue;
     setStates({ ...states, currentCase: caseTemp });
   };
@@ -335,7 +343,7 @@ const CaseFormView: React.FC = () => {
       IssuEmail: currentCaseDup.IssuEmail,
     };
     const packagingNeedsDup = [...states.packagingNeeds];
-    if (packagingNeedsDup.filter((i) => i.PackagingName === "").length > 0) {
+    if (packagingNeedsDup.filter((i) => !!i.ErrorMessage).length > 0) {
       await message.error("Invalid Packaging included in Packaging Needs");
       return;
     }
@@ -387,11 +395,11 @@ const CaseFormView: React.FC = () => {
                 bordered={!fieldEditable}
               />
             </Row>
-            {!!!record.PackagingName && (
+            {!!record.ErrorMessage && (
               <Row>
                 <Input
                   className={styles.inputAlert}
-                  defaultValue={"invalid"}
+                  defaultValue={record.ErrorMessage}
                   readOnly={true}
                   bordered={false}
                 />
