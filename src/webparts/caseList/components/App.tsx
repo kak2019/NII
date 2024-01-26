@@ -15,6 +15,7 @@ import { spfi } from "@pnp/sp";
 import { getSP } from '../../../common/pnpjsConfig'
 import { DatePicker, TextField, defaultDatePickerStrings} from '@fluentui/react';
 import "@pnp/sp/webs"; 
+import { PrimaryButton } from "office-ui-fabric-react";
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -230,13 +231,22 @@ export default memo(function App() {
                 <Label style={{ width: 60 }}>Parma</Label> <TextField style={{ width: 170 }} />{" "}
                 <Label style={{ width: 100, marginRight: 10, marginLeft: 40 }}>Supplier Name</Label> <Label>Supplier Name should get from parma </Label>
             </Stack>
-            <Stack>
-                <DatePicker
+            <Stack horizontal horizontalAlign="start">
+                <Label>Plan Start Date</Label><DatePicker
                     placeholder="Select a date..."
                     ariaLabel="Select a date"
                     // DatePicker uses English strings by default. For localized apps, you must override this prop.
                     strings={defaultDatePickerStrings}
-                />
+                /><Label>to</Label><DatePicker
+                placeholder="Select a date..."
+                ariaLabel="Select a date"
+                // DatePicker uses English strings by default. For localized apps, you must override this prop.
+                strings={defaultDatePickerStrings}
+            />
+            </Stack>
+            <Stack horizontal horizontalAlign="start">
+                <PrimaryButton>Search</PrimaryButton>
+                <PrimaryButton>Reset</PrimaryButton>
             </Stack>
 
             <DetailsList

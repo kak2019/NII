@@ -118,7 +118,7 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
             "Packaging": val['UD-KMP'], 
             "weekly need":val.__EMPTY,
             "Packaging Name": val['__EMPTY_4'],
-            "Yearly need":val['__EMPTY_5'],
+            "Yearly need":val['Mandatory field'],
         }
     })
     // const table2 = arr.slice(start + 1, end).map(val => {
