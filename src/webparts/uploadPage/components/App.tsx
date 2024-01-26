@@ -129,7 +129,7 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
     //     }
     // })
     // return [table1, table2]
-    return [table1]
+    return table1
     
 }
 
