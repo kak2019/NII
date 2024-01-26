@@ -63,6 +63,11 @@ const CaseFormView: React.FC = () => {
     fetchReceivingPlantByCase,
     fetchPackagingData,
   ] = useCases();
+  const editableStatus = [
+    "Case Created",
+    "In Contract Sign Off Process",
+    "Contract Submitted",
+  ];
   const initialState: IAppProps = {
     currentCase: currentCase,
     packagingNeeds: packagingNeeds,
@@ -72,7 +77,7 @@ const CaseFormView: React.FC = () => {
     packageEditable: true,
     selectedPackages: [],
     removePackagingIds: [],
-    isEditableCommon: currentCase.Status === "Case Created",
+    isEditableCommon: editableStatus.indexOf(currentCase.Status) !== -1,
   };
   const [states, setStates] = React.useState(initialState);
   const receivingColumns = [
