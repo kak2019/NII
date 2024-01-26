@@ -34,7 +34,7 @@ const DebouncedInput: React.FC<DebouncedInputProps> = ({
   const debouncedOnBlur = React.useCallback(
     debounce((value: string) => {
       onBlur(value);
-    }, 500),
+    }, 1500),
     [onBlur]
   );
 

@@ -10,4 +10,5 @@ export interface IPackaging {
   YearlyDemand?: number;
   SupplierNo?: string;
   SupplierName?: string;
+  ErrorMessage?: string;
 }
