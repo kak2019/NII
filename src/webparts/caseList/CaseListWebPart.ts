@@ -16,11 +16,13 @@ export interface ICaseListWebPartProps {
   description: string;
 }
 
+export let mytoken = ""
+
 export default class CaseListWebPart extends BaseClientSideWebPart<ICaseListWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-  
+  protected token: string = null;
   public render(): void {
     const element: React.ReactElement<ICaseListProps> = React.createElement(
       CaseList,
@@ -30,6 +32,7 @@ export default class CaseListWebPart extends BaseClientSideWebPart<ICaseListWebP
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
+        token: this.token,
         context:this.context,
       }
     );
@@ -41,6 +44,13 @@ export default class CaseListWebPart extends BaseClientSideWebPart<ICaseListWebP
     
     this._environmentMessage = this._getEnvironmentMessage();
     getSP(this.context);
+    this.context.aadTokenProviderFactory.getTokenProvider().then((provider): void => {
+      provider.getToken('b407b2b3-b500-4ea9-92f1-ca4c28558347').then((token): void => {
+        this.token = token;
+        mytoken = token
+        console.log("tokenAAD:" + token);
+      }, err => console.log("errorTokenAAD:" + err));
+    }, err => console.log("errorGetProvider:" + err));
     return super.onInit();
   }
 
