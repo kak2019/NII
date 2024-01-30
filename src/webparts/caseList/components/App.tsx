@@ -123,7 +123,7 @@ export default memo(function App() {
             name: 'Creation Date',
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
-            fieldName: 'Creation Date',
+            fieldName: 'Created',
             minWidth: 60,
             maxWidth: 120,
             styles: colomnstyle
@@ -184,12 +184,15 @@ export default memo(function App() {
         { key: 'Contract Submitted', text: 'Contract Submitted' },
         { key: 'Case Approved', text: 'Case Approved' },
         { key: 'Case Rejected', text: 'Case Rejected' },
+        { key: 'All Case', text: 'All Case' },
     ];
 
     const dropdownStyles: Partial<IDropdownStyles> = {
         dropdown: { width: 170, marginRight: 40 },
     };
-
+    const array: IDropdownOption[] = [];
+    const Countryoptions: IDropdownOption[] = []
+    const [countryoption,setcountryoption] = React.useState<IDropdownOption[]>([])
     React.useEffect(() => {
         const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
             ViewXml: `<View>
@@ -200,9 +203,12 @@ export default memo(function App() {
                                 <FieldRef Name="GSDBID"/>
                                 <FieldRef Name="RequestDate"/>
                                 <FieldRef Name="Status"/>
+                                <FieldRef Name="Created"/>
+                                <FieldRef Name="ASNCountryCode"/>
                               </ViewFields>
-                              <RowLimit>400</RowLimit>
+                           
                             </View>`,
+                            // <RowLimit>400</RowLimit>
         }).then((response) => {
             console.log("res", response)
             if (response.Row.length > 0) {
@@ -211,12 +217,31 @@ export default memo(function App() {
             }
         }
     
+        );
+        const itemoptionContry = sp.web.lists.getByTitle("Country").renderListDataAsStream({
+            ViewXml: `<View>
+                              <ViewFields>
+                                <FieldRef Name="Title"/>
+                                <FieldRef Name="CountryCode"/>
+                              </ViewFields>
+                              <RowLimit>400</RowLimit>
+                            </View>`,
+        }).then((response) => {
+            console.log("res", response)
+            if (response.Row.length > 0) {
+                for (let i = 0; i < response.Row.length; i++) {
+                    Countryoptions.push({ key: response.Row[i].Title, text: response.Row[i].CountryCode })
+                }
+                setcountryoption(Countryoptions)
+                console.log("array", Countryoptions);
+                console.log(itemoptionContry);
+            }
+        }
         )
     }, [])
 
 
-    const array: IDropdownOption[] = [];
-    const Countryoptions: IDropdownOption[] = array
+   
     // 变量拼起来 空格会导致搜索不到
     //const temp_Address = sp.web.lists.getByTitle("Entities").items.select("Title","Country","Address").filter(`Name eq ${(taregetID)}`).getAll();
 
@@ -273,14 +298,14 @@ export default memo(function App() {
                 <Label style={{ width: 60 }}>Country </Label><Dropdown
                     placeholder="Select an option"
                     //   label="Country"
-                    options={Countryoptions}
+                    options={countryoption}
                     styles={dropdownStyles}
                 />
             </Stack >
             <Stack horizontal horizontalAlign="start" style={{ marginRight: 20 }}>
                 <Label style={{ width: 60 }}>Parma</Label> <TextField style={{ width: 170 }} onChange={fetchName} />{" "}
                 <Label style={{ width: 100, marginRight: 10, marginLeft: 40 }}>Supplier Name</Label> 
-                <Label>{ supplierName || 'Supplier Name should get from parma' }</Label>
+                <Label>{ supplierName  }</Label>
             </Stack>
             <Stack horizontal horizontalAlign="start">
                 <Label style={{marginRight:20}}>Plan Start Date</Label><DatePicker
