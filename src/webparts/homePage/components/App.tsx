@@ -8,6 +8,7 @@ import { Stack, IStackStyles } from "@fluentui/react/lib/Stack";
 import { DefaultPalette } from "@fluentui/react/lib/Styling";
 import styles from "./HomePage.module.scss";
 import Receive from "../assets/receive";
+// import background from "../assets/Background.png"
 export default memo(function App() {
   // const test_click = (): void => {
   //     alert("111")
@@ -23,7 +24,7 @@ export default memo(function App() {
       {/* 看到就是成功
         <Button type="primary" onClick={test_click}>Primary Button</Button>
         <Button type="dashed">Default Button</Button> */}
-
+    {/* <div style={{ backgroundImage: `url(${background})` }}> */}
       <Stack enableScopedSelectors styles={stackStyles}>
         <div className={styles.section}>
           <div className={styles.parttitle}>Create New Case</div>
@@ -77,6 +78,7 @@ export default memo(function App() {
           </Stack>
         </div>
       </Stack>
+      {/* </div> */}
     </>
   )
 

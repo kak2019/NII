@@ -19,6 +19,10 @@ import { UploadOutlined } from '@ant-design/icons';
 import { useEffect } from "react";
 import { mytoken } from "../UploadPageWebPart";
 import * as moment from "moment";
+import { spfi } from "@pnp/sp";
+import { getSP } from "../../../common/pnpjsConfig";
+import "@pnp/sp/webs";
+import "@pnp/sp/folders";
 // import * as moment from "moment";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
@@ -88,7 +92,7 @@ const getSubTableData = (arr: Array<{ [key in string]: any }>) => {
     const res = []
     while (arr[i]['UD-KMP'] !== "CONSEQUENSES FOR OTHER SUPPLIERS?:") {
         // res.push(arr[i])
-        res.push({ "Packaging account no": arr[i]['UD-KMP'], "company name":arr[i]?.__EMPTY_1,"City":arr[i]?.__EMPTY_2,'Country Code':arr[i]?.__EMPTY_3})
+        res.push({ "Packaging account no": arr[i]['UD-KMP'], "company name":arr[i]?.__EMPTY,"City":arr[i]?.__EMPTY_1,'Country Code':arr[i]?.__EMPTY_2})
         i++
     }
     return res
@@ -148,6 +152,9 @@ export default memo(function App() {
     const [showBtn, setShowBtn] = useState(false)
     // const [apiResponse, setApiResponse] = useState<any>(null);
 
+
+
+   
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleFileUpload = (info: any) => {
         if (info.file) {
@@ -204,6 +211,7 @@ export default memo(function App() {
         }
     };
     useEffect(() => {
+        
         if (items.length > 0 && parmainfo && Object.keys(parmainfo).length > 0) {
            
             // 获取子表数据项
@@ -226,7 +234,9 @@ export default memo(function App() {
             // 获取不固定子表后面的数据
             const secItems = items.slice(index);
             console.log(secItems)
-            console.log('Packaging account no', secItems[3].__EMPTY_1)
+            console.log('Packaging account no', secItems[3].__EMPTY_1);
+            //@ts-ignore
+            console.log("新写法",items[items.findIndex(val => val.__rowNum__ === 55)])
         }
     }, [parmainfo, address])
 
@@ -283,18 +293,34 @@ export default memo(function App() {
             PackageJSON:JSON.stringify(getData2(items)),
             
             //这个日期 要日月年, 看看怎么做 这个存的时候要日期格式 
-            RequestDate:moment(String(secItems[29]?.__EMPTY_1),"dd-MM-YYYY"),
-            IssuCompName:String(secItems[31]?.__EMPTY_1),
-            IssuName:String(secItems[32]?.__EMPTY_1),
-            IssuPhoneNo:String(secItems[33]?.__EMPTY_1),
-            IssuEmail:String(secItems[34]?.__EMPTY_1),
+            //RequestDate:moment(String(secItems[29]?.__EMPTY_1),"dd-MM-YYYY"),
+            //@ts-ignore
+            RequestDate:moment(String(items[items.findIndex(val => val.__rowNum__ === 102)]?.__EMPTY_1),"dd-MM-YYYY"),
+            //IssuCompName:String(secItems[31]?.__EMPTY_1),
+            //@ts-ignore
+            IssuCompName:String(items[items.findIndex(val => val.__rowNum__ === 107)]?.__EMPTY_1),
+            //@ts-ignore
+            IssuName:String(items[items.findIndex(val => val.__rowNum__ === 108)]?.__EMPTY_1),
+            //@ts-ignore
+            IssuPhoneNo:String(items[items.findIndex(val => val.__rowNum__ === 109)]?.__EMPTY_1),
+            //@ts-ignore
+            IssuEmail:String(items[items.findIndex(val => val.__rowNum__ === 110)]?.__EMPTY_1),
 
 
         }
+        const sp = spfi(getSP());
         // let promiss
-        addRequest({ request }).then(promises => { console.log("promiss", promises, typeof (promises)); }).catch(err => console.log("err", err));
+        addRequest({ request }).then(promises => { console.log("promiss", promises, typeof (promises));
+        const responseData = (promises as Record<string, any>).data;
+        const id = responseData.ID;
+        console.log('ID:', id);
+        // console.log(promises.indexOf('ID'))
+         const folderName = id;
+        sp.web.folders.addUsingPath(`Nii Case Library/${folderName}`);
+    //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
+    }).catch(err => console.log("err", err));
     }
-
+   
 
     return (
         <>

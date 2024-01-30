@@ -30,6 +30,7 @@ const editRequest = async (arg: {
 
 const addRequest  = async (arg: {
   request: Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): Promise<Record<string, unknown> | string> => {
   const { request } = arg;
   const sp = spfi(getSP());
