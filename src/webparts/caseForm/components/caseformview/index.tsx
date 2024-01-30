@@ -30,6 +30,8 @@ import * as moment from "moment";
 import { useCases } from "../../../../common/hooks/useCases";
 import { IPackaging } from "../../../../common/model/packagingneed";
 import DebouncedInput from "./debounceinput";
+import { IFileInfo } from "@pnp/sp/files";
+import { RcFile } from "antd/lib/upload";
 
 const CaseFormView: React.FC = () => {
   //#region interfaces
@@ -52,6 +54,8 @@ const CaseFormView: React.FC = () => {
     receivingPlant,
     consequenses,
     packagingData,
+    contractFiles,
+    originalFiles,
     changeCaseId,
     fetchCaseById,
     editCase,
@@ -62,6 +66,9 @@ const CaseFormView: React.FC = () => {
     removePackagingNeedsById,
     fetchReceivingPlantByCase,
     fetchPackagingData,
+    fetchContractFileById,
+    fetchOriginalFileById,
+    uploadFile,
   ] = useCases();
   const editableStatus = [
     "Case Created",
@@ -80,6 +87,11 @@ const CaseFormView: React.FC = () => {
     isEditableCommon: editableStatus.indexOf(currentCase.Status) !== -1,
   };
   const [states, setStates] = React.useState(initialState);
+  const [fileList, setFileList] = React.useState([]);
+  const [existFile, setexistFile] = React.useState(contractFiles.length > 0);
+  const [needReplace, setneedReplace] = React.useState(
+    contractFiles.length > 0
+  );
   const receivingColumns = [
     {
       title: "Packaging account no.",
@@ -168,23 +180,6 @@ const CaseFormView: React.FC = () => {
       setStates({ ...states, selectedPackages: selectedRows });
     },
   };
-  const props: UploadProps = {
-    name: "file",
-    action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-    headers: {
-      authorization: "authorization-text",
-    },
-    onChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === "done") {
-        console.log("done");
-      } else if (info.file.status === "error") {
-        console.log("error");
-      }
-    },
-  };
   const dateFormat = "DD-MM-YYYY";
   //#endregion
   //#region events
@@ -213,9 +208,6 @@ const CaseFormView: React.FC = () => {
     key: React.Key,
     field: string
   ): void => {
-    console.log(e);
-    console.log(key);
-    console.log(field);
     const packagingDups: IPackaging[] = JSON.parse(
       JSON.stringify([...states.packagingNeeds])
     );
@@ -370,7 +362,6 @@ const CaseFormView: React.FC = () => {
       if (!!packaging.ID) {
         editPackagingNeed({ Packaging: packaging });
       } else {
-        console.log(packaging);
         addPackagingNeed({ Packaging: packaging });
       }
     });
@@ -378,10 +369,15 @@ const CaseFormView: React.FC = () => {
     removePackagingIdsDup.forEach((id) => {
       removePackagingNeedsById(id);
     });
+    if (fileList.length > 0) {
+      const originalFileUrl =
+        contractFiles.length > 0 ? contractFiles[0].ServerRelativeUrl : "";
+      uploadFile(fileList, needReplace, originalFileUrl, currentCaseId);
+    }
     await editCase({ niiCase: caseUpdate });
   };
   const onCancel = (): void => {
-    console.log(packagingData);
+    console.log(contractFiles);
   };
   //#endregion
   //#region methods
@@ -475,6 +471,16 @@ const CaseFormView: React.FC = () => {
           <Col span={6}>Creation Date:</Col>
           <Col>{states.currentCase.Created}</Col>
         </Row>
+        <Row className={styles.rowContent}>
+          <Col span={6}>Original Request Form:</Col>
+          <Col>
+            {originalFiles.length > 0 && (
+              <a href={originalFiles[0].ServerRelativeUrl}>
+                {originalFiles[0].Name}
+              </a>
+            )}
+          </Col>
+        </Row>
         <Row className={styles.rowContent} align="middle">
           <Col span={6}>Status</Col>
           <Col span={8}>
@@ -509,16 +515,36 @@ const CaseFormView: React.FC = () => {
             />
           </Col>
         </Row>
-        <Row className={styles.rowContent} align="middle">
+        <Row className={styles.rowContent} align="top">
           <Col span={6}>Sign-off Contract:</Col>
           <Col span={10}>
-            <Upload {...props}>
+            <Upload
+              fileList={fileList}
+              beforeUpload={(file) => {
+                setFileList([file]);
+                setexistFile(false);
+                return false;
+              }}
+              onRemove={(file) => {
+                setFileList(fileList.filter((item) => item.uid !== file.uid));
+                setexistFile(contractFiles.length > 0);
+              }}
+            >
               <Button icon={<UploadOutlined rev={undefined} />}>
                 Click to Upload
               </Button>
             </Upload>
           </Col>
         </Row>
+        {existFile && (
+          <Row className={styles.rowContent}>
+            <Col offset={6} span={8}>
+              <a href={contractFiles[0].ServerRelativeUrl}>
+                {contractFiles[0].Name}
+              </a>
+            </Col>
+          </Row>
+        )}
         <Row className={styles.rowContent}>
           <Col span={6}>Approval:</Col>
           <Col span={10}>
@@ -1023,7 +1049,7 @@ const CaseFormView: React.FC = () => {
                     rowSelection={rowSelection}
                     components={{ body: { cell: EditableCell } }}
                     dataSource={states.packagingNeeds.filter(
-                      (i) => i.Year.toString() === states.packageYear.toString()
+                      (i) => i.Year === states.packageYear.toString()
                     )}
                     columns={packagingColumns}
                     bordered={false}

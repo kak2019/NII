@@ -9,13 +9,17 @@ import {
   editPackagingNeedAction,
   fetchByIdAction,
   fetchConsequensesByCaseAction,
+  fetchContractFileByIdAction,
+  fetchOriginalFileByIdAction,
   fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
   fetchReceivingPlantByCaseAction,
   removePackagingNeedsByIdAction,
+  uploadFileAction,
 } from "./action";
 import { IPackaging } from "../../model/packagingneed";
 import { IPackagingData } from "../../model/packagingdata";
+import { IFileInfo } from "@pnp/sp/files";
 
 export enum CaseStatus {
   Idle,
@@ -32,6 +36,8 @@ export interface ICaseState {
   statue: CaseStatus;
   message: string;
   packagingData: IPackagingData[];
+  contractFiles: IFileInfo[];
+  originalFiles: IFileInfo[];
 }
 
 // Define the initial state using that type
@@ -44,6 +50,8 @@ const initialState: ICaseState = {
   statue: CaseStatus.Idle,
   message: "",
   packagingData: [],
+  contractFiles: [],
+  originalFiles: [],
 };
 
 export const caseSlice = createSlice({
@@ -147,8 +155,45 @@ export const caseSlice = createSlice({
       })
       .addCase(fetchPackagingDataAction.rejected, (state, action) => {
         state.statue = CaseStatus.Failed;
+      })
+      .addCase(fetchContractFileByIdAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchContractFileByIdAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.contractFiles = action.payload;
+      })
+      .addCase(fetchContractFileByIdAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+      })
+      .addCase(fetchOriginalFileByIdAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchOriginalFileByIdAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.originalFiles = action.payload;
+      })
+      .addCase(fetchOriginalFileByIdAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
+      })
+      .addCase(uploadFileAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(uploadFileAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+      })
+      .addCase(uploadFileAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
       });
   },
+});
+
+export const CASECONST = Object.freeze({
+  CASE_LIST: "Nii Cases",
+  CONSEQUENSES_LIST: "Consequenses List",
+  PACKAGING_LIST: "Packaging List",
+  LIBRARY_NAME: "Nii Case Library",
+  CONTRACT_TYPE: "Contract File",
 });
 
 export const { CaseItemIdChanged } = caseSlice.actions;

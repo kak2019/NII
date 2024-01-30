@@ -1,5 +1,9 @@
 import { spfi } from "@pnp/sp";
 import { getSP } from "../../pnpjsConfig";
+import "@pnp/sp/webs";
+import "@pnp/sp/content-types";
+import "@pnp/sp/files";
+import "@pnp/sp/folders";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FeatureKey } from "../../featureKey";
 import { INiiCaseItem } from "../../model/niicase";
@@ -7,12 +11,15 @@ import { IConsequense } from "../../model/consequense";
 import { IPackaging } from "../../model/packagingneed";
 import { IReceivingPlant } from "../../model/receivingplant";
 import { IPackagingData } from "../../model/packagingdata";
+import { CASECONST } from "./casesSlice";
+import { IFileInfo } from "@pnp/sp/files";
+import { RcFile } from "antd/lib/upload";
 
 const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
   const sp = spfi(getSP());
   try {
     const item = await sp.web.lists
-      .getByTitle("Nii Cases")
+      .getByTitle(CASECONST.CASE_LIST)
       .renderListDataAsStream({
         ViewXml: `<View>
                       <Query>
@@ -77,7 +84,6 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
             dateSP[1] = month;
             dateWebPart = dateSP.join("-");
           }
-          console.log(response);
           let dateCreated = "";
           if (response.Row[0].Created.length > 0) {
             const dateSP = response.Row[0].Created.split("/");
@@ -153,7 +159,7 @@ const editCase = async (arg: {
   const { niiCase } = arg;
   const sp = spfi(getSP());
   try {
-    const list = sp.web.lists.getByTitle("Nii Cases");
+    const list = sp.web.lists.getByTitle(CASECONST.CASE_LIST);
     await list.items.getById(+niiCase.ID).update(niiCase);
     const result = await fetchById({ Id: +niiCase.ID });
     return result;
@@ -168,7 +174,7 @@ const fetchConsequensesByCase = async (arg: {
   const sp = spfi(getSP());
   try {
     const result = await sp.web.lists
-      .getByTitle("Consequenses List")
+      .getByTitle(CASECONST.CONSEQUENSES_LIST)
       .renderListDataAsStream({
         ViewXml: `<View>
 	                        <Query>
@@ -215,7 +221,7 @@ const fetchPackagingNeedsByCase = async (arg: {
   const sp = spfi(getSP());
   try {
     const result = await sp.web.lists
-      .getByTitle("Packaging List")
+      .getByTitle(CASECONST.CONSEQUENSES_LIST)
       .renderListDataAsStream({
         ViewXml: `<View>
 	                        <Query>
@@ -289,7 +295,7 @@ const editPackagingNeed = async (arg: {
   const sp = spfi(getSP());
   try {
     await sp.web.lists
-      .getByTitle("Packaging List")
+      .getByTitle(CASECONST.CASE_LIST)
       .items.getById(+Packaging.ID)
       .update(PackagingEdit);
     const result = await fetchById({ Id: +Packaging.ID });
@@ -318,12 +324,8 @@ const addPackagingNeed = async (arg: {
   };
   try {
     await sp.web.lists
-      .getByTitle("Packaging List")
-      .items.add(PackagingAdd)
-      .then((response) => {
-        console.log("add successfully");
-        console.log(response);
-      });
+      .getByTitle(CASECONST.CONSEQUENSES_LIST)
+      .items.add(PackagingAdd);
   } catch (err) {
     console.log(err);
     return Promise.reject("Error when add Packging Need");
@@ -335,7 +337,7 @@ const removePackagingNeedsById = async (arg: {
   const sp = spfi(getSP());
   try {
     await sp.web.lists
-      .getByTitle("Packaging List")
+      .getByTitle(CASECONST.CONSEQUENSES_LIST)
       .items.getById(arg.Id)
       .delete();
   } catch (err) {
@@ -425,7 +427,110 @@ const fetchPackagingData = async (): Promise<IPackagingData[]> => {
     return Promise.reject("Error when fetch Packaging Data");
   }
 };
-
+const fetchContractFileById = async (arg: {
+  Id: number;
+}): Promise<IFileInfo[]> => {
+  const sp = spfi(getSP());
+  try {
+    const contractFileId = await sp.web.lists
+      .getByTitle(CASECONST.LIBRARY_NAME)
+      .contentTypes()
+      .then((result) => {
+        return result.filter((i) => i.Name === CASECONST.CONTRACT_TYPE)[0].Id
+          .StringValue;
+      });
+    const contractFiles = await sp.web
+      .getFolderByServerRelativePath(`${CASECONST.LIBRARY_NAME}/${arg.Id}`)
+      .files.expand("ListItemAllFields")()
+      .then((files) => {
+        return files.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (file: any) => file.ListItemAllFields.ContentTypeId === contractFileId
+        );
+      });
+    return contractFiles;
+  } catch (err) {
+    console.log(err);
+    return [] as IFileInfo[];
+  }
+};
+const fetchOriginalFileById = async (arg: {
+  Id: number;
+}): Promise<IFileInfo[]> => {
+  const sp = spfi(getSP());
+  try {
+    const contractFileId = await sp.web.lists
+      .getByTitle(CASECONST.LIBRARY_NAME)
+      .contentTypes()
+      .then((result) => {
+        return result.filter((i) => i.Name !== CASECONST.CONTRACT_TYPE)[0].Id
+          .StringValue;
+      });
+    const contractFiles = await sp.web
+      .getFolderByServerRelativePath(`${CASECONST.LIBRARY_NAME}/${arg.Id}`)
+      .files.expand("ListItemAllFields")()
+      .then((files) => {
+        console.log(files);
+        return files.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (file: any) => file.ListItemAllFields.ContentTypeId === contractFileId
+        );
+      });
+    return contractFiles;
+  } catch (err) {
+    console.log(err);
+    return [] as IFileInfo[];
+  }
+};
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const uploadFile = async (arg: {
+  newFile: RcFile[];
+  replace: boolean;
+  oldFileUrl: string;
+  caseId: string;
+}): Promise<void> => {
+  const sp = spfi(getSP());
+  const reader = new FileReader();
+  arg.newFile.forEach((file) => {
+    // const uploadedFile = new File([file], file.name, { type: file.type });
+    reader.onloadend = async () => {
+      const arrayBuffer = reader.result as ArrayBuffer;
+      await sp.web
+        .getFolderByServerRelativePath(
+          `${CASECONST.LIBRARY_NAME}/${arg.caseId}`
+        )
+        .files.addUsingPath(file.name, arrayBuffer)
+        .then(async (addResult) => {
+          await sp.web.lists
+            .getByTitle(CASECONST.LIBRARY_NAME)
+            .contentTypes()
+            .then(async (contentTypes) => {
+              const contentTypeContract = contentTypes.filter(
+                (ct) => ct.Name === CASECONST.CONTRACT_TYPE
+              )[0];
+              await addResult.file.getItem().then(async (item) => {
+                await item.update({
+                  ContentTypeId: contentTypeContract.Id.StringValue,
+                });
+              });
+            });
+        });
+    };
+    reader.readAsArrayBuffer(file);
+  });
+  if (arg.replace) {
+    await sp.web
+      .getFileByServerRelativePath(arg.oldFileUrl)
+      .delete()
+      .then((_) => {
+        console.log("File deleted successfully");
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+  return;
+};
 //Thunk function
 export const fetchByIdAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchById`,
@@ -462,4 +567,16 @@ export const fetchReceivingPlantByCaseAction = createAsyncThunk(
 export const fetchPackagingDataAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchPackagingData`,
   fetchPackagingData
+);
+export const fetchContractFileByIdAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchContractFileById`,
+  fetchContractFileById
+);
+export const fetchOriginalFileByIdAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchOriginalFileById`,
+  fetchOriginalFileById
+);
+export const uploadFileAction = createAsyncThunk(
+  `${FeatureKey.CASES}/uploadFile`,
+  uploadFile
 );

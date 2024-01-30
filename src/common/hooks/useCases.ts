@@ -2,10 +2,12 @@ import { useCallback } from "react";
 import { CaseItemIdChanged, CaseStatus } from "../features/cases/casesSlice";
 import {
   consequensesSelector,
+  contractFilesSelector,
   currentCaseIdSelector,
   currentCaseSelector,
   isFetchingSelector,
   messageSelector,
+  originalFilesSelector,
   packagingDataSelector,
   packagingNeedsSelector,
   receivingPlantSelector,
@@ -20,13 +22,18 @@ import {
   editPackagingNeedAction,
   fetchByIdAction,
   fetchConsequensesByCaseAction,
+  fetchContractFileByIdAction,
+  fetchOriginalFileByIdAction,
   fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
   fetchReceivingPlantByCaseAction,
   removePackagingNeedsByIdAction,
+  uploadFileAction,
 } from "../features/cases/action";
 import { IPackaging } from "../model/packagingneed";
 import { IPackagingData } from "../model/packagingdata";
+import { IFileInfo } from "@pnp/sp/files";
+import { RcFile } from "antd/lib/upload";
 
 type CasesOperators = [
   isFetching: CaseStatus,
@@ -37,6 +44,8 @@ type CasesOperators = [
   receivingPlant: IReceivingPlant[],
   consequenses: IConsequense[],
   packagingData: IPackagingData[],
+  contractFiles: IFileInfo[],
+  originalFiles: IFileInfo[],
   changeCaseId: (Id: string) => void,
   fetchCaseById: (Id: number) => void,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,7 +56,15 @@ type CasesOperators = [
   addPackagingNeed: (arg: { Packaging: IPackaging }) => void,
   removePackagingNeedsById: (Id: number) => void,
   fetchReceivingPlantByCase: (Id: number) => void,
-  fetchPackagingData: () => void
+  fetchPackagingData: () => void,
+  fetchContractFileById: (Id: number) => void,
+  fetchOriginalFileById: (Id: number) => void,
+  uploadFile: (
+    newFile: RcFile[],
+    replace: boolean,
+    oldFileUrl: string,
+    caseId: string
+  ) => void
 ];
 export const useCases = (): Readonly<CasesOperators> => {
   const dispatch = useAppDispatch();
@@ -59,6 +76,8 @@ export const useCases = (): Readonly<CasesOperators> => {
   const packagingData = useAppSelector(packagingDataSelector);
   const isFetching = useAppSelector(isFetchingSelector);
   const errorMessage = useAppSelector(messageSelector);
+  const contractFiles = useAppSelector(contractFilesSelector);
+  const originalFiles = useAppSelector(originalFilesSelector);
 
   const fetchCaseById = useCallback(
     (Id: number) => {
@@ -127,6 +146,31 @@ export const useCases = (): Readonly<CasesOperators> => {
   const fetchPackagingData = useCallback(() => {
     return dispatch(fetchPackagingDataAction());
   }, [dispatch]);
+  const fetchContractFileById = useCallback(
+    (Id: number) => {
+      return dispatch(fetchContractFileByIdAction({ Id }));
+    },
+    [dispatch]
+  );
+  const fetchOriginalFileById = useCallback(
+    (Id: number) => {
+      return dispatch(fetchOriginalFileByIdAction({ Id }));
+    },
+    [dispatch]
+  );
+  const uploadFile = useCallback(
+    (
+      newFile: RcFile[],
+      replace: boolean,
+      oldFileUrl: string,
+      caseId: string
+    ) => {
+      return dispatch(
+        uploadFileAction({ newFile, replace, oldFileUrl, caseId })
+      );
+    },
+    [dispatch]
+  );
   return [
     isFetching,
     errorMessage,
@@ -136,6 +180,8 @@ export const useCases = (): Readonly<CasesOperators> => {
     receivingPlant,
     consequenses,
     packagingData,
+    contractFiles,
+    originalFiles,
     changeCaseId,
     fetchCaseById,
     editCase,
@@ -146,5 +192,8 @@ export const useCases = (): Readonly<CasesOperators> => {
     removePackagingNeedsById,
     fetchReceivingPlantByCase,
     fetchPackagingData,
+    fetchContractFileById,
+    fetchOriginalFileById,
+    uploadFile,
   ];
 };

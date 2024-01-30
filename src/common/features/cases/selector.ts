@@ -36,3 +36,11 @@ export const packagingDataSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.packagingData
 );
+export const contractFilesSelector = createSelector(
+  featureStateSelector,
+  (state: ICaseState) => state?.contractFiles
+);
+export const originalFilesSelector = createSelector(
+  featureStateSelector,
+  (state: ICaseState) => state?.originalFiles
+);
