@@ -20,6 +20,7 @@ import { DatePicker, TextField, defaultDatePickerStrings} from '@fluentui/react'
 import "@pnp/sp/webs"; 
 import { PrimaryButton } from "office-ui-fabric-react";
 import { mytoken } from "../CaseListWebPart";
+import * as moment from "moment";
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -188,7 +189,7 @@ export default memo(function App() {
     ];
 
     const dropdownStyles: Partial<IDropdownStyles> = {
-        dropdown: { width: 200, marginRight: 40 },
+        dropdown: { width: 250, marginRight: 40 },
     };
     const array: IDropdownOption[] = [];
     const Countryoptions: IDropdownOption[] = []
@@ -230,7 +231,7 @@ export default memo(function App() {
             console.log("res", response)
             if (response.Row.length > 0) {
                 for (let i = 0; i < response.Row.length; i++) {
-                    Countryoptions.push({ key: response.Row[i].Title, text: response.Row[i].CountryCode })
+                    Countryoptions.push({ key: response.Row[i].Title, text: response.Row[i].Title })
                 }
                 setcountryoption(Countryoptions)
                 console.log("array", Countryoptions);
@@ -278,10 +279,22 @@ export default memo(function App() {
             return condition
         }))
    }
-
+   function formatDate(date: Date): string {
+        let day = date.getDate().toString();
+        let month = (date.getMonth() + 1).toString(); // getMonth() 返回 0-11
+        const year = date.getFullYear().toString();
+    
+        // 确保日和月始终是两位数字
+        day = day.length < 2 ? '0' + day : day;
+        month = month.length < 2 ? '0' + month : month;
+    
+        return `${day}-${month}-${year}`;
+    }
+    
+  
     return (
-        <>
-            <Stack>
+        <><section style={{backgroundColor:'rgba(248, 247, 246, 1)', borderRadius: 10}}>
+            <Stack >
                 <Label style={{ fontSize: 18 }}>NII Case List</Label>
 
             </Stack>
@@ -303,37 +316,42 @@ export default memo(function App() {
                 />
             </Stack >
             <Stack horizontal horizontalAlign="start" style={{ marginRight: 20 }}>
-                <Label style={{ width: 60 }}>Parma</Label> <TextField style={{ width: 170 }} onChange={fetchName} />{" "}
+                <Label style={{ width: 60 }}>Parma</Label> <TextField style={{ width: 250 }} onChange={fetchName} />{" "}
                 <Label style={{ width: 100, marginRight: 10, marginLeft: 40 }}>Supplier Name</Label> 
                 <Label>{ supplierName  }</Label>
             </Stack>
-            <Stack horizontal horizontalAlign="start">
-                <Label style={{marginRight:20}}>Plan Start Date</Label><DatePicker
+            <Stack horizontal horizontalAlign="start" style={{marginTop:10}}>
+                <Label style={{marginRight:20}}>Plan Start Date</Label><Label style={{marginLeft:20,marginRight:20}}>from</Label>
+                <DatePicker
                     placeholder="Select a date..."
                     ariaLabel="Select a date"
+                    style={{width:200}}
                     // DatePicker uses English strings by default. For localized apps, you must override this prop.
                     strings={defaultDatePickerStrings}
-                /><Label style={{marginLeft:20,marginRight:20}}>to</Label><DatePicker
+                    formatDate={formatDate}
+                /><Label style={{marginLeft:20,marginRight:20}}>to</Label>
+                <DatePicker
                 placeholder="Select a date..."
                 ariaLabel="Select a date"
+                style={{width:200}}
+                formatDate={formatDate}
                 // DatePicker uses English strings by default. For localized apps, you must override this prop.
                 strings={defaultDatePickerStrings}
             />
             </Stack>
-            <Stack horizontal horizontalAlign="start">
+            <Stack horizontal horizontalAlign="start" style={{marginTop:10}}>
                 <PrimaryButton onClick={handleSearch}>Search</PrimaryButton>
                 <PrimaryButton>Reset</PrimaryButton>
             </Stack>
-
+            </section>
             <DetailsList
                 items={items}
 
                 columns={columns}
-                selectionMode={SelectionMode.multiple}
+                selectionMode={SelectionMode.none}
                 setKey="multiple"
                 layoutMode={DetailsListLayoutMode.justified}
                 isHeaderVisible={true}
-
                 selectionPreservedOnEmptyClick={true}
 
                 enterModalSelectionOnTouch={true}
