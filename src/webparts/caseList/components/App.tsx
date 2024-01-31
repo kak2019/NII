@@ -188,7 +188,7 @@ export default memo(function App() {
     ];
 
     const dropdownStyles: Partial<IDropdownStyles> = {
-        dropdown: { width: 170, marginRight: 40 },
+        dropdown: { width: 200, marginRight: 40 },
     };
     const array: IDropdownOption[] = [];
     const Countryoptions: IDropdownOption[] = []
