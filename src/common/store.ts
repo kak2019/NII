@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { casesReducer } from "./features/cases/casesSlice";
+import { packagingsReducer } from "./features/packagings/packagingSlice";
 const store = configureStore({
   reducer: {
     cases: casesReducer,
+    packagings: packagingsReducer,
   },
 });
 

@@ -1,34 +1,31 @@
-@import '~office-ui-fabric-react/dist/sass/References.scss';
+@import "~office-ui-fabric-react/dist/sass/References.scss";
 
-.packageList {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
-  }
+.listWrapper {
+  /* Firefox */
+  min-height: -moz-calc(100vh - 324px);
+  /* WebKit */
+  min-height: -webkit-calc(100vh - 324px);
+  /* Opera */
+  min-height: -o-calc(100vh - 324px);
+  /* Standard */
+  min-height: calc(100vh - 324px);
+  min-width: 50vw;
+  width: fit-content;
+  overflow: inherit;
 }
-
-.welcome {
-  text-align: center;
+.tableWrapper {
+  /* Firefox */
+  min-height: -moz-calc(100vh - 324px);
+  /* WebKit */
+  min-height: -webkit-calc(100vh - 324px);
+  /* Opera */
+  min-height: -o-calc(100vh - 324px);
+  /* Standard */
+  min-height: calc(100vh - 324px);
+  margin-right: 10px;
+  width: fit-content;
+  overflow: inherit;
 }
-
-.welcomeImage {
-  width: 100%;
-  max-width: 420px;
-}
-
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
-
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
-  }
+.list {
+  overflow: inherit;
 }
