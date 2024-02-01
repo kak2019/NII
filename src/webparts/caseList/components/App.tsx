@@ -339,8 +339,8 @@ export default memo(function App() {
                 strings={defaultDatePickerStrings}
             />
             </Stack>
-            <Stack horizontal horizontalAlign="start" style={{marginTop:10}}>
-                <PrimaryButton onClick={handleSearch}>Search</PrimaryButton>
+            <Stack horizontal horizontalAlign="end" style={{marginTop:10}}>
+                <PrimaryButton onClick={handleSearch} style={{marginRight:10,color:"red"}}>Search</PrimaryButton>
                 <PrimaryButton>Reset</PrimaryButton>
             </Stack>
             </section>

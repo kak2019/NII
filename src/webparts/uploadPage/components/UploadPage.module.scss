@@ -1,13 +1,55 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
+:global{
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+}
+
 .uploadPage {
   overflow: hidden;
-  padding: 1em;
   color: "[theme:bodyText, default: #323130]";
   color: var(--bodyText);
+  background: #E5E5E5;
+  width: 100%;
+  height: 100vh;
   &.teams {
     font-family: $ms-font-family-fallbacks;
   }
+}
+
+.header {
+  height: 90px;
+  background-color: #000;
+}
+
+.content {
+  padding-top: 47px;
+  padding-left: 100px;
+  padding-right: 100px;
+  margin-bottom: '24px'
+}
+
+.title {
+  font-size: 28px;
+  color:#000;
+  margin-top: 24px;
+  margin-bottom: 34PX;
+}
+
+.subTitle {
+  font-size: 12px;
+  color: #4D4E53;
+}
+
+.uploadBox {
+  width: 100%;
+  padding: 32px;
+  border: 1px dashed #D6D3D0;
+  background: #F8F7F6;
+  gap: 16px;
+  align-items: center;
 }
 
 .welcome {

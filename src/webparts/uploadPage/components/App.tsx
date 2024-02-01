@@ -13,8 +13,8 @@ import 'antd/dist/antd.css';
 import { Stack } from '@fluentui/react/lib/Stack';
 import { Label } from '@fluentui/react/lib/Label';
 import { Icon, Link } from "office-ui-fabric-react";
+import { Icon as IconBase } from '@fluentui/react/lib/Icon';
 import { Upload, Alert, Space } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
 // import { AadHttpClient, HttpClientResponse } from '@microsoft/sp-http';
 import { useEffect } from "react";
 import { mytoken } from "../UploadPageWebPart";
@@ -23,6 +23,10 @@ import { spfi } from "@pnp/sp";
 import { getSP } from "../../../common/pnpjsConfig";
 import "@pnp/sp/webs";
 import "@pnp/sp/folders";
+import styles from './UploadPage.module.scss'
+import FileSvg from '../assets/file'
+import Del from '../assets/delete'
+import Error from '../assets/error'
 // import * as moment from "moment";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
@@ -139,7 +143,8 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const validate = (json: any) => {
-    if (!json['Supplier parma code']) return 'Please input parma code'
+    if (!json['Supplier parma code']) return 'Please input parma code';
+    if (!json['Company name']) return 'Please input Company Name';
     // if(!json['Supplier']) return '请输入Supplier'
 }
 
@@ -150,6 +155,7 @@ export default memo(function App() {
     const [parmainfo, setParmainfo] = useState<JsonData>();
     const [address, setAddress] = useState([]);
     const [showBtn, setShowBtn] = useState(false)
+    const [file, setFile] = useState()
     // const [apiResponse, setApiResponse] = useState<any>(null);
 
 
@@ -161,6 +167,7 @@ export default memo(function App() {
             const file = info.file
             if (!file) return;
 
+            setFile(file)
             const reader = new FileReader();
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 const binaryStr = e.target?.result;
@@ -172,36 +179,42 @@ export default memo(function App() {
                     console.log("Json", jsonData)
 
                     const json = {
-                        'Supplier parma code': getArrayKey(jsonData, 'Supplier parma code :')?.__EMPTY_1
+                        //'Supplier parma code': getArrayKey(jsonData, 'Supplier parma code :')?.__EMPTY_1
+                        //@ts-ignore
+                        'Supplier parma code': jsonData[jsonData.findIndex(val => val.__rowNum__ === 6)]?.__EMPTY_1,
+                        //@ts-ignore
+                        'Company name': jsonData[jsonData.findIndex(val => val.__rowNum__ === 7)]?.__EMPTY_1,
                     }
 
-                    setData(json)
-                    setError(validate(json))
+                    setData(json);
+                    setError(validate(json));
+                    console.log("error",error,validate(json));
+                    console.log("json['Supplier parma code']",json['Supplier parma code'])
 
-                    if (json['Supplier parma code']) {
-                        // const url = 'https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/getparma/'+ json['Supplier parma code']
-                        // helpers.getResponseFromAzureFunction(url, this.props.aadClient).then(data => {
-                        //     console.log(data)
-                        // }).catch(err => {
-                        //     console.log(err)
-                        // })
-                        fetch('https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/GetParma/' + json['Supplier parma code'], {
-                            method: 'get',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + mytoken
-                            }
-                        }).then(res => res.json()).then(res => {
-                            console.log(res);
-                            setParmainfo(res);
-                            setShowBtn(true)
-                        }).catch(error => {
-                            console.log(error)
-                        })
-                    } else {
-                        setShowBtn(true)
-                    }
-
+                    // if (json['Supplier parma code']) {
+                    //     // const url = 'https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/getparma/'+ json['Supplier parma code']
+                    //     // helpers.getResponseFromAzureFunction(url, this.props.aadClient).then(data => {
+                    //     //     console.log(data)
+                    //     // }).catch(err => {
+                    //     //     console.log(err)
+                    //     // })
+                    //     fetch('https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/GetParma/' + json['Supplier parma code'], {
+                    //         method: 'get',
+                    //         headers: {
+                    //             'Content-Type': 'application/json',
+                    //             'Authorization': 'Bearer ' + mytoken
+                    //         }
+                    //     }).then(res => res.json()).then(res => {
+                    //         console.log(res);
+                    //         setParmainfo(res);
+                    //         setShowBtn(true)
+                    //     }).catch(error => {
+                    //         console.log(error)
+                    //     })
+                    // } else {
+                    //     setShowBtn(true)
+                    // }
+                    setShowBtn(true)
                     
             console.log("61-66", getPackageData(jsonData))
             console.log("77-86两张表", getData2(jsonData))
@@ -255,29 +268,45 @@ export default memo(function App() {
         const request = {
             PARMANo: String(items[3]?.__EMPTY_1),
             CompanyName: items[4]?.__EMPTY_1,
-            ASNStreet: address[0]?.street,      //String(items[6]?.__EMPTY_2),
-            ASNPostCode: String(address[0]?.postalCode),//String(items[7]?.__EMPTY_2),
-            ASNCountryCode: String(address[0]?.countryCode),//String(items[8]?.__EMPTY_2),
-            ASNPhone: String(address[0]?.phoneNumber),//String(items[9]?.__EMPTY_2),
+            //@ts-ignore
+            ASNStreet: String(items[items.findIndex(val => val.__rowNum__ === 10)]?.__EMPTY_1),//address[0]?.street,      //String(items[6]?.__EMPTY_2),
+            //@ts-ignore
+            ASNPostCode: String(items[items.findIndex(val => val.__rowNum__ === 11)]?.__EMPTY_1),//String(address[0]?.postalCode),//String(items[7]?.__EMPTY_2),
+            //@ts-ignore
+            ASNCountryCode:String(items[items.findIndex(val => val.__rowNum__ === 12)]?.__EMPTY_1),// String(address[0]?.countryCode),//String(items[8]?.__EMPTY_2),
+            //@ts-ignore
+            ASNPhone:String(items[items.findIndex(val => val.__rowNum__ === 13)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[9]?.__EMPTY_2),
             //Title:"111"
-            BilltoNo: String(items[11]?.__EMPTY_1),
-            BillStreet: address[1]?.street,//String(items[12]?.__EMPTY_2),
-            BillPostCode: String(address[1]?.postalCode),//String(items[13]?.__EMPTY_2),
-            BillCountryCode: String(address[1]?.countryCode),//String(items[14]?.__EMPTY_2),
-            BillPhone: String(address[0]?.phoneNumber),//String(items[15]?.__EMPTY_2),
-            //
-            ShipToNo: String(items[17]?.__EMPTY_1),
-            ShipStreet: address[1]?.street,//String(items[18]?.__EMPTY_2),
-            ShipPostcode: String(address[2]?.postalCode),//String(items[19]?.__EMPTY_2),
-            ShipCountryCode: String(address[2]?.countryCode),//String(items[20]?.__EMPTY_2),
-            ShipPhone: String(address[2]?.phoneNumber),//String(items[21]?.__EMPTY_2),
-            //
-            VatNo: String(getArrayKey(items, 'VAT No:')?.__EMPTY_1),//String(items[22]?.__EMPTY_2),
-            GSDBID: String(getArrayKey(items, 'GSDB ID:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
-            //
-            ContractName: String(getArrayKey(items, 'First and Last Name:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
-            ContractEmail: String(getArrayKey(items, 'E-mail:')?.__EMPTY_1),//String(items[25]?.__EMPTY_2),
-            ContractPhoneno: String(getArrayKey(items, 'Phone No:')?.__EMPTY_1),// String(items[26]?.__EMPTY_2),
+            //@ts-ignore
+            BilltoNo: String(items[items.findIndex(val => val.__rowNum__ === 16)]?.__EMPTY_1),
+            //@ts-ignore
+            BillStreet: String(items[items.findIndex(val => val.__rowNum__ === 17)]?.__EMPTY_1),//address[1]?.street,//String(items[12]?.__EMPTY_2),
+           //@ts-ignore
+            BillPostCode: String(items[items.findIndex(val => val.__rowNum__ === 18)]?.__EMPTY_1),//String(address[1]?.postalCode),//String(items[13]?.__EMPTY_2),
+            //@ts-ignore
+            BillCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 19)]?.__EMPTY_1),//String(address[1]?.countryCode),//String(items[14]?.__EMPTY_2),
+            //@ts-ignore
+            BillPhone:String(items[items.findIndex(val => val.__rowNum__ === 20)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[15]?.__EMPTY_2),
+            //@ts-ignore
+            ShipToNo: String(items[items.findIndex(val => val.__rowNum__ === 23)]?.__EMPTY_1),//String(items[17]?.__EMPTY_1),
+            //@ts-ignore
+            ShipStreet: String(items[items.findIndex(val => val.__rowNum__ === 24)]?.__EMPTY_1),//address[1]?.street,//String(items[18]?.__EMPTY_2),
+            ///@ts-ignore
+            ShipPostcode: String(items[items.findIndex(val => val.__rowNum__ === 25)]?.__EMPTY_1),//String(address[2]?.postalCode),//String(items[19]?.__EMPTY_2),
+            //@ts-ignore
+            ShipCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 26)]?.__EMPTY_1),//String(address[2]?.countryCode),//String(items[20]?.__EMPTY_2),
+            //@ts-ignore
+            ShipPhone: String(items[items.findIndex(val => val.__rowNum__ === 27)]?.__EMPTY_1),//String(address[2]?.phoneNumber),//String(items[21]?.__EMPTY_2),
+            //@ts-ignore
+            VatNo: String(items[items.findIndex(val => val.__rowNum__ === 29)]?.__EMPTY_1),//String(getArrayKey(items, 'VAT No:')?.__EMPTY_1),//String(items[22]?.__EMPTY_2),
+            //@ts-ignore
+            GSDBID: String(items[items.findIndex(val => val.__rowNum__ === 30)]?.__EMPTY_1),//String(getArrayKey(items, 'GSDB ID:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
+            //@ts-ignore
+            ContractName: String(items[items.findIndex(val => val.__rowNum__ === 33)]?.__EMPTY_1),//String(getArrayKey(items, 'First and Last Name:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
+            //@ts-ignore
+            ContractEmail: String(items[items.findIndex(val => val.__rowNum__ === 34)]?.__EMPTY_1),//String(getArrayKey(items, 'E-mail:')?.__EMPTY_1),//String(items[25]?.__EMPTY_2),
+            //@ts-ignore
+            ContractPhoneno: String(items[items.findIndex(val => val.__rowNum__ === 35)]?.__EMPTY_1),//String(getArrayKey(items, 'Phone No:')?.__EMPTY_1),// String(items[26]?.__EMPTY_2),
             //
             ReceivingJSON:JSON.stringify(getSubTableData(items)),
             //
@@ -323,34 +352,83 @@ export default memo(function App() {
    
 
     return (
-        <>
-            <Stack horizontal>
-                <Label style={{ width: "70%", fontSize: 20 }}>Create New Case</Label> <Icon style={{ fontSize: "25px" }} iconName="HomeSolid" /><Link rel="www.baidu.com" style={{ textAlign: "right" }}>GO to Home Page</Link>
-                {/* <Divider/> */}
-            </Stack>
-            <hr />
-            <div>
-                <Upload
-                    beforeUpload={() => false}
-                    accept=".xlsx, .xls"
-                    onChange={handleFileUpload}
-                    maxCount={1}
-                >
-                    <Button icon={<UploadOutlined rev={'form'} />}>Click to Upload</Button>
-                </Upload>
-                <Stack>
-                    <Space direction="vertical" style={{ width: '100%' }}>
+        <div className={styles.uploadPage}>
+            {error}
+            {/* <div className={styles.header}>
+                <Stack horizontal>
+                    <Label style={{ width: "70%", fontSize: 20 }}>Create New Case</Label> 
+                    <Icon style={{ fontSize: "25px" }} iconName="HomeSolid" />
+                    <Link rel="www.baidu.com" style={{ textAlign: "right" }}>GO to Home Page</Link>
+                </Stack>
+            </div> */}
+            <div className={styles.content}>
+                <Stack horizontal>
+                    <Icon style={{ fontSize: "12px", color: '#00829B' }} iconName="Back" />
+                    <span style={{marginLeft: '4px', color: '#00829B'}} ><a href="www.baidu.com">Return to home</a></span>
+                </Stack>
+                <div className={styles.title}>Create new case</div>
+                <Stack horizontal horizontalAlign="space-between" style={{marginBottom: '8px'}}>
+                    <div className={styles.subTitle}>Upload an excel document</div>
+                    {/* <div className={styles.subTitle}>*Invalid file case</div> */}
+                </Stack>
+                {
+                    file 
+                    ? <Stack className={styles.uploadBox} verticalAlign="center" style={{alignItems: 'flex-start'}}>
+                        <Stack horizontal style={{alignItems: 'center'}}>
+                            <div className={styles.subTitle}>Upload an excel document</div>
+                            <div onClick={() => {
+                                setFile(null)
+                                setData([])
+                                setError('')
+                            }} style={{
+                                marginLeft: '16px',
+                                display: 'flex',
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                borderRadius: '6px',
+                                border: '1px solid #D6D3D0',
+                                background: '#FFF',
+                                padding: '13px',
+                                cursor: 'pointer'
+                            }}><Del /></div>
+                        </Stack>
+                    </Stack>
+                    : <Stack className={styles.uploadBox} verticalAlign="center">
                         {
-                            error && <Alert message={error} type="error" />
+                            error
+                            ? <div style={{display: 'flex', alignItems: 'center'}}><Error /> <div className={styles.subTitle} style={{color: '#E0402E', marginLeft: '8px'}}>Please provide valid company name</div></div>
+                            :<div className={styles.subTitle}>*Please contain supplier company name</div>
                         }
-                    </Space>
-                    {
-                        showBtn && <Button style={{ width: 150 }} onClick={() => submitFunction()}>Submit</Button>
-                    }
+                    <Upload
+                        beforeUpload={() => false}
+                        accept=".xlsx, .xls"
+                        onChange={handleFileUpload}
+                        maxCount={1}
+                    >
+                        <Button style={{
+                            display: 'flex', 
+                            alignItems: 'center',
+                            gap: '12px', 
+                            padding: '13px 34px',
+                            fontSize: '16px',
+                            borderRadius: '6px',
+                            border: '1px solid #D6D3D0',
+                            background: '#FFF'}} icon={<FileSvg />}>Select files</Button>
+                    </Upload>
                 </Stack>
 
+                }
+                
+                {
+                    showBtn ? 
+                        <Button style={{ width: 140, marginTop: '32px', borderRadius: '6px',color: '#fff',
+                        background: '#00829B' }} onClick={() => submitFunction()}>Upload</Button> :
+                        <Button style={{ width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
+                        background: '#C4C4C4' }}>Upload</Button>
+                }
+
             </div>
-        </>
+        </div>
     )
 
 
