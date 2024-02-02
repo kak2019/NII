@@ -14,7 +14,7 @@ import { Stack } from '@fluentui/react/lib/Stack';
 import { Label } from '@fluentui/react/lib/Label';
 import { Icon, Link } from "office-ui-fabric-react";
 import { Icon as IconBase } from '@fluentui/react/lib/Icon';
-import { Upload, Alert, Space } from 'antd';
+import { Upload, Modal, Space } from 'antd';
 // import { AadHttpClient, HttpClientResponse } from '@microsoft/sp-http';
 import { useEffect } from "react";
 import { mytoken } from "../UploadPageWebPart";
@@ -114,6 +114,19 @@ const getPackageData = (arr: Array<{ [key in string]: any }>) => {
     })
 }
 
+function sanitize(input: string) {
+    // based on https://support.microsoft.com/en-us/help/905231/information-about-the-characters-that-you-cannot-use-in-site-names--fo
+    // replace invalid characters
+    let sanitizedInput = input.replace(/['~"#%&*:<>?/{|}]/g, "_");
+    // replace consecutive periods
+    sanitizedInput = sanitizedInput.replace(/\.+/g, ".");
+    // replace leading period
+    sanitizedInput = sanitizedInput.replace(/^\./, "");
+    // replace leading underscore
+    sanitizedInput = sanitizedInput.replace(/^_/, "");
+    return sanitizedInput;
+  }
+
 // 获取76-85
 const getData2 = (arr: Array<{ [key in string]: any }>) => {
     // @ts-ignore 
@@ -155,7 +168,8 @@ export default memo(function App() {
     const [parmainfo, setParmainfo] = useState<JsonData>();
     const [address, setAddress] = useState([]);
     const [showBtn, setShowBtn] = useState(false)
-    const [file, setFile] = useState()
+    const [uploadFile, setFile] = useState<any>()
+    const [isShowModal, setIsShowModal] = useState(false)
     // const [apiResponse, setApiResponse] = useState<any>(null);
 
 
@@ -167,7 +181,6 @@ export default memo(function App() {
             const file = info.file
             if (!file) return;
 
-            setFile(file)
             const reader = new FileReader();
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 const binaryStr = e.target?.result;
@@ -187,7 +200,14 @@ export default memo(function App() {
                     }
 
                     setData(json);
-                    setError(validate(json));
+                    const validateError = validate(json)
+                    setError(validateError);
+                    if(validateError) {
+                        setFile(null)
+                    } else {
+                        setFile(file)
+                        setShowBtn(true)
+                    }
                     console.log("error",error,validate(json));
                     console.log("json['Supplier parma code']",json['Supplier parma code'])
 
@@ -214,7 +234,6 @@ export default memo(function App() {
                     // } else {
                     //     setShowBtn(true)
                     // }
-                    setShowBtn(true)
                     
             console.log("61-66", getPackageData(jsonData))
             console.log("77-86两张表", getData2(jsonData))
@@ -339,21 +358,42 @@ export default memo(function App() {
         }
         const sp = spfi(getSP());
         // let promiss
-        addRequest({ request }).then(promises => { console.log("promiss", promises, typeof (promises));
-        const responseData = (promises as Record<string, any>).data;
-        const id = responseData.ID;
-        console.log('ID:', id);
-        // console.log(promises.indexOf('ID'))
-         const folderName = id;
-        sp.web.folders.addUsingPath(`Nii Case Library/${folderName}`);
-    //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
-    }).catch(err => console.log("err", err));
+        addRequest({ request }).then(async promises => { 
+            console.log("promiss", promises, typeof (promises));
+            const responseData = (promises as Record<string, any>).data;
+            const id = responseData.ID;
+            console.log('ID:', id);
+            // console.log(promises.indexOf('ID'))
+            const folderName = id;
+            await sp.web.folders.addUsingPath(`Nii Case Library/${folderName}`)
+            const res = await sp.web.getFolderByServerRelativePath(`Nii Case Library/${folderName}`).files.addUsingPath(sanitize(uploadFile.name), uploadFile)
+            const item = await res.file.getItem()
+            const contentTypes = await sp.web.lists.getByTitle('Nii Case Library').contentTypes.getContextInfo()
+            console.log(contentTypes)
+            // .get()
+            // .then(result => {
+            //   const FinalFileContentTypeId = result.filter((contenType) => {
+            //     return contenType.Name === CONST.FinalFileCT;
+            //   })[0].StringId;
+            // @ts-ignore
+            sp.web.lists.getByTitle('Nii Case Library').contentTypes()
+        .then(async (result: any[]) => {
+          const UploadFileContentTypeId = result.filter((contenType) => {
+            return contenType.Name === 'uploadFile';
+          })[0].StringId;
+          //@ts-ignore
+            const finalRes = await sp.web.lists.getByTitle('Nii Case Library').items.getById(item.ID).update({
+                ContentTypeId: UploadFileContentTypeId
+              })
+            });
+        //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
+        }).catch(err => console.log("err", err));
     }
    
 
     return (
         <div className={styles.uploadPage}>
-            {error}
+            {/* {error} */}
             {/* <div className={styles.header}>
                 <Stack horizontal>
                     <Label style={{ width: "70%", fontSize: 20 }}>Create New Case</Label> 
@@ -372,10 +412,10 @@ export default memo(function App() {
                     {/* <div className={styles.subTitle}>*Invalid file case</div> */}
                 </Stack>
                 {
-                    file 
+                    uploadFile 
                     ? <Stack className={styles.uploadBox} verticalAlign="center" style={{alignItems: 'flex-start'}}>
                         <Stack horizontal style={{alignItems: 'center'}}>
-                            <div className={styles.subTitle}>Upload an excel document</div>
+                            <div className={styles.subTitle}>{uploadFile.name}</div>
                             <div onClick={() => {
                                 setFile(null)
                                 setData([])
@@ -396,14 +436,15 @@ export default memo(function App() {
                     : <Stack className={styles.uploadBox} verticalAlign="center">
                         {
                             error
-                            ? <div style={{display: 'flex', alignItems: 'center'}}><Error /> <div className={styles.subTitle} style={{color: '#E0402E', marginLeft: '8px'}}>Please provide valid company name</div></div>
-                            :<div className={styles.subTitle}>*Please contain supplier company name</div>
+                            ? <div style={{display: 'flex', alignItems: 'center'}}><Error /> <div className={styles.subTitle} style={{color: '#E0402E', marginLeft: '8px'}}>{error}</div></div>
+                            : <div className={styles.subTitle}>*Please contain supplier company name</div>
                         }
                     <Upload
                         beforeUpload={() => false}
                         accept=".xlsx, .xls"
                         onChange={handleFileUpload}
                         maxCount={1}
+                        showUploadList={false}
                     >
                         <Button style={{
                             display: 'flex', 
@@ -420,14 +461,27 @@ export default memo(function App() {
                 }
                 
                 {
-                    showBtn ? 
+                    showBtn && !error ? 
                         <Button style={{ width: 140, marginTop: '32px', borderRadius: '6px',color: '#fff',
-                        background: '#00829B' }} onClick={() => submitFunction()}>Upload</Button> :
+                        background: '#00829B' }} onClick={() => setIsShowModal(true)}>Upload</Button> :
                         <Button style={{ width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
                         background: '#C4C4C4' }}>Upload</Button>
                 }
 
             </div>
+            <Modal open={isShowModal} closable={false} footer={null} width={500} style={{borderRadius: '6px', overflow: 'hidden', paddingBottom: 0}}>
+                <Stack verticalAlign="center" style={{alignItems: 'center', paddingTop: '64px', paddingBottom: '54px'}}>
+                    <p>Are you sure you want to upload this file?</p>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '36px'}}>
+                        <Button onClick={() => setIsShowModal(false)} style={{ width: 120, height: 42, marginTop: '32px', borderRadius: '6px' }}>Cancel</Button>
+                        <Button style={{ width: 120, height: 42, marginTop: '32px', borderRadius: '6px',color: '#fff',
+                        background: '#00829B' }} onClick={() => {
+                            setIsShowModal(false)
+                            submitFunction()
+                        }}>Yes</Button>
+                    </div>
+                </Stack>
+            </Modal>
         </div>
     )
 
