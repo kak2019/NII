@@ -85,7 +85,7 @@ const CaseFormView: React.FC = () => {
     isEditableCommon: editableStatus.indexOf(currentCase.Status) !== -1,
   };
   const yearOptions = [];
-  for (let i = 2000; i < new Date().getFullYear(); i++) {
+  for (let i = 2000; i <= new Date().getFullYear(); i++) {
     yearOptions.push({
       value: i,
       label: i.toString(),
