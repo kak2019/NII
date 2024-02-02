@@ -41,7 +41,7 @@ const PackageListView: React.FC = () => {
         </Col>
       </Row>
       <Row>
-        <Col span={24}></Col>
+        <Col span={24}>{"[data area]"}</Col>
       </Row>
     </div>
   );
