@@ -474,12 +474,12 @@ const CaseFormView: React.FC = () => {
         <Col span={24}>
           <Card bordered={false}>
             <Row align="middle">
-              <Col span={4}>Case ID:</Col>
+              <Col span={5}>Case ID:</Col>
               <Col span={6}>{states.currentCase.CaseID}</Col>
               <Col offset={1} span={5}>
                 Status:
               </Col>
-              <Col span={8}>
+              <Col span={7}>
                 <Select
                   onChange={onStatusChange}
                   defaultValue={states.currentCase.Status}
@@ -512,48 +512,56 @@ const CaseFormView: React.FC = () => {
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col span={4}>Created By:</Col>
+              <Col span={5}>Created By:</Col>
               <Col span={6}>{states.currentCase.Author}</Col>
               <Col offset={1} span={5}>
                 Sign-off Contract:
               </Col>
-              <Col span={8}>
-                <Upload
-                  fileList={fileList}
-                  beforeUpload={(file) => {
-                    setFileList([file]);
-                    setexistFile(false);
-                    return false;
-                  }}
-                  onRemove={(file) => {
-                    setFileList(
-                      fileList.filter((item) => item.uid !== file.uid)
-                    );
-                    setexistFile(contractFiles.length > 0);
-                  }}
-                >
-                  <Button icon={<UploadOutlined rev={undefined} />}>
-                    Click to Upload
-                  </Button>
-                </Upload>
+              <Col span={7}>
+                {!existFile && (
+                  <Upload
+                    fileList={fileList}
+                    beforeUpload={(file) => {
+                      setFileList([file]);
+                      setexistFile(false);
+                      return false;
+                    }}
+                    onRemove={(file) => {
+                      setFileList(
+                        fileList.filter((item) => item.uid !== file.uid)
+                      );
+                    }}
+                  >
+                    {fileList.length === 0 && (
+                      <Button icon={<UploadOutlined rev={undefined} />}>
+                        Click to Upload
+                      </Button>
+                    )}
+                  </Upload>
+                )}
+                {existFile && (
+                  <Row align="middle">
+                    <Col span={20}>
+                      <a href={contractFiles[0].ServerRelativeUrl}>
+                        {contractFiles[0].Name}
+                      </a>
+                    </Col>
+                    <Col span={4}>
+                      <Button onClick={() => setexistFile(false)}>
+                        <DeleteOutlined rev={undefined} />
+                      </Button>
+                    </Col>
+                  </Row>
+                )}
               </Col>
             </Row>
-            {existFile && (
-              <Row className={styles.contractItem}>
-                <Col offset={16} span={8}>
-                  <a href={contractFiles[0].ServerRelativeUrl}>
-                    {contractFiles[0].Name}
-                  </a>
-                </Col>
-              </Row>
-            )}
             <Row className={styles.rowContent} align="middle">
-              <Col span={4}>Creation Date:</Col>
+              <Col span={5}>Creation Date:</Col>
               <Col span={6}>{states.currentCase.Created}</Col>
               <Col offset={1} span={5}>
                 Approval:
               </Col>
-              <Col span={8}>
+              <Col span={7}>
                 <Radio.Group
                   onChange={onApprovalChange}
                   value={states.currentCase.Approval}
@@ -564,7 +572,7 @@ const CaseFormView: React.FC = () => {
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col span={6}>Original Request Form:</Col>
+              <Col span={5}>Original Request Form:</Col>
               <Col>
                 {originalFiles.length > 0 && (
                   <a href={originalFiles[0].ServerRelativeUrl}>

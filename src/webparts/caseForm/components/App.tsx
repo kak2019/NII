@@ -43,7 +43,7 @@ export default memo(function App() {
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
     const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+    const id = params.get("caseid");
     console.log(id);
     changeCaseId(id);
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
