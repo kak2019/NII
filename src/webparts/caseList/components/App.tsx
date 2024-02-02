@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
-import { memo } from "react";
+import { memo, useContext } from "react";
 //import { read, utils, SSF }  as XLSX from 'xlsx';
 // import { useState } from "react";
 // import { Button, Divider} from "antd";
@@ -21,6 +21,7 @@ import "@pnp/sp/webs";
 import { PrimaryButton } from "office-ui-fabric-react";
 import { mytoken } from "../CaseListWebPart";
 import * as moment from "moment";
+import AppContext from "../../../common/AppContext";
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -47,6 +48,8 @@ function debounce(func:Function, delay: number) {
   
 
 export default memo(function App() {
+    const ctx = useContext(AppContext);
+    const webURL = ctx.context?._pageContext?._web?.absoluteUrl;
     const sp = spfi(getSP());
     const [supplierName, setSupplierName] = React.useState('')
     const query = React.useRef({
@@ -76,10 +79,10 @@ export default memo(function App() {
             fieldName: 'CaseID',
             minWidth: 40,
             maxWidth: 80,
-            styles: colomnstyle
-            // onRender: (item: Iitem) => (
-            //   <Text>{item.Material}</Text>
-            // ),
+            styles: colomnstyle,
+            onRender: (item) => (
+              <a href={webURL+"/CaseForm.aspx?ID="+item.ID}>{item.CaseID}</a>
+            ),
         },
         {
             key: 'column2',
@@ -151,10 +154,10 @@ export default memo(function App() {
             fieldName: 'Status',
             minWidth: 60,
             maxWidth: 80,
-            styles: colomnstyle
-            // onRender: (item: Iitem) => (
-            //   <Text>{item.Material}</Text>
-            // ),
+            styles: colomnstyle,
+            onRender: (item) => (
+            <span style={{color:'red',background:"green"}}>{item?.Status}</span>
+            ),
         }]
 
         const allItems = React.useRef([])
