@@ -1,16 +1,23 @@
 @import "~@fluentui/react/dist/sass/References.scss";
+.title {
+  font-weight: 600;
+  font-size: 25px;
+}
 .rowContent {
-  margin-top: 12px;
+  margin-top: 15px;
+}
+.contractItem {
   margin-left: 20px;
-  margin-right: 20px;
+}
+.sectionOne {
+  margin-top: 15px;
+}
+.sectionTwo {
+  margin-top: 15px;
+  margin-bottom: 30px;
 }
 .fixedWidth {
   width: 100%;
-}
-.title {
-  font-weight: 600;
-  font-size: large;
-  margin-bottom: 20px;
 }
 .marginTop {
   margin-top: 20px;
@@ -19,17 +26,10 @@
   font-weight: 600;
 }
 .listWrapper {
-  /* Firefox */
-  min-height: -moz-calc(100vh - 324px);
-  /* WebKit */
-  min-height: -webkit-calc(100vh - 324px);
-  /* Opera */
-  min-height: -o-calc(100vh - 324px);
-  /* Standard */
-  min-height: calc(100vh - 324px);
-  min-width: 50vw;
-  width: fit-content;
+  width: 80%;
   overflow: inherit;
+  background-color: rgb(238, 238, 238);
+  align-items: center;
 }
 .flexWrapper {
   align-items: flex-start;

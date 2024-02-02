@@ -194,6 +194,8 @@ export const CASECONST = Object.freeze({
   PACKAGING_LIST: "Packaging List",
   LIBRARY_NAME: "Nii Case Library",
   CONTRACT_TYPE: "Contract File",
+  RECEIVING_LIST: "Receiving Plant/Receiver",
+  PACKAGING_DATA_LIST: "Packaging Data",
 });
 
 export const { CaseItemIdChanged } = caseSlice.actions;

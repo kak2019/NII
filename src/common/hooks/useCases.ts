@@ -46,6 +46,7 @@ type CasesOperators = [
   packagingData: IPackagingData[],
   contractFiles: IFileInfo[],
   originalFiles: IFileInfo[],
+  initialCaseForm: (Id: number) => void,
   changeCaseId: (Id: string) => void,
   fetchCaseById: (Id: number) => void,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,6 +80,23 @@ export const useCases = (): Readonly<CasesOperators> => {
   const contractFiles = useAppSelector(contractFilesSelector);
   const originalFiles = useAppSelector(originalFilesSelector);
 
+  const initialCaseForm = useCallback(
+    async (Id: number) => {
+      const dispatchActions = async (): Promise<void> => {
+        dispatch(CaseItemIdChanged(Id));
+        await dispatch(fetchByIdAction({ Id }));
+        await dispatch(fetchConsequensesByCaseAction({ CaseId: Id }));
+        await dispatch(fetchPackagingNeedsByCaseAction({ CaseId: Id }));
+        await dispatch(fetchReceivingPlantByCaseAction({ CaseId: Id }));
+        await dispatch(fetchContractFileByIdAction({ Id }));
+        await dispatch(fetchContractFileByIdAction({ Id }));
+        await dispatch(fetchOriginalFileByIdAction({ Id }));
+        await dispatch(fetchPackagingDataAction());
+      };
+      await dispatchActions();
+    },
+    [dispatch]
+  );
   const fetchCaseById = useCallback(
     (Id: number) => {
       dispatch(CaseItemIdChanged(Id));
@@ -182,6 +200,7 @@ export const useCases = (): Readonly<CasesOperators> => {
     packagingData,
     contractFiles,
     originalFiles,
+    initialCaseForm,
     changeCaseId,
     fetchCaseById,
     editCase,

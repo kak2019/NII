@@ -86,11 +86,14 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
           }
           let dateCreated = "";
           if (response.Row[0].Created.length > 0) {
-            const dateSP = response.Row[0].Created.split("/");
-            const month = dateSP[0];
-            dateSP[0] = dateSP[1];
-            dateSP[1] = month;
-            dateCreated = dateSP.join("-").split(/(\s+)/)[0];
+            const dateSPCreated = response.Row[0].Created.split("/");
+            let monthCreated = dateSPCreated[0];
+            if (monthCreated.length === 1) {
+              monthCreated = `0${monthCreated}`;
+            }
+            dateSPCreated[0] = dateSPCreated[1];
+            dateSPCreated[1] = monthCreated;
+            dateCreated = dateSPCreated.join("-").split(/(\s+)/)[0];
           }
           let approval: number = null;
           switch (response.Row[0].Status) {
@@ -143,13 +146,13 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
             IssuEmail: response.Row[0].IssuEmail,
           } as INiiCaseItem;
         } else {
-          return {} as INiiCaseItem;
+          return Promise.reject(new Error("Case not found"));
         }
       });
     return item;
   } catch (err) {
     console.log(err);
-    return Promise.reject("Error when fetch Case by Id");
+    return Promise.reject(err.message);
   }
 };
 const editCase = async (arg: {
@@ -221,7 +224,7 @@ const fetchPackagingNeedsByCase = async (arg: {
   const sp = spfi(getSP());
   try {
     const result = await sp.web.lists
-      .getByTitle(CASECONST.CONSEQUENSES_LIST)
+      .getByTitle(CASECONST.PACKAGING_LIST)
       .renderListDataAsStream({
         ViewXml: `<View>
 	                        <Query>
@@ -295,7 +298,7 @@ const editPackagingNeed = async (arg: {
   const sp = spfi(getSP());
   try {
     await sp.web.lists
-      .getByTitle(CASECONST.CASE_LIST)
+      .getByTitle(CASECONST.PACKAGING_LIST)
       .items.getById(+Packaging.ID)
       .update(PackagingEdit);
     const result = await fetchById({ Id: +Packaging.ID });
@@ -324,7 +327,7 @@ const addPackagingNeed = async (arg: {
   };
   try {
     await sp.web.lists
-      .getByTitle(CASECONST.CONSEQUENSES_LIST)
+      .getByTitle(CASECONST.PACKAGING_LIST)
       .items.add(PackagingAdd);
   } catch (err) {
     console.log(err);
@@ -337,7 +340,7 @@ const removePackagingNeedsById = async (arg: {
   const sp = spfi(getSP());
   try {
     await sp.web.lists
-      .getByTitle(CASECONST.CONSEQUENSES_LIST)
+      .getByTitle(CASECONST.PACKAGING_LIST)
       .items.getById(arg.Id)
       .delete();
   } catch (err) {
@@ -351,7 +354,7 @@ const fetchReceivingPlantByCase = async (arg: {
   const sp = spfi(getSP());
   try {
     const result = await sp.web.lists
-      .getByTitle("Receiving Plant/Receiver")
+      .getByTitle(CASECONST.RECEIVING_LIST)
       .renderListDataAsStream({
         ViewXml: `<View>
 	                        <Query>
@@ -398,7 +401,7 @@ const fetchPackagingData = async (): Promise<IPackagingData[]> => {
   const sp = spfi(getSP());
   try {
     const result = await sp.web.lists
-      .getByTitle("Packaging Data")
+      .getByTitle(CASECONST.PACKAGING_DATA_LIST)
       .renderListDataAsStream({
         ViewXml: `<View>
 	                        <ViewFields>
