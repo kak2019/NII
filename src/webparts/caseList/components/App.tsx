@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
-import { memo, useContext } from "react";
+import { memo, useContext, useState } from "react";
 //import { read, utils, SSF }  as XLSX from 'xlsx';
 // import { useState } from "react";
 // import { Button, Divider} from "antd";
@@ -56,6 +56,11 @@ export default memo(function App() {
     const webURL = ctx.context?._pageContext?._web?.absoluteUrl;
     const sp = spfi(getSP());
     const [supplierName, setSupplierName] = React.useState('')
+    const [selectedKey, setSelectedKey] = useState(null);
+    const [selectedKeycontry, setSelectedKeyCountry] = useState(null)
+    const [textFieldValue, setTextFieldValue] = useState(""); 
+    const [selectedDateFrom, setSelectedDateFrom] = useState(null);
+    const [selectedDateTo, setSelectedDateTo] = useState(null);
     const query = React.useRef({
         parma: '',
         status: '',
@@ -88,7 +93,7 @@ export default memo(function App() {
             maxWidth: 80,
             styles: colomnstyle,
             onRender: (item) => (
-              <a href={webURL+"/CaseForm.aspx?ID="+item.ID}>{item.CaseID}</a>
+              <a href={webURL+"/CaseForm.aspx?caseid="+item.ID}>{item.CaseID}</a>
             ),
         },
         {
@@ -137,10 +142,10 @@ export default memo(function App() {
             fieldName: 'Created',
             minWidth: 60,
             maxWidth: 120,
-            styles: colomnstyle
-            // onRender: (item: Iitem) => (
-            //   <Text>{item.Material}</Text>
-            // ),
+            styles: colomnstyle,
+            onRender: (item) => (
+                <span>{item.Created?moment(item.Created).format("DD-MM-YYYY"):""}</span>
+            ),
         }, {
             key: 'column4',
             name: 'Start Date',
@@ -149,10 +154,10 @@ export default memo(function App() {
             fieldName: 'RequestDate',
             minWidth: 60,
             maxWidth: 120,
-            styles: colomnstyle
-            // onRender: (item: Iitem) => (
-            //   <Text>{item.Material}</Text>
-            // ),
+            styles: colomnstyle,
+            onRender: (item) => (
+              <span>{item.RequestDate?moment(item.RequestDate).format("DD-MM-YYYY"):""}</span>
+            ),
         }, {
             key: 'column4',
             name: 'Status',
@@ -172,19 +177,19 @@ export default memo(function App() {
                         border = '1px solid #00829B'
                         break
                     }
-                    case 'Submitted': {
+                    case 'Contract Submitted': {
                         backgroundColor = "#0077C7"
                         break
                     }
-                    case 'Approved': {
+                    case 'Case Approved': {
                         backgroundColor = "#11A38B"
                         break
                     }
-                    case 'Rejected': {
+                    case 'Case Rejected': {
                         backgroundColor = "#E01E5A"
                         break
                     }
-                    case 'In Sign off': {
+                    case 'In Contract Sign Off Process': {
                         backgroundColor = "#F78C29"
                         break
                     }
@@ -197,17 +202,9 @@ export default memo(function App() {
 
     const allItems = React.useRef([])
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [items, setItems] = React.useState([{
-        "Case ID": "1223",
-        "Parma": "110",
-        "Supplier Name": "FLynt",
-        "GSDBID": "001",
-        "Creation Date": "09-02-1999",
-        "Start Date": "04-09-2032",
-        "Status": "OK"
-
-    }]);
-
+    const [items, setItems] = React.useState([{}]);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [itemsCopy, setItemsCopy] = React.useState([{}]);
     const [page, setPage] = React.useState(1)
     const handlePageChange : PaginationProps['onChange'] = (page) => {
         setPage(page)
@@ -275,7 +272,8 @@ export default memo(function App() {
             console.log("res", response)
             if (response.Row.length > 0) {
                 allItems.current = response.Row
-                setItems(response.Row)
+                setItems(response.Row);
+                setItemsCopy(response.Row)
             }
         }
     
@@ -308,7 +306,8 @@ export default memo(function App() {
     //const temp_Address = sp.web.lists.getByTitle("Entities").items.select("Title","Country","Address").filter(`Name eq ${(taregetID)}`).getAll();
 
    const fetchName: (e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, val: string) => void  = debounce((e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, val: string) => {
-        query.current.parma = val    
+        query.current.parma = val 
+        setTextFieldValue(val)   
         if(val) {
             fetch('https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/GetParma/' + val, {
             method: 'get',
@@ -325,18 +324,24 @@ export default memo(function App() {
    }, 500)
 
    const handleStatus = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption<any>, index?: number) => {
-        query.current.status = option.key as string
+        query.current.status = option.key as string;
+        setSelectedKey(option.key)
    }
    const handleCty = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption<any>, index?: number) => {
-        query.current.country = option.key as string
+        query.current.country = option.key as string;
+        setSelectedKeyCountry(option.key)
     }
 
     const handleStart = (date: Date | null | undefined) => {
         query.current.start = moment(date).format('yyyy-MM-DD')
         console.log(query.current.start)
+        setSelectedDateFrom(date)
     }
     const handleEnd = (date: Date | null | undefined) => {
+        
         query.current.end = moment(date).format('yyyy-MM-DD')
+        console.log(typeof(query.current.end),query.current.end)
+        setSelectedDateTo(date)
     }
 
    const handleSearch = () => {
@@ -352,8 +357,18 @@ export default memo(function App() {
                 condition = condition && val.ASNCountryCode === query.current.country.toUpperCase()
             }
             if(query.current.start && query.current.end) {
-                condition = condition && !!val.RequestDate && moment(val.RequestDate).isBetween(query.current.start, query.current.end)
+                const aa = moment(val.RequestDate,'yyyy/MM/DD').isBetween(query.current.start, query.current.end)
+                // console.log("moment",typeof(aa),aa)
+                // console.log("moment(query.current.start)",typeof(query.current.start))
+                // console.log("req",moment(val?.RequestDate,'MM-DD-YYYY'))
+                //condition = condition && !!val.RequestDate && moment(val.RequestDate).isBetween(query.current.start, query.current.end)
+                //condition = condition && !!val.RequestDate && moment(val?.RequestDate,'MM-DD-YYYY').isBetween(moment(query.current.start,'YYYY-DD-MM'), moment(query.current.end,'YYYY-DD-MM'))
+                condition = condition && !!val.RequestDate && moment(val?.RequestDate,"MM/DD/YYYY").isBetween(moment(selectedDateFrom,"DD-MM-YYYY"), moment(selectedDateTo,"DD-MM-YYYY"))
             } 
+            if(query.current.status && query.current.status === 'All Case') {
+                setItems(itemsCopy)
+            }
+            
             return condition
         }))
    }
@@ -369,14 +384,21 @@ export default memo(function App() {
     
         return `${day}-${month}-${year}`;
     }
-    
+
+    function reestoption():void{
+        setSelectedKey(null);
+        setSelectedKeyCountry(null);
+        setTextFieldValue("")
+        setSelectedDateFrom(null)
+        setSelectedDateTo(null)
+    }
   
     return (
         <div className={styles.caseList}>
             <div className={styles.content}>
                 <Stack horizontal>
-                    <Icon style={{ fontSize: "12px", color: '#00829B' }} iconName="Back" />
-                    <span style={{marginLeft: '4px', color: '#00829B'}} ><a href="www.baidu.com">Return to home</a></span>
+                    <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
+                    <span style={{marginLeft: '8px', color: '#00829B'}} ><a href={webURL+"/CollabHome.aspx"} style={{color: '#00829B',fontSize:"12px"}}>Return to home</a></span>
                 </Stack>
                 <div className={styles.title}>Case List</div>
                 <Stack className={styles.contentBox} verticalAlign="center">
@@ -388,6 +410,8 @@ export default memo(function App() {
                             options={Statusoptions}
                             styles={dropdownStyles}
                             onChange={handleStatus}
+                            selectedKey={selectedKey}
+                            
                         />  {"   "}
                         <Label className={styles.formLabel}>Country </Label>
                         <Dropdown
@@ -396,11 +420,12 @@ export default memo(function App() {
                             options={countryoption}
                             styles={dropdownStyles}
                             onChange={handleCty}
+                            selectedKey={selectedKeycontry}
                         />
                     </Stack >
                     <Stack horizontal horizontalAlign="start" style={{ marginRight: 20 }}>
                         <Label className={styles.formLabel}>Parma</Label> 
-                        <TextField styles={textStyles} onChange={fetchName} />{" "}
+                        <TextField styles={textStyles} onChange={fetchName} value={textFieldValue}/>{" "}
                         <Label className={styles.formLabel}>Supplier Name</Label> 
                         <Label>{ supplierName  }</Label>
                     </Stack>
@@ -418,6 +443,7 @@ export default memo(function App() {
                             strings={defaultDatePickerStrings}
                             formatDate={formatDate}
                             onSelectDate={handleStart}
+                            value={selectedDateFrom}
                         />
                         <Label style={{marginLeft:20,marginRight:20}}>to</Label>
                         <DatePicker
@@ -431,10 +457,11 @@ export default memo(function App() {
                         // DatePicker uses English strings by default. For localized apps, you must override this prop.
                         strings={defaultDatePickerStrings}
                         onSelectDate={handleEnd}
+                        value={selectedDateTo}
                     />
                     </Stack>
                     <Stack horizontal horizontalAlign="end" style={{marginTop:10}}>
-                    <Button style={{ width: 117, borderRadius: '6px' }}>Reset</Button>
+                    <Button style={{ width: 117, borderRadius: '6px' } } onClick={reestoption}>Reset</Button>
                     <Button onClick={handleSearch} style={{ width: 117, marginLeft: '20px', borderRadius: '6px',color: '#fff',
                         background: '#00829B' }}>Search</Button>
                         {/* <PrimaryButton onClick={handleSearch} style={{marginRight:10,color:"red"}}>Search</PrimaryButton>
@@ -457,9 +484,9 @@ export default memo(function App() {
 
                             checkButtonAriaLabel="select row"
                         />
-                        {/* <Stack horizontal horizontalAlign="center">
+                        <Stack horizontal horizontalAlign="center">
                             <Pagination size="small" showSizeChanger={false} current={page} onChange={handlePageChange} total={items.length} />
-                        </Stack> */}
+                        </Stack>
                 </Stack>
             </div>
         </div>
