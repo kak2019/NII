@@ -196,6 +196,7 @@ export const CASECONST = Object.freeze({
   CONTRACT_TYPE: "Contract File",
   RECEIVING_LIST: "Receiving Plant/Receiver",
   PACKAGING_DATA_LIST: "Packaging Data",
+  UPLOAD_FILE: "uploadFile",
 });
 
 export const { CaseItemIdChanged } = caseSlice.actions;

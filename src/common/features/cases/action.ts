@@ -77,10 +77,14 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
           if (response.Row[0].RequestDate.length > 0) {
             const dateSP = response.Row[0].RequestDate.split("/");
             let month = dateSP[0];
+            let day = dateSP[1];
             if (month.length === 1) {
               month = `0${month}`;
             }
-            dateSP[0] = dateSP[1];
+            if (day.length === 1) {
+              day = `0${day}`;
+            }
+            dateSP[0] = day;
             dateSP[1] = month;
             dateWebPart = dateSP.join("-");
           }
@@ -88,10 +92,14 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
           if (response.Row[0].Created.length > 0) {
             const dateSPCreated = response.Row[0].Created.split("/");
             let monthCreated = dateSPCreated[0];
+            let dayCreated = dateSPCreated[1];
             if (monthCreated.length === 1) {
               monthCreated = `0${monthCreated}`;
             }
-            dateSPCreated[0] = dateSPCreated[1];
+            if (dayCreated.length === 1) {
+              dayCreated = `0${dayCreated}`;
+            }
+            dateSPCreated[0] = dayCreated;
             dateSPCreated[1] = monthCreated;
             dateCreated = dateSPCreated.join("-").split(/(\s+)/)[0];
           }
@@ -466,7 +474,7 @@ const fetchOriginalFileById = async (arg: {
       .getByTitle(CASECONST.LIBRARY_NAME)
       .contentTypes()
       .then((result) => {
-        return result.filter((i) => i.Name !== CASECONST.CONTRACT_TYPE)[0].Id
+        return result.filter((i) => i.Name === CASECONST.UPLOAD_FILE)[0].Id
           .StringValue;
       });
     const contractFiles = await sp.web
@@ -495,7 +503,6 @@ const uploadFile = async (arg: {
   const sp = spfi(getSP());
   const reader = new FileReader();
   arg.newFile.forEach((file) => {
-    // const uploadedFile = new File([file], file.name, { type: file.type });
     reader.onloadend = async () => {
       const arrayBuffer = reader.result as ArrayBuffer;
       await sp.web
