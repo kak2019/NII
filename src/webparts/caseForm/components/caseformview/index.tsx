@@ -450,6 +450,7 @@ const CaseFormView: React.FC = () => {
       }
       case "save": {
         await onSave();
+        window.location.href = `${appContext.context.pageContext.web.absoluteUrl}/SitePages/CaseList.aspx`;
         break;
       }
     }
