@@ -391,6 +391,7 @@ export default memo(function App() {
         setTextFieldValue("")
         setSelectedDateFrom(null)
         setSelectedDateTo(null)
+        setSupplierName('')
     }
   
     return (
