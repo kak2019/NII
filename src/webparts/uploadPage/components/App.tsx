@@ -97,7 +97,7 @@ const getSubTableData = (arr: Array<{ [key in string]: any }>) => {
     const res = []
     while (arr[i]['UD-KMP'] !== "CONSEQUENSES FOR OTHER SUPPLIERS?:") {
         // res.push(arr[i])
-        res.push({ "Packaging account no": arr[i]['UD-KMP'], "company name":arr[i]?.__EMPTY,"City":arr[i]?.__EMPTY_1,'Country Code':arr[i]?.__EMPTY_2})
+        res.push({ "Packaging account no": arr[i]['UD-KMP'], "company name":arr[i]?.__EMPTY,"City":arr[i]?.__EMPTY_1,'Country Code':arr[i]?.__EMPTY_2?String(arr[i]?.__EMPTY_2):""})
         i++
     }
     return res
