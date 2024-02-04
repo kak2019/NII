@@ -1,0 +1,56 @@
+/*SharePoint workbench full width webpart*/
+#workbenchPageContent {
+    min-width: 100vw !important;
+}
+
+.CanvasComponent.LCS .Canvas--edit.Canvas--withLayout {
+    margin-left: 0;
+}
+
+.CanvasComponent.LCS .CanvasSection-col {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+div[data-automation-id="CanvasControl"] {
+    margin: 0;
+    padding: 0;
+}
+
+/*remove left navigation box from the SharePoint page*/
+#spLeftNav {
+    display: none !important;
+}
+
+#sideNavBox {
+    display: none !important;
+}
+
+#contentBox {
+    margin-left: 5px !important;
+}
+
+.disabled-style label {
+    background-color: #ffffff !important;
+}
+
+/*move the form a little up*/
+.ms-core-tableNoSpace {
+    margin-top: -50px;
+}
+
+.headerColumn {
+    font-weight: bold;
+    white-space: normal;
+    float: left;
+    /*width: 85%;*/
+}
+
+.relative-left {
+    position: relative;
+    right: 30px;
+}
+
+#DeltaPlaceHolderPageDescription {
+    display: none;
+}
