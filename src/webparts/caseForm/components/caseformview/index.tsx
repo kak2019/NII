@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Col,
   Row,
@@ -46,8 +45,8 @@ const CaseFormView: React.FC = () => {
   //#endregion
   //#region fields
   const [
-    isFetching,
-    errorMessage,
+    ,
+    ,
     currentCase,
     currentCaseId,
     packagingNeeds,
@@ -56,19 +55,19 @@ const CaseFormView: React.FC = () => {
     packagingData,
     contractFiles,
     originalFiles,
-    initialCaseForm,
-    changeCaseId,
-    fetchCaseById,
+    ,
+    ,
+    ,
     editCase,
-    fetchConsequensesByCase,
-    fetchPackagingNeedsByCase,
+    ,
+    ,
     editPackagingNeed,
     addPackagingNeed,
     removePackagingNeedsById,
-    fetchReceivingPlantByCase,
-    fetchPackagingData,
-    fetchContractFileById,
-    fetchOriginalFileById,
+    ,
+    ,
+    ,
+    ,
     uploadFile,
   ] = useCases();
   const editableStatus = [
@@ -102,6 +101,7 @@ const CaseFormView: React.FC = () => {
     message: "",
     type: "",
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [needReplace, setneedReplace] = React.useState(
     contractFiles.length > 0
   );
@@ -597,7 +597,12 @@ const CaseFormView: React.FC = () => {
                     }}
                   >
                     {fileList.length === 0 && (
-                      <Button icon={<UploadOutlined rev={undefined} />}>
+                      <Button
+                        icon={<UploadOutlined rev={undefined} />}
+                        style={{
+                          borderRadius: "6px",
+                        }}
+                      >
                         Click to Upload
                       </Button>
                     )}
@@ -611,7 +616,12 @@ const CaseFormView: React.FC = () => {
                       </a>
                     </Col>
                     <Col span={4}>
-                      <Button onClick={() => onOpenModal("removeFile")}>
+                      <Button
+                        onClick={() => onOpenModal("removeFile")}
+                        style={{
+                          borderRadius: "6px",
+                        }}
+                      >
                         <DeleteOutlined rev={undefined} />
                       </Button>
                     </Col>
@@ -1074,6 +1084,9 @@ const CaseFormView: React.FC = () => {
                   </Col>
                   <Col span={4} offset={2}>
                     <Button
+                      style={{
+                        borderRadius: "6px",
+                      }}
                       className={styles.iconPlus}
                       icon={<PlusOutlined rev={undefined} />}
                       onClick={onAdd}
@@ -1082,6 +1095,9 @@ const CaseFormView: React.FC = () => {
                       }
                     />
                     <Button
+                      style={{
+                        borderRadius: "6px",
+                      }}
                       className={styles.iconDelete}
                       icon={<DeleteOutlined rev={undefined} />}
                       onClick={() => onOpenModal("removePackagings")}
@@ -1183,6 +1199,9 @@ const CaseFormView: React.FC = () => {
             <Row className={styles.rowContent}>
               <Col offset={15} span={4}>
                 <Button
+                  style={{
+                    borderRadius: "6px",
+                  }}
                   className={styles.fixedWidth}
                   onClick={() => onOpenModal("cancel")}
                 >
@@ -1191,6 +1210,11 @@ const CaseFormView: React.FC = () => {
               </Col>
               <Col offset={1} span={4}>
                 <Button
+                  style={{
+                    borderRadius: "6px",
+                    color: "#fff",
+                    background: "#00829B",
+                  }}
                   className={styles.fixedWidth}
                   onClick={() => onOpenModal("save")}
                 >
