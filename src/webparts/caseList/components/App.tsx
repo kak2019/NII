@@ -93,7 +93,7 @@ export default memo(function App() {
             maxWidth: 80,
             styles: colomnstyle,
             onRender: (item) => (
-              <a href={webURL+"/CaseForm.aspx?caseid="+item.ID}>{item.CaseID}</a>
+              <a href={webURL+"/sitepages/CaseForm.aspx?caseid="+item.ID}>{item.CaseID}</a>
             ),
         },
         {
@@ -229,12 +229,12 @@ export default memo(function App() {
     ];
 
     const dropdownStyles: Partial<IDropdownStyles> = {
-        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 180, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
-        dropdown: { ':focus::after': { border: 'none'}, width: 180 },
+        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 230, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        dropdown: { ':focus::after': { border: 'none'}, width: 230 },
         title: { border: 'none', background: 'none' }
     };
     const textStyles: Partial<ITextFieldStyles> = {
-        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 180, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 230, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
         fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none'} }
     }
 
