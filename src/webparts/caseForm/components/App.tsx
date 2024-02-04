@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { memo, useEffect } from "react";
 import { useCases } from "../../../common/hooks/useCases";
@@ -13,28 +12,28 @@ export default memo(function App() {
   const [
     isFetching,
     errorMessage,
-    currentCase,
-    currentCaseId,
-    packagingNeeds,
-    receivingPlant,
-    consequenses,
-    packagingData,
-    contractFiles,
-    originalFiles,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
     initialCaseForm,
     changeCaseId,
-    fetchCaseById,
-    editCase,
-    fetchConsequensesByCase,
-    fetchPackagingNeedsByCase,
-    editPackagingNeed,
-    addPackagingNeed,
-    removePackagingNeedsById,
-    fetchReceivingPlantByCase,
-    fetchPackagingData,
-    fetchContractFileById,
-    fetchOriginalFileById,
-    uploadFile,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
   ] = useCases();
   const [initial, setInitial] = React.useState(false);
   useEffect(() => {
@@ -65,9 +64,10 @@ export default memo(function App() {
   return (
     <div className={styles.listWrapper}>
       <Row align="middle">
-        <Col offset={1}>
+        <Col offset={2}>
           <a
             href={`${appContext.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`}
+            style={{ color: "#00829B" }}
           >
             <ArrowLeftOutlined rev={undefined} />
             <span>Return to home</span>
@@ -75,7 +75,7 @@ export default memo(function App() {
         </Col>
       </Row>
       <Row>
-        <Col offset={1} span={22}>
+        <Col offset={2} span={20}>
           {(isLoadingCase || initial) && (
             <Spin tip="Loading...">
               <Alert
