@@ -989,15 +989,15 @@ const CaseFormView: React.FC = () => {
                       onChange={onConsequenseChange}
                       value={states.currentCase.Constatus}
                     >
-                      <Radio value={"Y"}>Yes</Radio>
-                      <Radio value={"N"}>No</Radio>
+                      <Radio value={"Yes"}>Yes</Radio>
+                      <Radio value={"No"}>No</Radio>
                     </Radio.Group>
                   </Col>
                 </Row>
                 <div
                   style={{
                     visibility:
-                      states.currentCase.Constatus === "Y"
+                      states.currentCase.Constatus === "Yes"
                         ? "visible"
                         : "hidden",
                   }}
