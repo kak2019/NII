@@ -611,7 +611,10 @@ const CaseFormView: React.FC = () => {
                 {existFile && (
                   <Row align="middle">
                     <Col span={20}>
-                      <a href={contractFiles[0].ServerRelativeUrl}>
+                      <a
+                        href={contractFiles[0].ServerRelativeUrl}
+                        style={{ color: "#00829B" }}
+                      >
                         {contractFiles[0].Name}
                       </a>
                     </Col>
@@ -649,7 +652,10 @@ const CaseFormView: React.FC = () => {
               <Col span={5}>Original Request Form:</Col>
               <Col>
                 {originalFiles.length > 0 && (
-                  <a href={originalFiles[0].ServerRelativeUrl}>
+                  <a
+                    href={originalFiles[0].ServerRelativeUrl}
+                    style={{ color: "#00829B" }}
+                  >
                     {originalFiles[0].Name}
                   </a>
                 )}

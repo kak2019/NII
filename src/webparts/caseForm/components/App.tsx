@@ -67,6 +67,7 @@ export default memo(function App() {
         <Col offset={2}>
           <a
             href={`${appContext.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`}
+            style={{ color: "#00829B" }}
           >
             <ArrowLeftOutlined rev={undefined} />
             <span>Return to home</span>
