@@ -544,35 +544,40 @@ const CaseFormView: React.FC = () => {
                 Status:
               </Col>
               <Col span={7}>
-                <Select
-                  onChange={onStatusChange}
-                  defaultValue={states.currentCase.Status}
-                  className={styles.fixedWidth}
-                  options={[
-                    {
-                      value: "Case Created",
-                      label: "Case Created",
-                    },
-                    {
-                      value: "In Contract Sign Off Process",
-                      label: "In Contract Sign Off Process",
-                    },
-                    {
-                      value: "Contract Submitted",
-                      label: "Contract Submitted",
-                    },
-                    {
-                      value: "Case Approved",
-                      label: "Case Approved",
-                      disabled: true,
-                    },
-                    {
-                      value: "Case Rejected",
-                      label: "Case Rejected",
-                      disabled: true,
-                    },
-                  ]}
-                />
+                {states.isEditableCommon && (
+                  <Select
+                    onChange={onStatusChange}
+                    defaultValue={states.currentCase.Status}
+                    className={styles.fixedWidth}
+                    options={[
+                      {
+                        value: "Case Created",
+                        label: "Case Created",
+                      },
+                      {
+                        value: "In Contract Sign Off Process",
+                        label: "In Contract Sign Off Process",
+                      },
+                      {
+                        value: "Contract Submitted",
+                        label: "Contract Submitted",
+                      },
+                      {
+                        value: "Case Approved",
+                        label: "Case Approved",
+                        disabled: true,
+                      },
+                      {
+                        value: "Case Rejected",
+                        label: "Case Rejected",
+                        disabled: true,
+                      },
+                    ]}
+                  />
+                )}
+                {!states.isEditableCommon && (
+                  <span>{states.currentCase.Status}</span>
+                )}
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
@@ -619,14 +624,16 @@ const CaseFormView: React.FC = () => {
                       </a>
                     </Col>
                     <Col span={4}>
-                      <Button
-                        onClick={() => onOpenModal("removeFile")}
-                        style={{
-                          borderRadius: "6px",
-                        }}
-                      >
-                        <DeleteOutlined rev={undefined} />
-                      </Button>
+                      {states.isEditableCommon && (
+                        <Button
+                          onClick={() => onOpenModal("removeFile")}
+                          style={{
+                            borderRadius: "6px",
+                          }}
+                        >
+                          <DeleteOutlined rev={undefined} />
+                        </Button>
+                      )}
                     </Col>
                   </Row>
                 )}
@@ -640,6 +647,7 @@ const CaseFormView: React.FC = () => {
               </Col>
               <Col span={7}>
                 <Radio.Group
+                  disabled={!states.isEditableCommon}
                   onChange={onApprovalChange}
                   value={states.currentCase.Approval}
                 >
@@ -1096,9 +1104,7 @@ const CaseFormView: React.FC = () => {
                       className={styles.iconPlus}
                       icon={<PlusOutlined rev={undefined} />}
                       onClick={onAdd}
-                      disabled={
-                        !states.packageEditable || !states.isEditableCommon
-                      }
+                      disabled={!states.packageEditable}
                     />
                     <Button
                       style={{
@@ -1107,9 +1113,7 @@ const CaseFormView: React.FC = () => {
                       className={styles.iconDelete}
                       icon={<DeleteOutlined rev={undefined} />}
                       onClick={() => onOpenModal("removePackagings")}
-                      disabled={
-                        !states.packageEditable || !states.isEditableCommon
-                      }
+                      disabled={!states.packageEditable}
                     />
                   </Col>
                 </Row>
