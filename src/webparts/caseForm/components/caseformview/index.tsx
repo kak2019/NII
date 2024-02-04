@@ -12,6 +12,7 @@ import {
   Table,
   DatePicker,
   message,
+  Modal,
 } from "antd";
 import {
   DeleteOutlined,
@@ -29,6 +30,8 @@ import { useCases } from "../../../../common/hooks/useCases";
 import { IPackaging } from "../../../../common/model/packagingneed";
 import DebouncedInput from "./debounceinput";
 import Card from "antd/lib/card/Card";
+import AppContext from "../../../../common/AppContext";
+import { Stack } from "office-ui-fabric-react";
 
 const CaseFormView: React.FC = () => {
   //#region interfaces
@@ -94,6 +97,11 @@ const CaseFormView: React.FC = () => {
   const [states, setStates] = React.useState(initialState);
   const [fileList, setFileList] = React.useState([]);
   const [existFile, setexistFile] = React.useState(contractFiles.length > 0);
+  const [modalDetail, setModalDetail] = React.useState({
+    isShow: false,
+    message: "",
+    type: "",
+  });
   const [needReplace, setneedReplace] = React.useState(
     contractFiles.length > 0
   );
@@ -181,8 +189,10 @@ const CaseFormView: React.FC = () => {
     },
   };
   const dateFormat = "DD-MM-YYYY";
+  const appContext = React.useContext(AppContext);
   //#endregion
   //#region events
+
   const onTextChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: keyof typeof states.currentCase
@@ -388,8 +398,62 @@ const CaseFormView: React.FC = () => {
     }
     await editCase({ niiCase: caseUpdate });
   };
-  const onCancel = (): void => {
-    console.log(contractFiles);
+  const onOpenModal = (type: string): void => {
+    switch (type) {
+      case "removeFile": {
+        setModalDetail({
+          isShow: true,
+          message: "Are you sure to delete the current contract?",
+          type: type,
+        });
+        break;
+      }
+      case "removePackagings": {
+        setModalDetail({
+          isShow: true,
+          message: "Are you sure to remove these packagings?",
+          type: type,
+        });
+        break;
+      }
+      case "cancel": {
+        setModalDetail({
+          isShow: true,
+          message: "Are you sure to leave?",
+          type: type,
+        });
+        break;
+      }
+      case "save": {
+        setModalDetail({
+          isShow: true,
+          message: "Are you sure to save the data?",
+          type: type,
+        });
+        break;
+      }
+    }
+  };
+  const onConfirm = async (type: string): Promise<void> => {
+    switch (type) {
+      case "removeFile": {
+        setexistFile(false);
+        break;
+      }
+      case "removePackagings": {
+        onDelete();
+        break;
+      }
+      case "cancel": {
+        window.location.href = `${appContext.context.pageContext.web.absoluteUrl}/SitePages/CaseList.aspx`;
+        break;
+      }
+      case "save": {
+        await onSave();
+        break;
+      }
+    }
+    setModalDetail({ isShow: false, message: "", type: "" });
   };
   //#endregion
   //#region methods
@@ -470,7 +534,7 @@ const CaseFormView: React.FC = () => {
       <Row className={styles.title}>
         <Col>Case Handling</Col>
       </Row>
-      <Row className={styles.sectionOne}>
+      <Row className={styles.rowContent}>
         <Col span={24}>
           <Card bordered={false}>
             <Row align="middle">
@@ -547,7 +611,7 @@ const CaseFormView: React.FC = () => {
                       </a>
                     </Col>
                     <Col span={4}>
-                      <Button onClick={() => setexistFile(false)}>
+                      <Button onClick={() => onOpenModal("removeFile")}>
                         <DeleteOutlined rev={undefined} />
                       </Button>
                     </Col>
@@ -1010,7 +1074,6 @@ const CaseFormView: React.FC = () => {
                   </Col>
                   <Col span={4} offset={2}>
                     <Button
-                      shape="circle"
                       className={styles.iconPlus}
                       icon={<PlusOutlined rev={undefined} />}
                       onClick={onAdd}
@@ -1019,23 +1082,16 @@ const CaseFormView: React.FC = () => {
                       }
                     />
                     <Button
-                      shape="circle"
                       className={styles.iconDelete}
                       icon={<DeleteOutlined rev={undefined} />}
-                      onClick={onDelete}
+                      onClick={() => onOpenModal("removePackagings")}
                       disabled={
                         !states.packageEditable || !states.isEditableCommon
                       }
                     />
                   </Col>
                 </Row>
-                <Row className={styles.marginTop}>
-                  <Col span={9} className={styles.fontBold}>
-                    Weekly need:
-                  </Col>
-                  <Col className={styles.fontBold}>Yearly need:</Col>
-                </Row>
-                <Row>
+                <Row className={styles.rowContent}>
                   <Col span={22}>
                     <Table
                       pagination={false}
@@ -1126,12 +1182,18 @@ const CaseFormView: React.FC = () => {
             </Tabs>
             <Row className={styles.rowContent}>
               <Col offset={15} span={4}>
-                <Button className={styles.fixedWidth} onClick={onCancel}>
+                <Button
+                  className={styles.fixedWidth}
+                  onClick={() => onOpenModal("cancel")}
+                >
                   Cancel
                 </Button>
               </Col>
               <Col offset={1} span={4}>
-                <Button className={styles.fixedWidth} onClick={onSave}>
+                <Button
+                  className={styles.fixedWidth}
+                  onClick={() => onOpenModal("save")}
+                >
                   Save
                 </Button>
               </Col>
@@ -1139,6 +1201,55 @@ const CaseFormView: React.FC = () => {
           </Card>
         </Col>
       </Row>
+      {/** modals */}
+      <Modal
+        open={modalDetail.isShow}
+        closable={false}
+        footer={null}
+        width={500}
+        style={{ borderRadius: "6px", overflow: "hidden", paddingBottom: 0 }}
+      >
+        <Stack
+          verticalAlign="center"
+          style={{
+            alignItems: "center",
+            paddingTop: "64px",
+            paddingBottom: "54px",
+          }}
+        >
+          <p>{modalDetail.message}</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "36px" }}>
+            <Button
+              onClick={() =>
+                setModalDetail({ isShow: false, message: "", type: "" })
+              }
+              style={{
+                width: 120,
+                height: 42,
+                marginTop: "32px",
+                borderRadius: "6px",
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              style={{
+                width: 120,
+                height: 42,
+                marginTop: "32px",
+                borderRadius: "6px",
+                color: "#fff",
+                background: "#00829B",
+              }}
+              onClick={async () => {
+                await onConfirm(modalDetail.type);
+              }}
+            >
+              Yes
+            </Button>
+          </div>
+        </Stack>
+      </Modal>
     </div>
   );
 };
