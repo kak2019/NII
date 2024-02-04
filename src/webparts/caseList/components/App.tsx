@@ -17,11 +17,15 @@ import "@pnp/sp/items/get-all";
 import { spfi } from "@pnp/sp";
 import { getSP } from '../../../common/pnpjsConfig'
 import { DatePicker, TextField, defaultDatePickerStrings} from '@fluentui/react';
+import { IDatePickerStyles, ITextFieldStyles, Icon, TextStyles } from "office-ui-fabric-react";
 import "@pnp/sp/webs"; 
 import { PrimaryButton } from "office-ui-fabric-react";
 import { mytoken } from "../CaseListWebPart";
 import * as moment from "moment";
 import AppContext from "../../../common/AppContext";
+import styles from './CaseList.module.scss'
+import { Button, Pagination } from "antd";
+import type { PaginationProps } from "antd";
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -54,7 +58,10 @@ export default memo(function App() {
     const [supplierName, setSupplierName] = React.useState('')
     const query = React.useRef({
         parma: '',
-        status: ''
+        status: '',
+        country: '',
+        start: '',
+        end: ''
     })
     const colomnstyle = {
         root: {
@@ -155,12 +162,40 @@ export default memo(function App() {
             minWidth: 60,
             maxWidth: 80,
             styles: colomnstyle,
-            onRender: (item) => (
-            <span style={{color:'red',background:"green"}}>{item?.Status}</span>
-            ),
+            onRender: (item) => {
+                let color = '#fff'
+                let border = ''
+                let backgroundColor = "#fff"
+                switch(item.Status) {
+                    case 'Case Created': {
+                        color = '#00829B'
+                        border = '1px solid #00829B'
+                        break
+                    }
+                    case 'Submitted': {
+                        backgroundColor = "#0077C7"
+                        break
+                    }
+                    case 'Approved': {
+                        backgroundColor = "#11A38B"
+                        break
+                    }
+                    case 'Rejected': {
+                        backgroundColor = "#E01E5A"
+                        break
+                    }
+                    case 'In Sign off': {
+                        backgroundColor = "#F78C29"
+                        break
+                    }
+                }
+              return  (
+                <span style={{color,backgroundColor, border, fontSize: '14px', padding: '5px 9px'}}>{item?.Status}</span>
+                )
+            },
         }]
 
-        const allItems = React.useRef([])
+    const allItems = React.useRef([])
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [items, setItems] = React.useState([{
         "Case ID": "1223",
@@ -172,6 +207,11 @@ export default memo(function App() {
         "Status": "OK"
 
     }]);
+
+    const [page, setPage] = React.useState(1)
+    const handlePageChange : PaginationProps['onChange'] = (page) => {
+        setPage(page)
+    }
     // setItems([{
     //     "Case ID": "1223",
     //     "Parma": "110",
@@ -192,8 +232,26 @@ export default memo(function App() {
     ];
 
     const dropdownStyles: Partial<IDropdownStyles> = {
-        dropdown: { width: 250, marginRight: 40 },
+        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 180, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        dropdown: { ':focus::after': { border: 'none'}, width: 180 },
+        title: { border: 'none', background: 'none' }
     };
+    const textStyles: Partial<ITextFieldStyles> = {
+        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 180, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none'} }
+    }
+
+    const datePickerStyles: Partial<IDatePickerStyles> = {
+        // root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 260, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        textField: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 260, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        // fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none'} }
+    }
+
+    const datePickerTextStyles =  {
+        root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', marginRight: 60, fontSize: '14px', height: 42, color: '#191919' },
+        fieldGroup: {  width: 260, border: 'none', background: 'none', '::after': { border: 'none'} }
+    }
+
     const array: IDropdownOption[] = [];
     const Countryoptions: IDropdownOption[] = []
     const [countryoption,setcountryoption] = React.useState<IDropdownOption[]>([])
@@ -269,6 +327,17 @@ export default memo(function App() {
    const handleStatus = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption<any>, index?: number) => {
         query.current.status = option.key as string
    }
+   const handleCty = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption<any>, index?: number) => {
+        query.current.country = option.key as string
+    }
+
+    const handleStart = (date: Date | null | undefined) => {
+        query.current.start = moment(date).format('yyyy-MM-DD')
+        console.log(query.current.start)
+    }
+    const handleEnd = (date: Date | null | undefined) => {
+        query.current.end = moment(date).format('yyyy-MM-DD')
+    }
 
    const handleSearch = () => {
         setItems(allItems.current.filter(val => {
@@ -276,12 +345,19 @@ export default memo(function App() {
             if(query.current.parma) {
                 condition = condition && val.PARMANo === query.current.parma
             }
-            if(query.current.status) {
+            if(query.current.status && query.current.status !== 'All Case') {
                 condition = condition && val.Status === query.current.status
             }
+            if(query.current.country) {
+                condition = condition && val.ASNCountryCode === query.current.country.toUpperCase()
+            }
+            if(query.current.start && query.current.end) {
+                condition = condition && !!val.RequestDate && moment(val.RequestDate).isBetween(query.current.start, query.current.end)
+            } 
             return condition
         }))
    }
+   console.log(items)
    function formatDate(date: Date): string {
         let day = date.getDate().toString();
         let month = (date.getMonth() + 1).toString(); // getMonth() 返回 0-11
@@ -296,73 +372,97 @@ export default memo(function App() {
     
   
     return (
-        <><section style={{backgroundColor:'rgba(248, 247, 246, 1)', borderRadius: 10}}>
-            <Stack >
-                <Label style={{ fontSize: 18 }}>NII Case List</Label>
+        <div className={styles.caseList}>
+            <div className={styles.content}>
+                <Stack horizontal>
+                    <Icon style={{ fontSize: "12px", color: '#00829B' }} iconName="Back" />
+                    <span style={{marginLeft: '4px', color: '#00829B'}} ><a href="www.baidu.com">Return to home</a></span>
+                </Stack>
+                <div className={styles.title}>Case List</div>
+                <Stack className={styles.contentBox} verticalAlign="center">
+                    <Stack horizontal horizontalAlign="start" style={{ marginBottom: 10 }}>
+                        <Label className={styles.formLabel}>Status</Label>
+                        <Dropdown
+                            placeholder="Select an option"
+                            // label="Status"
+                            options={Statusoptions}
+                            styles={dropdownStyles}
+                            onChange={handleStatus}
+                        />  {"   "}
+                        <Label className={styles.formLabel}>Country </Label>
+                        <Dropdown
+                            placeholder="Select an option"
+                            //   label="Country"
+                            options={countryoption}
+                            styles={dropdownStyles}
+                            onChange={handleCty}
+                        />
+                    </Stack >
+                    <Stack horizontal horizontalAlign="start" style={{ marginRight: 20 }}>
+                        <Label className={styles.formLabel}>Parma</Label> 
+                        <TextField styles={textStyles} onChange={fetchName} />{" "}
+                        <Label className={styles.formLabel}>Supplier Name</Label> 
+                        <Label>{ supplierName  }</Label>
+                    </Stack>
+                    <Stack horizontal horizontalAlign="start" style={{marginTop:10,alignItems: 'center'}}>
+                        <Label className={styles.formLabel}>Plan Start Date</Label>
+                        <Label className={styles.formLabel}>from</Label>
+                        <DatePicker
+                            placeholder="Select a date..."
+                            ariaLabel="Select a date"
+                            styles={datePickerStyles}
+                            textField={{
+                                styles: datePickerTextStyles
+                            }}
+                            // DatePicker uses English strings by default. For localized apps, you must override this prop.
+                            strings={defaultDatePickerStrings}
+                            formatDate={formatDate}
+                            onSelectDate={handleStart}
+                        />
+                        <Label style={{marginLeft:20,marginRight:20}}>to</Label>
+                        <DatePicker
+                        placeholder="Select a date..."
+                        ariaLabel="Select a date"
+                        styles={datePickerStyles}
+                        textField={{
+                            styles: datePickerTextStyles
+                        }}
+                        formatDate={formatDate}
+                        // DatePicker uses English strings by default. For localized apps, you must override this prop.
+                        strings={defaultDatePickerStrings}
+                        onSelectDate={handleEnd}
+                    />
+                    </Stack>
+                    <Stack horizontal horizontalAlign="end" style={{marginTop:10}}>
+                    <Button style={{ width: 117, borderRadius: '6px' }}>Reset</Button>
+                    <Button onClick={handleSearch} style={{ width: 117, marginLeft: '20px', borderRadius: '6px',color: '#fff',
+                        background: '#00829B' }}>Search</Button>
+                        {/* <PrimaryButton onClick={handleSearch} style={{marginRight:10,color:"red"}}>Search</PrimaryButton>
+                        <PrimaryButton>Reset</PrimaryButton> */}
+                    </Stack>
+                </Stack>
 
-            </Stack>
+                <Stack className={styles.contentBox} verticalAlign="center" style={{marginTop: '24px'}}>
+                        <DetailsList
+                            items={items.slice(10*(page - 1), 10*(page - 1)+9)}
 
-            <Stack horizontal horizontalAlign="start" style={{ marginBottom: 10 }}>
-                <Label style={{ width: 60 }}>Status</Label>
-                <Dropdown
-                    placeholder="Select an option"
-                    // label="Status"
-                    options={Statusoptions}
-                    styles={dropdownStyles}
-                    onChange={handleStatus}
-                />  {"   "}
-                <Label style={{ width: 60 }}>Country </Label><Dropdown
-                    placeholder="Select an option"
-                    //   label="Country"
-                    options={countryoption}
-                    styles={dropdownStyles}
-                />
-            </Stack >
-            <Stack horizontal horizontalAlign="start" style={{ marginRight: 20 }}>
-                <Label style={{ width: 60 }}>Parma</Label> <TextField style={{ width: 250 }} onChange={fetchName} />{" "}
-                <Label style={{ width: 100, marginRight: 10, marginLeft: 40 }}>Supplier Name</Label> 
-                <Label>{ supplierName  }</Label>
-            </Stack>
-            <Stack horizontal horizontalAlign="start" style={{marginTop:10}}>
-                <Label style={{marginRight:20}}>Plan Start Date</Label><Label style={{marginLeft:20,marginRight:20}}>from</Label>
-                <DatePicker
-                    placeholder="Select a date..."
-                    ariaLabel="Select a date"
-                    style={{width:200}}
-                    // DatePicker uses English strings by default. For localized apps, you must override this prop.
-                    strings={defaultDatePickerStrings}
-                    formatDate={formatDate}
-                /><Label style={{marginLeft:20,marginRight:20}}>to</Label>
-                <DatePicker
-                placeholder="Select a date..."
-                ariaLabel="Select a date"
-                style={{width:200}}
-                formatDate={formatDate}
-                // DatePicker uses English strings by default. For localized apps, you must override this prop.
-                strings={defaultDatePickerStrings}
-            />
-            </Stack>
-            <Stack horizontal horizontalAlign="end" style={{marginTop:10}}>
-                <PrimaryButton onClick={handleSearch} style={{marginRight:10,color:"red"}}>Search</PrimaryButton>
-                <PrimaryButton>Reset</PrimaryButton>
-            </Stack>
-            </section>
-            <DetailsList
-                items={items}
+                            columns={columns}
+                            selectionMode={SelectionMode.none}
+                            setKey="multiple"
+                            layoutMode={DetailsListLayoutMode.justified}
+                            isHeaderVisible={true}
+                            selectionPreservedOnEmptyClick={true}
 
-                columns={columns}
-                selectionMode={SelectionMode.none}
-                setKey="multiple"
-                layoutMode={DetailsListLayoutMode.justified}
-                isHeaderVisible={true}
-                selectionPreservedOnEmptyClick={true}
+                            enterModalSelectionOnTouch={true}
 
-                enterModalSelectionOnTouch={true}
-
-                checkButtonAriaLabel="select row"
-            />
-
-        </>
+                            checkButtonAriaLabel="select row"
+                        />
+                        {/* <Stack horizontal horizontalAlign="center">
+                            <Pagination size="small" showSizeChanger={false} current={page} onChange={handlePageChange} total={items.length} />
+                        </Stack> */}
+                </Stack>
+            </div>
+        </div>
     )
 
 

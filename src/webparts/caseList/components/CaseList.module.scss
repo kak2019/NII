@@ -1,17 +1,70 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
+:global{
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .ant-pagination-item-active {
+    background-color: #00829B;
+    border: none
+  }
+
+  .ant-pagination-item-active a {
+    color: white;
+  }
+}
 .caseList {
-  overflow: hidden;
-  padding: 1em;
   color: "[theme:bodyText, default: #323130]";
   color: var(--bodyText);
+  background: #E5E5E5;
+  width: 100%;
   &.teams {
     font-family: $ms-font-family-fallbacks;
   }
 }
 
+.header {
+  height: 90px;
+  background-color: #000;
+}
+
+.content {
+  padding-top: 47px;
+  padding-left: 100px;
+  padding-right: 100px;
+  margin-bottom: '24px'
+}
+
+.title {
+  font-size: 28px;
+  color:#000;
+  margin-top: 24px;
+  margin-bottom: 34PX;
+}
+
+.contentBox {
+  width: 100%;
+  padding: 30px 32px 18px 38px;
+  border: 1px dashed #D6D3D0;
+  background: #F8F7F6;
+  gap: 16px;
+}
+
+.formLabel {
+  margin-right: 24px;
+  font-size: 14px;
+  color: #4D4E53;
+  flex-shrink: 0;
+}
+
 .welcome {
   text-align: center;
+}
+
+.no-shrink {
+  flex-shrink: 0;
 }
 
 .welcomeImage {
