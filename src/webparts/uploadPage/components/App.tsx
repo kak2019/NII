@@ -3,18 +3,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable */
 import * as React from "react";
-import { memo } from "react";
+import { memo,useContext } from "react";
 //import { read, utils, SSF }  as XLSX from 'xlsx';
 import * as XLSX from 'xlsx';
 import { useState } from "react";
-import { Button, Divider } from "antd";
+import { Button} from "antd";
 import { addRequest } from "./utils/request";
 import 'antd/dist/antd.css';
 import { Stack } from '@fluentui/react/lib/Stack';
-import { Label } from '@fluentui/react/lib/Label';
-import { Icon, Link } from "office-ui-fabric-react";
-import { Icon as IconBase } from '@fluentui/react/lib/Icon';
-import { Upload, Modal, Space } from 'antd';
+// import { Label } from '@fluentui/react/lib/Label';
+import { Icon } from "office-ui-fabric-react";
+// import { Icon as IconBase } from '@fluentui/react/lib/Icon';
+import { Upload, Modal } from 'antd';
 // import { AadHttpClient, HttpClientResponse } from '@microsoft/sp-http';
 import { useEffect } from "react";
 import { mytoken } from "../UploadPageWebPart";
@@ -27,6 +27,7 @@ import styles from './UploadPage.module.scss'
 import FileSvg from '../assets/file'
 import Del from '../assets/delete'
 import Error from '../assets/error'
+import AppContext from "../../../common/AppContext";
 // import * as moment from "moment";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
@@ -171,9 +172,10 @@ export default memo(function App() {
     const [uploadFile, setFile] = useState<any>()
     const [isShowModal, setIsShowModal] = useState(false)
     // const [apiResponse, setApiResponse] = useState<any>(null);
+    const [submiting, setSubmiting] = React.useState<boolean>(false)
 
-
-
+    const ctx = useContext(AppContext);
+    const webURL = ctx.context?._pageContext?._web?.absoluteUrl;
    
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleFileUpload = (info: any) => {
@@ -273,6 +275,8 @@ export default memo(function App() {
     }, [parmainfo, address])
 
     const submitFunction = async (): Promise<void> => {
+        if(submiting) return
+        setSubmiting(true)
         let index = 0
         for (let i = 0; i < items.length; i++) {
             if (items[i]['UD-KMP'] === 'CONSEQUENSES FOR OTHER SUPPLIERS?:') {
@@ -402,9 +406,9 @@ export default memo(function App() {
                 </Stack>
             </div> */}
             <div className={styles.content}>
-                <Stack horizontal>
-                    <Icon style={{ fontSize: "12px", color: '#00829B' }} iconName="Back" />
-                    <span style={{marginLeft: '4px', color: '#00829B'}} ><a href="www.baidu.com">Return to home</a></span>
+            <Stack horizontal>
+                    <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
+                    <span style={{marginLeft: '8px', color: '#00829B'}} ><a href={webURL+"/sitepages/CollabHome.aspx"} style={{color: '#00829B',fontSize:"12px"}}>Return to home</a></span>
                 </Stack>
                 <div className={styles.title}>Create new case</div>
                 <Stack horizontal horizontalAlign="space-between" style={{marginBottom: '8px'}}>
@@ -477,7 +481,8 @@ export default memo(function App() {
                         <Button style={{ width: 120, height: 42, marginTop: '32px', borderRadius: '6px',color: '#fff',
                         background: '#00829B' }} onClick={() => {
                             setIsShowModal(false)
-                            submitFunction()
+                            submitFunction().then( 
+                                ()=>window.location.href = webURL+"/sitepages/CollabHome.aspx")
                         }}>Yes</Button>
                     </div>
                 </Stack>

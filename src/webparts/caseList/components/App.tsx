@@ -398,7 +398,7 @@ export default memo(function App() {
             <div className={styles.content}>
                 <Stack horizontal>
                     <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
-                    <span style={{marginLeft: '8px', color: '#00829B'}} ><a href={webURL+"/CollabHome.aspx"} style={{color: '#00829B',fontSize:"12px"}}>Return to home</a></span>
+                    <span style={{marginLeft: '8px', color: '#00829B'}} ><a href={webURL+"/sitepages/CollabHome.aspx"} style={{color: '#00829B',fontSize:"12px"}}>Return to home</a></span>
                 </Stack>
                 <div className={styles.title}>Case List</div>
                 <Stack className={styles.contentBox} verticalAlign="center">
