@@ -348,19 +348,50 @@ export default memo(function App() {
     }
 
     const handleSearch = () => {
+        console.log("querryparma",query.current.parma)
+        console.log("status",query.current.status)
+        console.log("country",query.current.country)
+        console.log("start-end",query.current.start,query.current.end)
+        // setItems(allItems.current.filter(val => {
+        //     let condition = true
+        //     if (query.current.parma) {
+        //         condition = condition && val.PARMANo === query.current.parma
+        //     }
+        //     if (query.current.status && query.current.status !== 'All') {
+        //         condition = condition && val.Status === query.current.status
+        //     }
+        //     if (query.current.country) {
+        //         condition = condition && val.ASNCountryCode === query.current.country.toUpperCase()
+        //     }
+        //     if (query.current.start && query.current.end) {
+        //         const aa = moment(val.RequestDate, 'yyyy/MM/DD').isBetween(query.current.start, query.current.end)
+        //         // console.log("moment",typeof(aa),aa)
+        //         // console.log("moment(query.current.start)",typeof(query.current.start))
+        //         // console.log("req",moment(val?.RequestDate,'MM-DD-YYYY'))
+        //         //condition = condition && !!val.RequestDate && moment(val.RequestDate).isBetween(query.current.start, query.current.end)
+        //         //condition = condition && !!val.RequestDate && moment(val?.RequestDate,'MM-DD-YYYY').isBetween(moment(query.current.start,'YYYY-DD-MM'), moment(query.current.end,'YYYY-DD-MM'))
+        //         condition = condition && !!val.RequestDate && moment(val?.RequestDate, "MM/DD/YYYY").isBetween(moment(selectedDateFrom, "DD-MM-YYYY"), moment(selectedDateTo, "DD-MM-YYYY"))
+        //     }
+        //     if (query.current.status && query.current.status === 'All') {
+        //         setItems(itemsCopy)
+        //     }
+
+        //     return condition
+        // }))
+
         setItems(allItems.current.filter(val => {
             let condition = true
-            if (query.current.parma) {
-                condition = condition && val.PARMANo === query.current.parma
+            if (textFieldValue) {
+                condition = condition && val.PARMANo === textFieldValue
             }
-            if (query.current.status && query.current.status !== 'All') {
-                condition = condition && val.Status === query.current.status
+            if (selectedKey && selectedKey !== 'All') {
+                condition = condition && val.Status === selectedKey
             }
-            if (query.current.country) {
-                condition = condition && val.ASNCountryCode === query.current.country.toUpperCase()
+            if (selectedKeycontry) {
+                condition = condition && val.ASNCountryCode === selectedKeycontry.toUpperCase()
             }
-            if (query.current.start && query.current.end) {
-                const aa = moment(val.RequestDate, 'yyyy/MM/DD').isBetween(query.current.start, query.current.end)
+            if (selectedDateFrom && selectedDateTo) {
+                const aa = moment(val.RequestDate, 'yyyy/MM/DD').isBetween(selectedDateFrom, selectedDateTo)
                 // console.log("moment",typeof(aa),aa)
                 // console.log("moment(query.current.start)",typeof(query.current.start))
                 // console.log("req",moment(val?.RequestDate,'MM-DD-YYYY'))
@@ -368,7 +399,7 @@ export default memo(function App() {
                 //condition = condition && !!val.RequestDate && moment(val?.RequestDate,'MM-DD-YYYY').isBetween(moment(query.current.start,'YYYY-DD-MM'), moment(query.current.end,'YYYY-DD-MM'))
                 condition = condition && !!val.RequestDate && moment(val?.RequestDate, "MM/DD/YYYY").isBetween(moment(selectedDateFrom, "DD-MM-YYYY"), moment(selectedDateTo, "DD-MM-YYYY"))
             }
-            if (query.current.status && query.current.status === 'All') {
+            if (selectedKey && selectedKey === 'All') {
                 setItems(itemsCopy)
             }
 
@@ -395,6 +426,7 @@ export default memo(function App() {
         setSelectedDateFrom(null)
         setSelectedDateTo(null)
         setSupplierName('')
+        setItems(itemsCopy)
     }
 
     return (
@@ -493,10 +525,10 @@ export default memo(function App() {
                     <Stack horizontal horizontalAlign="center">
                         <Pagination size="small" showSizeChanger={false} current={page} onChange={handlePageChange} total={items.length} />
                     </Stack>
-                    <Stack verticalAlign="center" tokens={{ childrenGap: 10 }}>
+                    {/* <Stack verticalAlign="center" tokens={{ childrenGap: 10 }}>
                         <Text className="labelStyle">No data can be displayed</Text>
                         <span className="spanStyle">Please enter valid criteria to search data</span>
-                    </Stack>
+                    </Stack> */}
                 </Stack>
             </div>
         </div>
