@@ -157,8 +157,8 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const validate = (json: any) => {
-    if (!json['Supplier parma code']) return 'Please input parma code';
-    if (!json['Company name']) return 'Please input Company Name';
+    if (!json['Supplier parma code']) return 'Please input valid Parma and Company Name';
+    if (!json['Company name']) return 'Please input valid Parma and Company Name';
     // if(!json['Supplier']) return '请输入Supplier'
 }
 
