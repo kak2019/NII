@@ -389,7 +389,7 @@ export default memo(function App() {
             const finalRes = await sp.web.lists.getByTitle('Nii Case Library').items.getById(item.ID).update({
                 ContentTypeId: UploadFileContentTypeId
               })
-            });
+            }).then(()=>window.location.href = webURL+"/sitepages/CollabHome.aspx");
         //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
         }).catch(err => console.log("err", err));
     }
@@ -481,8 +481,7 @@ export default memo(function App() {
                         <Button style={{ width: 120, height: 42, marginTop: '32px', borderRadius: '6px',color: '#fff',
                         background: '#00829B' }} onClick={() => {
                             setIsShowModal(false)
-                            submitFunction().then( 
-                                ()=>window.location.href = webURL+"/sitepages/CollabHome.aspx")
+                            submitFunction()
                         }}>Yes</Button>
                     </div>
                 </Stack>
