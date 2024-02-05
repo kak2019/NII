@@ -525,10 +525,10 @@ export default memo(function App() {
                     <Stack horizontal horizontalAlign="center">
                         <Pagination size="small" showSizeChanger={false} current={page} onChange={handlePageChange} total={items.length} />
                     </Stack>
-                    <Stack verticalAlign="center" tokens={{ childrenGap: 10 }}>
+                    {/* <Stack verticalAlign="center" tokens={{ childrenGap: 10 }}>
                         <Text className="labelStyle">No data can be displayed</Text>
                         <span className="spanStyle">Please enter valid criteria to search data</span>
-                    </Stack>
+                    </Stack> */}
                 </Stack>
             </div>
         </div>
