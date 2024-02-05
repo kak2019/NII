@@ -14,6 +14,7 @@ import { IPackagingData } from "../../model/packagingdata";
 import { CASECONST } from "./casesSlice";
 import { IFileInfo } from "@pnp/sp/files";
 import { RcFile } from "antd/lib/upload";
+import { IOption } from "../../model/option";
 
 const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
   const sp = spfi(getSP());
@@ -541,6 +542,40 @@ const uploadFile = async (arg: {
   }
   return;
 };
+const fetchCountryData = async (): Promise<IOption[]> => {
+  const sp = spfi(getSP());
+  try {
+    const result = await sp.web.lists
+      .getByTitle(CASECONST.COUNTRY_LIST)
+      .renderListDataAsStream({
+        ViewXml: `<View>
+	                        <ViewFields>
+		                        <FieldRef Name="CountryCode"/>
+		                        <FieldRef Name="Title"/>
+	                        </ViewFields>
+	                        <RowLimit>5000</RowLimit>
+                        </View>`,
+      })
+      .then((response) => {
+        if (response.Row.length > 0) {
+          console.log(response);
+          return response.Row.map(
+            (item) =>
+              ({
+                value: item.Title,
+                label: item.Title,
+              } as IOption)
+          );
+        } else {
+          return [] as IOption[];
+        }
+      });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when fetch Country Data");
+  }
+};
 //Thunk function
 export const fetchByIdAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchById`,
@@ -589,4 +624,8 @@ export const fetchOriginalFileByIdAction = createAsyncThunk(
 export const uploadFileAction = createAsyncThunk(
   `${FeatureKey.CASES}/uploadFile`,
   uploadFile
+);
+export const fetchCountryDataAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchCountryData`,
+  fetchCountryData
 );

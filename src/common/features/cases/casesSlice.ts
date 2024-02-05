@@ -10,6 +10,7 @@ import {
   fetchByIdAction,
   fetchConsequensesByCaseAction,
   fetchContractFileByIdAction,
+  fetchCountryDataAction,
   fetchOriginalFileByIdAction,
   fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
@@ -20,6 +21,7 @@ import {
 import { IPackaging } from "../../model/packagingneed";
 import { IPackagingData } from "../../model/packagingdata";
 import { IFileInfo } from "@pnp/sp/files";
+import { IOption } from "../../model/option";
 
 export enum CaseStatus {
   Idle,
@@ -38,6 +40,7 @@ export interface ICaseState {
   packagingData: IPackagingData[];
   contractFiles: IFileInfo[];
   originalFiles: IFileInfo[];
+  countryCodes: IOption[];
 }
 
 // Define the initial state using that type
@@ -52,6 +55,7 @@ const initialState: ICaseState = {
   packagingData: [],
   contractFiles: [],
   originalFiles: [],
+  countryCodes: [],
 };
 
 export const caseSlice = createSlice({
@@ -184,6 +188,16 @@ export const caseSlice = createSlice({
       })
       .addCase(uploadFileAction.rejected, (state, action) => {
         state.statue = CaseStatus.Failed;
+      })
+      .addCase(fetchCountryDataAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchCountryDataAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.countryCodes = action.payload;
+      })
+      .addCase(fetchCountryDataAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
       });
   },
 });
@@ -197,6 +211,7 @@ export const CASECONST = Object.freeze({
   RECEIVING_LIST: "Receiving Plant/Receiver",
   PACKAGING_DATA_LIST: "Packaging Data",
   UPLOAD_FILE: "uploadFile",
+  COUNTRY_LIST: "Country",
 });
 
 export const { CaseItemIdChanged } = caseSlice.actions;

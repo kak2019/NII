@@ -3,6 +3,7 @@ import { CaseItemIdChanged, CaseStatus } from "../features/cases/casesSlice";
 import {
   consequensesSelector,
   contractFilesSelector,
+  countryCodesSelector,
   currentCaseIdSelector,
   currentCaseSelector,
   isFetchingSelector,
@@ -23,6 +24,7 @@ import {
   fetchByIdAction,
   fetchConsequensesByCaseAction,
   fetchContractFileByIdAction,
+  fetchCountryDataAction,
   fetchOriginalFileByIdAction,
   fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
@@ -34,6 +36,7 @@ import { IPackaging } from "../model/packagingneed";
 import { IPackagingData } from "../model/packagingdata";
 import { IFileInfo } from "@pnp/sp/files";
 import { RcFile } from "antd/lib/upload";
+import { IOption } from "../model/option";
 
 type CasesOperators = [
   isFetching: CaseStatus,
@@ -46,6 +49,7 @@ type CasesOperators = [
   packagingData: IPackagingData[],
   contractFiles: IFileInfo[],
   originalFiles: IFileInfo[],
+  countryCodes: IOption[],
   initialCaseForm: (Id: number) => void,
   changeCaseId: (Id: string) => void,
   fetchCaseById: (Id: number) => void,
@@ -79,6 +83,7 @@ export const useCases = (): Readonly<CasesOperators> => {
   const errorMessage = useAppSelector(messageSelector);
   const contractFiles = useAppSelector(contractFilesSelector);
   const originalFiles = useAppSelector(originalFilesSelector);
+  const countryCodes = useAppSelector(countryCodesSelector);
 
   const initialCaseForm = useCallback(
     async (Id: number) => {
@@ -92,6 +97,7 @@ export const useCases = (): Readonly<CasesOperators> => {
         await dispatch(fetchContractFileByIdAction({ Id }));
         await dispatch(fetchOriginalFileByIdAction({ Id }));
         await dispatch(fetchPackagingDataAction());
+        await dispatch(fetchCountryDataAction());
       };
       await dispatchActions();
     },
@@ -200,6 +206,7 @@ export const useCases = (): Readonly<CasesOperators> => {
     packagingData,
     contractFiles,
     originalFiles,
+    countryCodes,
     initialCaseForm,
     changeCaseId,
     fetchCaseById,

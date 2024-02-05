@@ -55,6 +55,7 @@ const CaseFormView: React.FC = () => {
     packagingData,
     contractFiles,
     originalFiles,
+    countryCodes,
     ,
     ,
     ,
@@ -194,11 +195,11 @@ const CaseFormView: React.FC = () => {
   //#region events
 
   const onTextChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: string,
     field: keyof typeof states.currentCase
   ): void => {
     const currentCaseDup = { ...states.currentCase };
-    (currentCaseDup[field] as string) = e.target.value;
+    (currentCaseDup[field] as string) = e;
     setStates({ ...states, currentCase: currentCaseDup });
   };
   const onApprovalChange = (e: RadioChangeEvent): void => {
@@ -686,7 +687,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.PARMANo}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "PARMANo");
+                        onTextChange(e.target.value, "PARMANo");
                       }}
                     />
                   </Col>
@@ -699,7 +700,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.CompanyName}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "CompanyName");
+                        onTextChange(e.target.value, "CompanyName");
                       }}
                     />
                   </Col>
@@ -717,7 +718,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ASNStreet}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ASNStreet");
+                        onTextChange(e.target.value, "ASNStreet");
                       }}
                     />
                   </Col>
@@ -730,7 +731,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ASNPostCode}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ASNPostCode");
+                        onTextChange(e.target.value, "ASNPostCode");
                       }}
                     />
                   </Col>
@@ -738,13 +739,13 @@ const CaseFormView: React.FC = () => {
                 <Row align="middle">
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
-                    <Input
-                      className={styles.inputStyle}
+                    <Select
+                      className={styles.selectWrapper}
                       defaultValue={states.currentCase.ASNCountryCode}
-                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "ASNCountryCode");
                       }}
+                      options={countryCodes}
                     />
                   </Col>
                 </Row>
@@ -756,7 +757,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ASNPhone}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ASNPhone");
+                        onTextChange(e.target.value, "ASNPhone");
                       }}
                     />
                   </Col>
@@ -774,7 +775,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.BilltoNo}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "BilltoNo");
+                        onTextChange(e.target.value, "BilltoNo");
                       }}
                     />
                   </Col>
@@ -787,7 +788,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.BillStreet}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "BillStreet");
+                        onTextChange(e.target.value, "BillStreet");
                       }}
                     />
                   </Col>
@@ -800,7 +801,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.BillPostCode}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "BillPostCode");
+                        onTextChange(e.target.value, "BillPostCode");
                       }}
                     />
                   </Col>
@@ -808,13 +809,13 @@ const CaseFormView: React.FC = () => {
                 <Row align="middle">
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
-                    <Input
-                      className={styles.inputStyle}
+                    <Select
+                      className={styles.selectWrapper}
                       defaultValue={states.currentCase.BillCountryCode}
-                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "BillCountryCode");
                       }}
+                      options={countryCodes}
                     />
                   </Col>
                 </Row>
@@ -826,7 +827,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.BillPhone}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "BillPhone");
+                        onTextChange(e.target.value, "BillPhone");
                       }}
                     />
                   </Col>
@@ -844,7 +845,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ShipToNo}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ShipToNo");
+                        onTextChange(e.target.value, "ShipToNo");
                       }}
                     />
                   </Col>
@@ -857,7 +858,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ShipStreet}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ShipStreet");
+                        onTextChange(e.target.value, "ShipStreet");
                       }}
                     />
                   </Col>
@@ -870,7 +871,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ShipPostcode}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ShipPostcode");
+                        onTextChange(e.target.value, "ShipPostcode");
                       }}
                     />
                   </Col>
@@ -878,13 +879,13 @@ const CaseFormView: React.FC = () => {
                 <Row align="middle">
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
-                    <Input
-                      className={styles.inputStyle}
+                    <Select
+                      className={styles.selectWrapper}
                       defaultValue={states.currentCase.ShipCountryCode}
-                      disabled={!states.isEditableCommon}
                       onChange={(e) => {
                         onTextChange(e, "ShipCountryCode");
                       }}
+                      options={countryCodes}
                     />
                   </Col>
                 </Row>
@@ -896,7 +897,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ShipPhone}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ShipPhone");
+                        onTextChange(e.target.value, "ShipPhone");
                       }}
                     />
                   </Col>
@@ -909,7 +910,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.VatNo}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "VatNo");
+                        onTextChange(e.target.value, "VatNo");
                       }}
                     />
                   </Col>
@@ -922,7 +923,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.GSDBID}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "GSDBID");
+                        onTextChange(e.target.value, "GSDBID");
                       }}
                     />
                   </Col>
@@ -942,7 +943,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ContractName}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ContractName");
+                        onTextChange(e.target.value, "ContractName");
                       }}
                     />
                   </Col>
@@ -955,7 +956,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ContractEmail}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ContractEmail");
+                        onTextChange(e.target.value, "ContractEmail");
                       }}
                     />
                   </Col>
@@ -968,7 +969,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.ContractPhoneno}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "ContractPhoneno");
+                        onTextChange(e.target.value, "ContractPhoneno");
                       }}
                     />
                   </Col>
@@ -1019,7 +1020,7 @@ const CaseFormView: React.FC = () => {
                         defaultValue={states.currentCase.ConPackagingAccno}
                         disabled={!states.isEditableCommon}
                         onChange={(e) => {
-                          onTextChange(e, "ConPackagingAccno");
+                          onTextChange(e.target.value, "ConPackagingAccno");
                         }}
                       />
                     </Col>
@@ -1032,7 +1033,7 @@ const CaseFormView: React.FC = () => {
                         defaultValue={states.currentCase.ConCompanyName}
                         disabled={!states.isEditableCommon}
                         onChange={(e) => {
-                          onTextChange(e, "ConCompanyName");
+                          onTextChange(e.target.value, "ConCompanyName");
                         }}
                       />
                     </Col>
@@ -1045,7 +1046,7 @@ const CaseFormView: React.FC = () => {
                         defaultValue={states.currentCase.ConCity}
                         disabled={!states.isEditableCommon}
                         onChange={(e) => {
-                          onTextChange(e, "ConCity");
+                          onTextChange(e.target.value, "ConCity");
                         }}
                       />
                     </Col>
@@ -1053,13 +1054,13 @@ const CaseFormView: React.FC = () => {
                   <Row align="middle">
                     <Col span={6}>Country Code:</Col>
                     <Col span={8}>
-                      <Input
-                        className={styles.inputStyle}
+                      <Select
+                        className={styles.selectWrapper}
                         defaultValue={states.currentCase.ConCountryCode}
-                        disabled={!states.isEditableCommon}
                         onChange={(e) => {
                           onTextChange(e, "ConCountryCode");
                         }}
+                        options={countryCodes}
                       />
                     </Col>
                   </Row>
@@ -1161,7 +1162,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.IssuCompName}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "IssuCompName");
+                        onTextChange(e.target.value, "IssuCompName");
                       }}
                     />
                   </Col>
@@ -1174,7 +1175,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.IssuName}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "IssuName");
+                        onTextChange(e.target.value, "IssuName");
                       }}
                     />
                   </Col>
@@ -1187,7 +1188,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.IssuPhoneNo}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "IssuPhoneNo");
+                        onTextChange(e.target.value, "IssuPhoneNo");
                       }}
                     />
                   </Col>
@@ -1200,7 +1201,7 @@ const CaseFormView: React.FC = () => {
                       defaultValue={states.currentCase.IssuEmail}
                       disabled={!states.isEditableCommon}
                       onChange={(e) => {
-                        onTextChange(e, "IssuEmail");
+                        onTextChange(e.target.value, "IssuEmail");
                       }}
                     />
                   </Col>

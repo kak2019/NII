@@ -44,3 +44,7 @@ export const originalFilesSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.originalFiles
 );
+export const countryCodesSelector = createSelector(
+  featureStateSelector,
+  (state: ICaseState) => state?.countryCodes
+);
