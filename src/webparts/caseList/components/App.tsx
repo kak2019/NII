@@ -370,7 +370,7 @@ React.useEffect(()=>{
         console.log("res", response)
         if (response.Row.length > 0) {
             allItems.current = response.Row
-            setItems(response.Row);
+            setItems(response.Row.sort((a,b)=>b.CaseID - a.CaseID));
             setItemsCopy(response.Row)
         }
     }
