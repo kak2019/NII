@@ -17,16 +17,15 @@ import "@pnp/sp/items/get-all";
 import { spfi } from "@pnp/sp";
 import { getSP } from '../../../common/pnpjsConfig'
 import { DatePicker, TextField, defaultDatePickerStrings } from '@fluentui/react';
-import { IDatePickerStyles, ITextFieldStyles, Icon, TextStyles } from "office-ui-fabric-react";
+import { IDatePickerStyles, ITextFieldStyles, Icon} from "office-ui-fabric-react";
 import "@pnp/sp/webs";
-import { PrimaryButton } from "office-ui-fabric-react";
+// import { PrimaryButton } from "office-ui-fabric-react";
 import { mytoken } from "../CaseListWebPart";
 import * as moment from "moment";
 import AppContext from "../../../common/AppContext";
 import styles from './CaseList.module.scss'
 import { Button, Pagination } from "antd";
 import type { PaginationProps } from "antd";
-import { Text } from '@fluentui/react';
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
