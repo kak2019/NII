@@ -15,6 +15,7 @@ import { CASECONST } from "./casesSlice";
 import { IFileInfo } from "@pnp/sp/files";
 import { RcFile } from "antd/lib/upload";
 import { IOption } from "../../model/option";
+import { IContentTypeInfo } from "@pnp/sp/content-types";
 
 const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
   const sp = spfi(getSP());
@@ -512,19 +513,20 @@ const uploadFile = async (arg: {
         )
         .files.addUsingPath(file.name, arrayBuffer)
         .then(async (addResult) => {
+          let contentTypeContract: IContentTypeInfo;
           await sp.web.lists
             .getByTitle(CASECONST.LIBRARY_NAME)
             .contentTypes()
             .then(async (contentTypes) => {
-              const contentTypeContract = contentTypes.filter(
+              contentTypeContract = contentTypes.filter(
                 (ct) => ct.Name === CASECONST.CONTRACT_TYPE
               )[0];
-              await addResult.file.getItem().then(async (item) => {
-                await item.update({
-                  ContentTypeId: contentTypeContract.Id.StringValue,
-                });
-              });
             });
+          await addResult.file.getItem().then(async (item) => {
+            await item.update({
+              ContentTypeId: contentTypeContract.Id.StringValue,
+            });
+          });
         });
     };
     reader.readAsArrayBuffer(file);

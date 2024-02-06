@@ -323,7 +323,7 @@ const CaseFormView: React.FC = () => {
       },
     });
   };
-  const onSave = async (): Promise<void> => {
+  const onSave = async (callback: () => void): Promise<void> => {
     const currentCaseDup = { ...states.currentCase };
     const caseUpdate: INiiCaseItem = {
       ID: currentCaseDup.ID,
@@ -398,6 +398,7 @@ const CaseFormView: React.FC = () => {
       uploadFile(fileList, needReplace, originalFileUrl, currentCaseId);
     }
     await editCase({ niiCase: caseUpdate });
+    callback();
   };
   const onOpenModal = (type: string): void => {
     switch (type) {
@@ -450,8 +451,9 @@ const CaseFormView: React.FC = () => {
         break;
       }
       case "save": {
-        await onSave();
-        window.location.href = `${appContext.context.pageContext.web.absoluteUrl}/SitePages/CaseList.aspx`;
+        await onSave(() => {
+          window.location.href = `${appContext.context.pageContext.web.absoluteUrl}/SitePages/CaseList.aspx`;
+        });
         break;
       }
     }
