@@ -365,6 +365,7 @@ const CaseFormView: React.FC = () => {
     const packagingNeedsDup = [...states.packagingNeeds];
     if (packagingNeedsDup.filter((i) => !!i.ErrorMessage).length > 0) {
       await message.error("Invalid Packaging included in Packaging Needs");
+      setModalDetail({ isShow: false, message: "", type: "" });
       return;
     }
     const packagingNeedsUpdate = packagingNeedsDup.map((item) => {
