@@ -142,7 +142,8 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
             "Packaging Name": val['__EMPTY_4'],
             "Yearly need":val['Mandatory field'],
         }
-    })
+    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined)
+
     // const table2 = arr.slice(start + 1, end).map(val => {
     //     return { 
     //         "Packaging": val['__EMPTY_3'],
