@@ -142,7 +142,8 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
             "Packaging Name": val['__EMPTY_4'],
             "Yearly need":val['Mandatory field'],
         }
-    })
+    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined)
+
     // const table2 = arr.slice(start + 1, end).map(val => {
     //     return { 
     //         "Packaging": val['__EMPTY_3'],
@@ -156,13 +157,10 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const validate = (json: any) => {
-    if (!json['Supplier parma code']) return 'Please input valid Parma and Company Name';
-    if (!json['Company name']) return 'Please input valid Parma and Company Name';
-    // if(!json['Supplier']) return '请输入Supplier'
-}
+
 
 export default memo(function App() {
+    const sp = spfi(getSP());
     const [items, setItems] = useState([]);
     const [data, setData] = useState({});
     const [error, setError] = useState('');
@@ -173,10 +171,51 @@ export default memo(function App() {
     const [isShowModal, setIsShowModal] = useState(false)
     // const [apiResponse, setApiResponse] = useState<any>(null);
     const [submiting, setSubmiting] = React.useState<boolean>(false)
+    const [spParmaList,setspParmaList] = React.useState([])
 
     const ctx = useContext(AppContext);
     const webURL = ctx.context?._pageContext?._web?.absoluteUrl;
-   
+    const validate = (json: any) => {
+        if (!json['Supplier parma code']) return 'Please input valid Parma and Company Name';
+        if (!json['Company name']) return 'Please input valid Parma and Company Name';
+        //The Parma(33345) is existed with Case ID: 23001. Do you want to create a new case for 33345?
+        if((spParmaList.indexOf(json['Supplier parma code'])>-1))return "The Parma("+json['Supplier parma code']+") is existed with Case ID: 23001. Do you want to create a new case for 33345?"
+        // if(!json['Supplier']) return '请输入Supplier'
+        console.log(spParmaList.indexOf(json['Supplier parma code']))
+    }
+useEffect(()=>{
+
+    const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
+        ViewXml: `<View>
+                          <ViewFields>
+                            <FieldRef Name="CaseID"/>
+                            <FieldRef Name="PARMANo"/>
+                            <FieldRef Name="IssuName"/>
+                            <FieldRef Name="GSDBID"/>
+                            <FieldRef Name="RequestDate"/>
+                            <FieldRef Name="Status"/>
+                            <FieldRef Name="Created"/>
+                            <FieldRef Name="ASNCountryCode"/>
+                          </ViewFields>
+                       
+                        </View>`,
+        // <RowLimit>400</RowLimit>
+    }).then((response) => {
+        console.log("res", response.Row)
+        if (response.Row.length > 0) {
+            const parmaNoList = response.Row.map((item: { PARMANo: string; }) => item.PARMANo).filter(parmaNo => parmaNo !== undefined && parmaNo !== "undefined");
+            //@ts-ignore
+            const uniqueParmaNoList = Array.from(new Set(parmaNoList));
+            setspParmaList(uniqueParmaNoList)
+            console.log("uni",uniqueParmaNoList);
+        }
+    }
+
+    );
+},[])
+
+
+
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleFileUpload = (info: any) => {
         if (info.file) {

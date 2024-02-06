@@ -17,16 +17,15 @@ import "@pnp/sp/items/get-all";
 import { spfi } from "@pnp/sp";
 import { getSP } from '../../../common/pnpjsConfig'
 import { DatePicker, TextField, defaultDatePickerStrings } from '@fluentui/react';
-import { IDatePickerStyles, ITextFieldStyles, Icon, TextStyles } from "office-ui-fabric-react";
+import { IDatePickerStyles, ITextFieldStyles, Icon} from "office-ui-fabric-react";
 import "@pnp/sp/webs";
-import { PrimaryButton } from "office-ui-fabric-react";
+// import { PrimaryButton } from "office-ui-fabric-react";
 import { mytoken } from "../CaseListWebPart";
 import * as moment from "moment";
 import AppContext from "../../../common/AppContext";
 import styles from './CaseList.module.scss'
 import { Button, Pagination } from "antd";
 import type { PaginationProps } from "antd";
-import { Text } from '@fluentui/react';
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -203,7 +202,7 @@ export default memo(function App() {
 
     const allItems = React.useRef([])
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [items, setItems] = React.useState([{}]);
+    const [items, setItems] = React.useState([]);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [itemsCopy, setItemsCopy] = React.useState([{}]);
     const [page, setPage] = React.useState(1)
@@ -254,32 +253,33 @@ export default memo(function App() {
     const array: IDropdownOption[] = [];
     const Countryoptions: IDropdownOption[] = []
     const [countryoption, setcountryoption] = React.useState<IDropdownOption[]>([])
+    const [showInitData , setshowInitData] = React.useState(false)
     React.useEffect(() => {
-        const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
-            ViewXml: `<View>
-                              <ViewFields>
-                                <FieldRef Name="CaseID"/>
-                                <FieldRef Name="PARMANo"/>
-                                <FieldRef Name="IssuName"/>
-                                <FieldRef Name="GSDBID"/>
-                                <FieldRef Name="RequestDate"/>
-                                <FieldRef Name="Status"/>
-                                <FieldRef Name="Created"/>
-                                <FieldRef Name="ASNCountryCode"/>
-                              </ViewFields>
+        // const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
+        //     ViewXml: `<View>
+        //                       <ViewFields>
+        //                         <FieldRef Name="CaseID"/>
+        //                         <FieldRef Name="PARMANo"/>
+        //                         <FieldRef Name="IssuName"/>
+        //                         <FieldRef Name="GSDBID"/>
+        //                         <FieldRef Name="RequestDate"/>
+        //                         <FieldRef Name="Status"/>
+        //                         <FieldRef Name="Created"/>
+        //                         <FieldRef Name="ASNCountryCode"/>
+        //                       </ViewFields>
                            
-                            </View>`,
-            // <RowLimit>400</RowLimit>
-        }).then((response) => {
-            console.log("res", response)
-            if (response.Row.length > 0) {
-                allItems.current = response.Row
-                setItems(response.Row);
-                setItemsCopy(response.Row)
-            }
-        }
+        //                     </View>`,
+        //     // <RowLimit>400</RowLimit>
+        // }).then((response) => {
+        //     console.log("res", response)
+        //     if (response.Row.length > 0) {
+        //         allItems.current = response.Row
+        //         setItems(response.Row);
+        //         setItemsCopy(response.Row)
+        //     }
+        // }
 
-        );
+        // );
         const itemoptionContry = sp.web.lists.getByTitle("Country").renderListDataAsStream({
             ViewXml: `<View>
                               <ViewFields>
@@ -301,7 +301,9 @@ export default memo(function App() {
         }
         )
     }, [])
-
+React.useEffect(()=>{
+    initdata()
+},[showInitData])
 
 
     // 变量拼起来 空格会导致搜索不到
@@ -346,12 +348,42 @@ export default memo(function App() {
         console.log(typeof (query.current.end), query.current.end)
         setSelectedDateTo(date)
     }
+    function initdata(){
+        if(showInitData){
+    const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
+        ViewXml: `<View>
+                          <ViewFields>
+                            <FieldRef Name="CaseID"/>
+                            <FieldRef Name="PARMANo"/>
+                            <FieldRef Name="IssuName"/>
+                            <FieldRef Name="GSDBID"/>
+                            <FieldRef Name="RequestDate"/>
+                            <FieldRef Name="Status"/>
+                            <FieldRef Name="Created"/>
+                            <FieldRef Name="ASNCountryCode"/>
+                          </ViewFields>
+                       
+                        </View>`,
+        // <RowLimit>400</RowLimit>
+    }).then((response) => {
+        console.log("res", response)
+        if (response.Row.length > 0) {
+            allItems.current = response.Row
+            setItems(response.Row.sort((a,b)=>b.CaseID - a.CaseID));
+            setItemsCopy(response.Row)
+        }
+    }
 
+    );
+}
+    }
     const handleSearch = () => {
+        setshowInitData(true)
         console.log("querryparma",query.current.parma)
         console.log("status",query.current.status)
         console.log("country",query.current.country)
         console.log("start-end",query.current.start,query.current.end)
+        
         // setItems(allItems.current.filter(val => {
         //     let condition = true
         //     if (query.current.parma) {
@@ -378,7 +410,7 @@ export default memo(function App() {
 
         //     return condition
         // }))
-
+        
         setItems(allItems.current.filter(val => {
             let condition = true
             if (textFieldValue) {
@@ -521,6 +553,13 @@ export default memo(function App() {
                         enterModalSelectionOnTouch={true}
 
                         checkButtonAriaLabel="select row"
+                        onRenderDetailsFooter={() => 
+                            items.length === 0 && 
+                                <Stack verticalAlign="center" style={{height: '500px', width: '100%', alignItems: 'center'}}>
+                                    <span style={{fontSize: '22px', fontWeight: 600}}>No data can be displayed</span>
+                                    <span style={{fontSize: '15px', marginTop: '14px'}}>Please enter valid criteria to search data</span>
+                                </Stack>
+                        }
                     />
                     <Stack horizontal horizontalAlign="center">
                         <Pagination size="small" showSizeChanger={false} current={page} onChange={handlePageChange} total={items.length} />
