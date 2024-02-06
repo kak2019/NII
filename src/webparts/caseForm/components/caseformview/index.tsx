@@ -740,6 +740,7 @@ const CaseFormView: React.FC = () => {
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
                     <Select
+                      disabled={!states.isEditableCommon}
                       className={styles.selectWrapper}
                       defaultValue={states.currentCase.ASNCountryCode}
                       onChange={(e) => {
@@ -810,6 +811,7 @@ const CaseFormView: React.FC = () => {
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
                     <Select
+                      disabled={!states.isEditableCommon}
                       className={styles.selectWrapper}
                       defaultValue={states.currentCase.BillCountryCode}
                       onChange={(e) => {
@@ -880,6 +882,7 @@ const CaseFormView: React.FC = () => {
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
                     <Select
+                      disabled={!states.isEditableCommon}
                       className={styles.selectWrapper}
                       defaultValue={states.currentCase.ShipCountryCode}
                       onChange={(e) => {
@@ -1055,6 +1058,7 @@ const CaseFormView: React.FC = () => {
                     <Col span={6}>Country Code:</Col>
                     <Col span={8}>
                       <Select
+                        disabled={!states.isEditableCommon}
                         className={styles.selectWrapper}
                         defaultValue={states.currentCase.ConCountryCode}
                         onChange={(e) => {
