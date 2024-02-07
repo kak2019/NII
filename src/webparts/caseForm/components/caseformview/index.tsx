@@ -10,7 +10,6 @@ import {
   InputNumber,
   Table,
   DatePicker,
-  message,
   Modal,
 } from "antd";
 import {
@@ -56,7 +55,7 @@ const CaseFormView: React.FC = () => {
     contractFiles,
     originalFiles,
     countryCodes,
-    ,
+    initialCaseForm,
     ,
     ,
     editCase,
@@ -86,6 +85,7 @@ const CaseFormView: React.FC = () => {
     selectedPackages: [],
     removePackagingIds: [],
     isEditableCommon: editableStatus.indexOf(currentCase.Status) !== -1,
+    isApprovalAllow: currentCase.Status !== "Contract Submitted",
   };
   const yearOptions = [];
   for (let i = 2000; i <= new Date().getFullYear(); i++) {
@@ -101,6 +101,7 @@ const CaseFormView: React.FC = () => {
     isShow: false,
     message: "",
     type: "",
+    isDataInvalid: false,
   });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [needReplace, setneedReplace] = React.useState(
@@ -259,8 +260,12 @@ const CaseFormView: React.FC = () => {
             break;
           }
           case "YearlyDemand": {
+            item.ErrorMessageNumber = "";
             item.YearlyDemand = Number(e);
             item.WeeklyDemand = Math.ceil(Number(e) / 48);
+            if (Number(e) <= 0) {
+              item.ErrorMessageNumber = "invalid";
+            }
             break;
           }
         }
@@ -323,7 +328,7 @@ const CaseFormView: React.FC = () => {
       },
     });
   };
-  const onSave = async (callback: () => void): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     const currentCaseDup = { ...states.currentCase };
     const caseUpdate: INiiCaseItem = {
       ID: currentCaseDup.ID,
@@ -363,11 +368,6 @@ const CaseFormView: React.FC = () => {
       IssuEmail: currentCaseDup.IssuEmail,
     };
     const packagingNeedsDup = [...states.packagingNeeds];
-    if (packagingNeedsDup.filter((i) => !!i.ErrorMessage).length > 0) {
-      await message.error("Invalid Packaging included in Packaging Needs");
-      setModalDetail({ isShow: false, message: "", type: "" });
-      return;
-    }
     const packagingNeedsUpdate = packagingNeedsDup.map((item) => {
       return {
         ID: item.ID,
@@ -393,13 +393,13 @@ const CaseFormView: React.FC = () => {
     removePackagingIdsDup.forEach((id) => {
       removePackagingNeedsById(id);
     });
-    if (fileList.length > 0) {
+    if (fileList.length > 0 || needReplace) {
       const originalFileUrl =
         contractFiles.length > 0 ? contractFiles[0].ServerRelativeUrl : "";
       uploadFile(fileList, needReplace, originalFileUrl, currentCaseId);
     }
     await editCase({ niiCase: caseUpdate });
-    callback();
+    initialCaseForm(Number(currentCaseId));
   };
   const onOpenModal = (type: string): void => {
     switch (type) {
@@ -408,6 +408,7 @@ const CaseFormView: React.FC = () => {
           isShow: true,
           message: "Are you sure to delete the current contract?",
           type: type,
+          isDataInvalid: false,
         });
         break;
       }
@@ -416,6 +417,7 @@ const CaseFormView: React.FC = () => {
           isShow: true,
           message: "Are you sure to remove these packagings?",
           type: type,
+          isDataInvalid: false,
         });
         break;
       }
@@ -424,14 +426,32 @@ const CaseFormView: React.FC = () => {
           isShow: true,
           message: "Are you sure to leave?",
           type: type,
+          isDataInvalid: false,
         });
         break;
       }
       case "save": {
+        const packagingNeedsDup = [...states.packagingNeeds];
+        if (
+          packagingNeedsDup.filter((i) => !!i.ErrorMessage).length > 0 ||
+          packagingNeedsDup.filter((i) => i.YearlyDemand === undefined).length >
+            0 ||
+          packagingNeedsDup.filter((i) => i.YearlyDemand === null).length > 0 ||
+          packagingNeedsDup.filter((i) => i.YearlyDemand <= 0).length > 0
+        ) {
+          setModalDetail({
+            isShow: true,
+            message: "Please correct invalid data before saving",
+            type: "invalid",
+            isDataInvalid: true,
+          });
+          break;
+        }
         setModalDetail({
           isShow: true,
           message: "Are you sure to save the data?",
           type: type,
+          isDataInvalid: false,
         });
         break;
       }
@@ -452,19 +472,21 @@ const CaseFormView: React.FC = () => {
         break;
       }
       case "save": {
-        await onSave(() => {
-          window.location.href = `${appContext.context.pageContext.web.absoluteUrl}/SitePages/CaseList.aspx`;
-        });
+        await onSave();
         break;
       }
     }
-    setModalDetail({ isShow: false, message: "", type: "" });
+    setModalDetail({
+      isShow: false,
+      message: "",
+      type: "",
+      isDataInvalid: false,
+    });
   };
   //#endregion
   //#region methods
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const cellInput = (field: string, record: IPackaging, editable: boolean) => {
-    const fieldEditable = !(editable && states.packageEditable);
+  const cellInput = (field: string, record: IPackaging) => {
     switch (field) {
       case "Packaging":
         return (
@@ -472,9 +494,9 @@ const CaseFormView: React.FC = () => {
             <Row>
               <DebouncedInput
                 value={record.Packaging}
-                readOnly={fieldEditable}
+                readOnly={!states.packageEditable}
                 onBlur={(e) => onPackagingChange(e, record.key, "Packaging")}
-                bordered={!fieldEditable}
+                bordered={states.packageEditable}
               />
             </Row>
             {!!record.ErrorMessage && (
@@ -499,15 +521,29 @@ const CaseFormView: React.FC = () => {
         );
       case "YearlyDemand":
         return (
-          <InputNumber
-            controls={false}
-            value={record.YearlyDemand}
-            readOnly={fieldEditable}
-            onBlur={(e) =>
-              onPackagingChange(e.target.value, record.key, "YearlyDemand")
-            }
-            bordered={!fieldEditable}
-          />
+          <>
+            <InputNumber
+              controls={false}
+              value={record.YearlyDemand}
+              readOnly={!states.packageEditable}
+              onBlur={(e) =>
+                onPackagingChange(e.target.value, record.key, "YearlyDemand")
+              }
+              bordered={states.packageEditable}
+              min={1}
+              precision={0}
+            />
+            {!!record.ErrorMessageNumber && (
+              <Row>
+                <Input
+                  className={styles.inputAlert}
+                  defaultValue={record.ErrorMessageNumber}
+                  readOnly={true}
+                  bordered={false}
+                />
+              </Row>
+            )}
+          </>
         );
     }
   };
@@ -526,7 +562,7 @@ const CaseFormView: React.FC = () => {
     return (
       <td {...restProps}>
         {fields.indexOf(dataIndex) !== -1 ? (
-          <div>{cellInput(dataIndex, record, editing)}</div>
+          <div>{cellInput(dataIndex, record)}</div>
         ) : (
           children
         )}
@@ -652,7 +688,7 @@ const CaseFormView: React.FC = () => {
               </Col>
               <Col span={7}>
                 <Radio.Group
-                  disabled={!states.isEditableCommon}
+                  disabled={states.isApprovalAllow}
                   onChange={onApprovalChange}
                   value={states.currentCase.Approval}
                 >
@@ -742,15 +778,23 @@ const CaseFormView: React.FC = () => {
                 <Row align="middle">
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
-                    <Select
-                      disabled={!states.isEditableCommon}
-                      className={styles.selectWrapper}
-                      defaultValue={states.currentCase.ASNCountryCode}
-                      onChange={(e) => {
-                        onTextChange(e, "ASNCountryCode");
-                      }}
-                      options={countryCodes}
-                    />
+                    {states.isEditableCommon && (
+                      <Select
+                        className={styles.selectWrapper}
+                        defaultValue={states.currentCase.ASNCountryCode}
+                        onChange={(e) => {
+                          onTextChange(e, "ASNCountryCode");
+                        }}
+                        options={countryCodes}
+                      />
+                    )}
+                    {!states.isEditableCommon && (
+                      <Input
+                        className={styles.inputStyle}
+                        defaultValue={states.currentCase.ASNCountryCode}
+                        disabled={true}
+                      />
+                    )}
                   </Col>
                 </Row>
                 <Row align="middle">
@@ -813,15 +857,23 @@ const CaseFormView: React.FC = () => {
                 <Row align="middle">
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
-                    <Select
-                      disabled={!states.isEditableCommon}
-                      className={styles.selectWrapper}
-                      defaultValue={states.currentCase.BillCountryCode}
-                      onChange={(e) => {
-                        onTextChange(e, "BillCountryCode");
-                      }}
-                      options={countryCodes}
-                    />
+                    {states.isEditableCommon && (
+                      <Select
+                        className={styles.selectWrapper}
+                        defaultValue={states.currentCase.BillCountryCode}
+                        onChange={(e) => {
+                          onTextChange(e, "BillCountryCode");
+                        }}
+                        options={countryCodes}
+                      />
+                    )}
+                    {!states.isEditableCommon && (
+                      <Input
+                        className={styles.inputStyle}
+                        defaultValue={states.currentCase.BillCountryCode}
+                        disabled={true}
+                      />
+                    )}
                   </Col>
                 </Row>
                 <Row align="middle">
@@ -884,15 +936,23 @@ const CaseFormView: React.FC = () => {
                 <Row align="middle">
                   <Col span={6}>Country Code:</Col>
                   <Col span={8}>
-                    <Select
-                      disabled={!states.isEditableCommon}
-                      className={styles.selectWrapper}
-                      defaultValue={states.currentCase.ShipCountryCode}
-                      onChange={(e) => {
-                        onTextChange(e, "ShipCountryCode");
-                      }}
-                      options={countryCodes}
-                    />
+                    {states.isEditableCommon && (
+                      <Select
+                        className={styles.selectWrapper}
+                        defaultValue={states.currentCase.ShipCountryCode}
+                        onChange={(e) => {
+                          onTextChange(e, "ShipCountryCode");
+                        }}
+                        options={countryCodes}
+                      />
+                    )}
+                    {!states.isEditableCommon && (
+                      <Input
+                        className={styles.inputStyle}
+                        defaultValue={states.currentCase.ShipCountryCode}
+                        disabled={true}
+                      />
+                    )}
                   </Col>
                 </Row>
                 <Row align="middle">
@@ -1060,15 +1120,23 @@ const CaseFormView: React.FC = () => {
                   <Row align="middle">
                     <Col span={6}>Country Code:</Col>
                     <Col span={8}>
-                      <Select
-                        disabled={!states.isEditableCommon}
-                        className={styles.selectWrapper}
-                        defaultValue={states.currentCase.ConCountryCode}
-                        onChange={(e) => {
-                          onTextChange(e, "ConCountryCode");
-                        }}
-                        options={countryCodes}
-                      />
+                      {states.isEditableCommon && (
+                        <Select
+                          className={styles.selectWrapper}
+                          defaultValue={states.currentCase.ConCountryCode}
+                          onChange={(e) => {
+                            onTextChange(e, "ConCountryCode");
+                          }}
+                          options={countryCodes}
+                        />
+                      )}
+                      {!states.isEditableCommon && (
+                        <Input
+                          className={styles.inputStyle}
+                          defaultValue={states.currentCase.ConCountryCode}
+                          disabled={true}
+                        />
+                      )}
                     </Col>
                   </Row>
                   <Row className={styles.marginTop}>
@@ -1262,34 +1330,67 @@ const CaseFormView: React.FC = () => {
         >
           <p>{modalDetail.message}</p>
           <div style={{ display: "flex", alignItems: "center", gap: "36px" }}>
-            <Button
-              onClick={() =>
-                setModalDetail({ isShow: false, message: "", type: "" })
-              }
-              style={{
-                width: 120,
-                height: 42,
-                marginTop: "32px",
-                borderRadius: "6px",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              style={{
-                width: 120,
-                height: 42,
-                marginTop: "32px",
-                borderRadius: "6px",
-                color: "#fff",
-                background: "#00829B",
-              }}
-              onClick={async () => {
-                await onConfirm(modalDetail.type);
-              }}
-            >
-              Yes
-            </Button>
+            {!modalDetail.isDataInvalid && (
+              <>
+                <Button
+                  onClick={() =>
+                    setModalDetail({
+                      isShow: false,
+                      message: "",
+                      type: "",
+                      isDataInvalid: false,
+                    })
+                  }
+                  style={{
+                    width: 120,
+                    height: 42,
+                    marginTop: "32px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  style={{
+                    width: 120,
+                    height: 42,
+                    marginTop: "32px",
+                    borderRadius: "6px",
+                    color: "#fff",
+                    background: "#00829B",
+                  }}
+                  onClick={async () => {
+                    await onConfirm(modalDetail.type);
+                  }}
+                >
+                  Yes
+                </Button>
+              </>
+            )}
+            {modalDetail.isDataInvalid && (
+              <>
+                <Button
+                  onClick={() =>
+                    setModalDetail({
+                      isShow: false,
+                      message: "",
+                      type: "",
+                      isDataInvalid: false,
+                    })
+                  }
+                  style={{
+                    width: 120,
+                    height: 42,
+                    marginTop: "32px",
+                    borderRadius: "6px",
+                    color: "#fff",
+                    background: "#00829B",
+                  }}
+                >
+                  Ok
+                </Button>
+              </>
+            )}
           </div>
         </Stack>
       </Modal>

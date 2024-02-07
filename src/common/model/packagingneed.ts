@@ -11,4 +11,5 @@ export interface IPackaging {
   SupplierNo?: string;
   SupplierName?: string;
   ErrorMessage?: string;
+  ErrorMessageNumber?: string;
 }
