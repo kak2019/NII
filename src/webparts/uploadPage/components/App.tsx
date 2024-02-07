@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable */
 import * as React from "react";
-import { memo,useContext } from "react";
+import { memo, useContext } from "react";
 //import { read, utils, SSF }  as XLSX from 'xlsx';
 import * as XLSX from 'xlsx';
 import { useState } from "react";
-import { Button} from "antd";
+import { Button } from "antd";
 import { addRequest } from "./utils/request";
 import 'antd/dist/antd.css';
 import { Stack } from '@fluentui/react/lib/Stack';
@@ -28,6 +28,7 @@ import FileSvg from '../assets/file'
 import Del from '../assets/delete'
 import Error from '../assets/error'
 import AppContext from "../../../common/AppContext";
+import  Viewhistory from '../assets/submit';
 // import * as moment from "moment";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
@@ -97,7 +98,7 @@ const getSubTableData = (arr: Array<{ [key in string]: any }>) => {
     const res = []
     while (arr[i]['UD-KMP'] !== "CONSEQUENSES FOR OTHER SUPPLIERS?:") {
         // res.push(arr[i])
-        res.push({ "Packaging account no": arr[i]['UD-KMP'], "company name":arr[i]?.__EMPTY,"City":arr[i]?.__EMPTY_1,'Country Code':arr[i]?.__EMPTY_2?String(arr[i]?.__EMPTY_2):""})
+        res.push({ "Packaging account no": arr[i]['UD-KMP'], "company name": arr[i]?.__EMPTY, "City": arr[i]?.__EMPTY_1, 'Country Code': arr[i]?.__EMPTY_2 ? String(arr[i]?.__EMPTY_2) : "" })
         i++
     }
     return res
@@ -111,7 +112,7 @@ const getPackageData = (arr: Array<{ [key in string]: any }>) => {
     const end = arr.findIndex(val => val.__rowNum__ === 67)
 
     return arr.slice(start + 1, end).map(val => {
-        return { "Packaging": val['__EMPTY_1'], "Packaging Name":val.__EMPTY_2,"Yearly need":val.__EMPTY_3}
+        return { "Packaging": val['__EMPTY_1'], "Packaging Name": val.__EMPTY_2, "Yearly need": val.__EMPTY_3 }
     })
 }
 
@@ -126,7 +127,7 @@ function sanitize(input: string) {
     // replace leading underscore
     sanitizedInput = sanitizedInput.replace(/^_/, "");
     return sanitizedInput;
-  }
+}
 
 // 获取76-85
 const getData2 = (arr: Array<{ [key in string]: any }>) => {
@@ -136,11 +137,11 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
     const end = arr.findIndex(val => val.__rowNum__ === 86)
 
     const table1 = arr.slice(start + 1, end).map(val => {
-        return { 
-            "Packaging": val['UD-KMP'], 
-            "weekly need":val.__EMPTY,
+        return {
+            "Packaging": val['UD-KMP'],
+            "weekly need": val.__EMPTY,
             "Packaging Name": val['__EMPTY_4'],
-            "Yearly need":val['Mandatory field'],
+            "Yearly need": val['Mandatory field'],
         }
     }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined)
 
@@ -153,7 +154,7 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
     // })
     // return [table1, table2]
     return table1
-    
+
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -171,22 +172,38 @@ export default memo(function App() {
     const [isShowModal, setIsShowModal] = useState(false)
     // const [apiResponse, setApiResponse] = useState<any>(null);
     const [submiting, setSubmiting] = React.useState<boolean>(false)
-    const [spParmaList,setspParmaList] = React.useState([])
-
+    const [spParmaList, setspParmaList] = React.useState([])
+    const [fileWarning, setfileWarning] = React.useState("")
+    const [buttonvisible, setbuttonVisible] = React.useState<boolean>(true)
     const ctx = useContext(AppContext);
     const webURL = ctx.context?._pageContext?._web?.absoluteUrl;
     const validate = (json: any) => {
         if (!json['Supplier parma code']) return 'Please input valid Parma and Company Name';
         if (!json['Company name']) return 'Please input valid Parma and Company Name';
         //The Parma(33345) is existed with Case ID: 23001. Do you want to create a new case for 33345?
-        if((spParmaList.indexOf(json['Supplier parma code'])>-1))return "The Parma("+json['Supplier parma code']+") is existed with Case ID: 23001. Do you want to create a new case for 33345?"
+        //if ((spParmaList['PARMANO'].indexOf(json['Supplier parma code'] + "") > -1)) setfileWarning("The Parma(" + json['Supplier parma code'] + ") is existed with Case ID: 23001. create a new case for 33345?")
         // if(!json['Supplier']) return '请输入Supplier'
         console.log(spParmaList.indexOf(json['Supplier parma code']))
-    }
-useEffect(()=>{
 
-    const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
-        ViewXml: `<View>
+        spParmaList.forEach(item=>{
+            if(item['PARMANo']+"" ===json['Supplier parma code']+""){
+                setfileWarning("The Parma(" + json['Supplier parma code'] + ") is existed with Case ID:" + item['CaseID'] + ". create a new case for"+ json['Supplier parma code']+"?")
+                console.log("item['PARMANo']",item['PARMANo'])
+                console.log("item['PARMANo']",item['CaseID'])
+            }
+        
+        
+        })
+        console.log("filewarning",fileWarning)
+    }
+    interface CaseItem {
+        PARMANo: string;
+        CaseID: string;
+    }
+    useEffect(() => {
+
+        const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
+            ViewXml: `<View>
                           <ViewFields>
                             <FieldRef Name="CaseID"/>
                             <FieldRef Name="PARMANo"/>
@@ -199,20 +216,33 @@ useEffect(()=>{
                           </ViewFields>
                        
                         </View>`,
-        // <RowLimit>400</RowLimit>
-    }).then((response) => {
-        console.log("res", response.Row)
-        if (response.Row.length > 0) {
-            const parmaNoList = response.Row.map((item: { PARMANo: string; }) => item.PARMANo).filter(parmaNo => parmaNo !== undefined && parmaNo !== "undefined");
-            //@ts-ignore
-            const uniqueParmaNoList = Array.from(new Set(parmaNoList));
-            setspParmaList(uniqueParmaNoList)
-            console.log("uni",uniqueParmaNoList);
+            // <RowLimit>400</RowLimit>
+        }).then((response) => {
+            console.log("res", response.Row)
+            if (response.Row.length > 0) {
+                //const parmaNoList = response.Row.map((item: { PARMANo: string; }) => item.PARMANo).filter(parmaNo => parmaNo !== undefined && parmaNo !== "undefined");
+                const parmaNoList = response.Row.filter(item => item.PARMANo && item.CaseID).map(item => ({
+                    PARMANo: item.PARMANo,
+                    CaseID: item.CaseID
+                }));
+                const uniqueByPARMANo: { [key: string]: CaseItem } = {};
+                parmaNoList.forEach(item => {
+                    const parmaNo = item.PARMANo;
+                    if (!uniqueByPARMANo[parmaNo]&& (parmaNo !=='undefined')) {
+                        uniqueByPARMANo[parmaNo] = item;
+                    }
+                });
+                //@ts-ignore
+              const  uniparmaNoList =  Object.values(uniqueByPARMANo);
+                //@ts-ignore
+                //const uniqueParmaNoList = Array.from(new Set(parmaNoList));
+                setspParmaList(uniparmaNoList)
+                console.log("uni", uniparmaNoList);
+            }
         }
-    }
 
-    );
-},[])
+        );
+    }, [])
 
 
 
@@ -243,14 +273,14 @@ useEffect(()=>{
                     setData(json);
                     const validateError = validate(json)
                     setError(validateError);
-                    if(validateError) {
+                    if (validateError) {
                         setFile(null)
                     } else {
                         setFile(file)
                         setShowBtn(true)
                     }
-                    console.log("error",error,validate(json));
-                    console.log("json['Supplier parma code']",json['Supplier parma code'])
+                    console.log("error", error, validate(json));
+                    console.log("json['Supplier parma code']", json['Supplier parma code'])
 
                     // if (json['Supplier parma code']) {
                     //     // const url = 'https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/getparma/'+ json['Supplier parma code']
@@ -275,18 +305,18 @@ useEffect(()=>{
                     // } else {
                     //     setShowBtn(true)
                     // }
-                    
-            console.log("61-66", getPackageData(jsonData))
-            console.log("77-86两张表", getData2(jsonData))
+
+                    console.log("61-66", getPackageData(jsonData))
+                    console.log("77-86两张表", getData2(jsonData))
                 }
             };
             reader.readAsBinaryString(file);
         }
     };
     useEffect(() => {
-        
+
         if (items.length > 0 && parmainfo && Object.keys(parmainfo).length > 0) {
-           
+
             // 获取子表数据项
             console.log(getSubTableData(items))
             // 获取普通数据项
@@ -309,12 +339,12 @@ useEffect(()=>{
             console.log(secItems)
             console.log('Packaging account no', secItems[3].__EMPTY_1);
             //@ts-ignore
-            console.log("新写法",items[items.findIndex(val => val.__rowNum__ === 55)])
+            console.log("新写法", items[items.findIndex(val => val.__rowNum__ === 55)])
         }
     }, [parmainfo, address])
 
     const submitFunction = async (): Promise<void> => {
-        if(submiting) return
+        if (submiting) return
         setSubmiting(true)
         let index = 0
         for (let i = 0; i < items.length; i++) {
@@ -335,20 +365,20 @@ useEffect(()=>{
             //@ts-ignore
             ASNPostCode: String(items[items.findIndex(val => val.__rowNum__ === 11)]?.__EMPTY_1),//String(address[0]?.postalCode),//String(items[7]?.__EMPTY_2),
             //@ts-ignore
-            ASNCountryCode:String(items[items.findIndex(val => val.__rowNum__ === 12)]?.__EMPTY_1),// String(address[0]?.countryCode),//String(items[8]?.__EMPTY_2),
+            ASNCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 12)]?.__EMPTY_1),// String(address[0]?.countryCode),//String(items[8]?.__EMPTY_2),
             //@ts-ignore
-            ASNPhone:String(items[items.findIndex(val => val.__rowNum__ === 13)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[9]?.__EMPTY_2),
+            ASNPhone: String(items[items.findIndex(val => val.__rowNum__ === 13)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[9]?.__EMPTY_2),
             //Title:"111"
             //@ts-ignore
             BilltoNo: String(items[items.findIndex(val => val.__rowNum__ === 16)]?.__EMPTY_1),
             //@ts-ignore
             BillStreet: String(items[items.findIndex(val => val.__rowNum__ === 17)]?.__EMPTY_1),//address[1]?.street,//String(items[12]?.__EMPTY_2),
-           //@ts-ignore
+            //@ts-ignore
             BillPostCode: String(items[items.findIndex(val => val.__rowNum__ === 18)]?.__EMPTY_1),//String(address[1]?.postalCode),//String(items[13]?.__EMPTY_2),
             //@ts-ignore
             BillCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 19)]?.__EMPTY_1),//String(address[1]?.countryCode),//String(items[14]?.__EMPTY_2),
             //@ts-ignore
-            BillPhone:String(items[items.findIndex(val => val.__rowNum__ === 20)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[15]?.__EMPTY_2),
+            BillPhone: String(items[items.findIndex(val => val.__rowNum__ === 20)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[15]?.__EMPTY_2),
             //@ts-ignore
             ShipToNo: String(items[items.findIndex(val => val.__rowNum__ === 23)]?.__EMPTY_1),//String(items[17]?.__EMPTY_1),
             //@ts-ignore
@@ -370,38 +400,38 @@ useEffect(()=>{
             //@ts-ignore
             ContractPhoneno: String(items[items.findIndex(val => val.__rowNum__ === 35)]?.__EMPTY_1),//String(getArrayKey(items, 'Phone No:')?.__EMPTY_1),// String(items[26]?.__EMPTY_2),
             //
-            ReceivingJSON:JSON.stringify(getSubTableData(items)),
+            ReceivingJSON: JSON.stringify(getSubTableData(items)),
             //
-            Constatus:secItems[0]?.__EMPTY_1 !=="Y"? "Yes":"No",
-            ConPackagingAccno:String(secItems[2]?.__EMPTY_1),
-            ConCompanyName:String(secItems[3]?.__EMPTY_1),
-            ConCity:String(secItems[4]?.__EMPTY_1),
-            ConCountryCode:String(secItems[5]?.__EMPTY_1),
+            Constatus: secItems[0]?.__EMPTY_1 !== "Y" ? "Yes" : "No",
+            ConPackagingAccno: String(secItems[2]?.__EMPTY_1),
+            ConCompanyName: String(secItems[3]?.__EMPTY_1),
+            ConCity: String(secItems[4]?.__EMPTY_1),
+            ConCountryCode: String(secItems[5]?.__EMPTY_1),
             //
             // 需要写一个JSON 存住 Excel 62-67 行 类似于ReceivingJSON:JSON.stringify(getSubTableData(items)),
-            ConsequensesJSON:JSON.stringify(getPackageData(items)),
+            ConsequensesJSON: JSON.stringify(getPackageData(items)),
             // 还有一个JSON 存住Excel 77-82 
-            PackageJSON:JSON.stringify(getData2(items)),
-            
+            PackageJSON: JSON.stringify(getData2(items)),
+
             //这个日期 要日月年, 看看怎么做 这个存的时候要日期格式 
             //RequestDate:moment(String(secItems[29]?.__EMPTY_1),"dd-MM-YYYY"),
             //@ts-ignore
-            RequestDate:moment(String(items[items.findIndex(val => val.__rowNum__ === 102)]?.__EMPTY_1),"dd-MM-YYYY"),
+            RequestDate: moment(String(items[items.findIndex(val => val.__rowNum__ === 102)]?.__EMPTY_1), "dd-MM-YYYY"),
             //IssuCompName:String(secItems[31]?.__EMPTY_1),
             //@ts-ignore
-            IssuCompName:String(items[items.findIndex(val => val.__rowNum__ === 107)]?.__EMPTY_1),
+            IssuCompName: String(items[items.findIndex(val => val.__rowNum__ === 107)]?.__EMPTY_1),
             //@ts-ignore
-            IssuName:String(items[items.findIndex(val => val.__rowNum__ === 108)]?.__EMPTY_1),
+            IssuName: String(items[items.findIndex(val => val.__rowNum__ === 108)]?.__EMPTY_1),
             //@ts-ignore
-            IssuPhoneNo:String(items[items.findIndex(val => val.__rowNum__ === 109)]?.__EMPTY_1),
+            IssuPhoneNo: String(items[items.findIndex(val => val.__rowNum__ === 109)]?.__EMPTY_1),
             //@ts-ignore
-            IssuEmail:String(items[items.findIndex(val => val.__rowNum__ === 110)]?.__EMPTY_1),
+            IssuEmail: String(items[items.findIndex(val => val.__rowNum__ === 110)]?.__EMPTY_1),
 
 
         }
         const sp = spfi(getSP());
         // let promiss
-        addRequest({ request }).then(async promises => { 
+        addRequest({ request }).then(async promises => {
             console.log("promiss", promises, typeof (promises));
             const responseData = (promises as Record<string, any>).data;
             const id = responseData.ID;
@@ -420,19 +450,22 @@ useEffect(()=>{
             //   })[0].StringId;
             // @ts-ignore
             sp.web.lists.getByTitle('Nii Case Library').contentTypes()
-        .then(async (result: any[]) => {
-          const UploadFileContentTypeId = result.filter((contenType) => {
-            return contenType.Name === 'uploadFile';
-          })[0].StringId;
-          //@ts-ignore
-            const finalRes = await sp.web.lists.getByTitle('Nii Case Library').items.getById(item.ID).update({
-                ContentTypeId: UploadFileContentTypeId
-              })
-            }).then(()=>window.location.href = webURL+"/sitepages/CollabHome.aspx");
-        //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
+                .then(async (result: any[]) => {
+                    const UploadFileContentTypeId = result.filter((contenType) => {
+                        return contenType.Name === 'uploadFile';
+                    })[0].StringId;
+                    //@ts-ignore
+                    const finalRes = await sp.web.lists.getByTitle('Nii Case Library').items.getById(item.ID).update({
+                        ContentTypeId: UploadFileContentTypeId
+                    })
+                }).then(() => 
+                // window.location.href = webURL + "/sitepages/CollabHome.aspx"
+                setbuttonVisible(false)
+                );
+            //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
         }).catch(err => console.log("err", err));
     }
-   
+
 
     return (
         <div className={styles.uploadPage}>
@@ -444,87 +477,115 @@ useEffect(()=>{
                     <Link rel="www.baidu.com" style={{ textAlign: "right" }}>GO to Home Page</Link>
                 </Stack>
             </div> */}
-            <div className={styles.content}>
-            <Stack horizontal>
+            {
+          buttonvisible ?<div className={styles.content}>
+                <Stack horizontal>
                     <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
-                    <span style={{marginLeft: '8px', color: '#00829B'}} ><a href={webURL+"/sitepages/CollabHome.aspx"} style={{color: '#00829B',fontSize:"12px"}}>Return to home</a></span>
+                    <span style={{ marginLeft: '8px', color: '#00829B' }} ><a href={webURL + "/sitepages/CollabHome.aspx"} style={{ color: '#00829B', fontSize: "12px" }}>Return to home</a></span>
                 </Stack>
                 <div className={styles.title}>Create new case</div>
-                <Stack horizontal horizontalAlign="space-between" style={{marginBottom: '8px'}}>
+                <Stack horizontal horizontalAlign="space-between" style={{ marginBottom: '8px' }}>
                     <div className={styles.subTitle}>Upload an excel document</div>
                     {/* <div className={styles.subTitle}>*Invalid file case</div> */}
                 </Stack>
                 {
-                    uploadFile 
-                    ? <Stack className={styles.uploadBox} verticalAlign="center" style={{alignItems: 'flex-start'}}>
-                        <Stack horizontal style={{alignItems: 'center'}}>
-                            <div className={styles.subTitle}>{uploadFile.name}</div>
-                            <div onClick={() => {
-                                setFile(null)
-                                setData([])
-                                setError('')
-                            }} style={{
-                                marginLeft: '16px',
-                                display: 'flex',
-                                alignItems: 'center', 
-                                justifyContent: 'center',
-                                borderRadius: '6px',
-                                border: '1px solid #D6D3D0',
-                                background: '#FFF',
-                                padding: '13px',
-                                cursor: 'pointer'
-                            }}><Del /></div>
+                    uploadFile
+                        ? <Stack className={styles.uploadBox} verticalAlign="center" style={{ alignItems: 'flex-start' }}>
+                            <Stack horizontal style={{ alignItems: 'center' }}>
+                                <div className={styles.subTitle}>{uploadFile.name}</div>
+                                <div onClick={() => {
+                                    setFile(null)
+                                    setData([])
+                                    setError('')
+                                }} style={{
+                                    marginLeft: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: '6px',
+                                    border: '1px solid #D6D3D0',
+                                    background: '#FFF',
+                                    padding: '13px',
+                                    cursor: 'pointer'
+                                }}><Del /></div>
+                            </Stack>
                         </Stack>
-                    </Stack>
-                    : <Stack className={styles.uploadBox} verticalAlign="center">
-                        {
-                            error
-                            ? <div style={{display: 'flex', alignItems: 'center'}}><Error /> <div className={styles.subTitle} style={{color: '#E0402E', marginLeft: '8px'}}>{error}</div></div>
-                            : <div className={styles.subTitle}>*Please contain supplier company name</div>
-                        }
-                    <Upload
-                        beforeUpload={() => false}
-                        accept=".xlsx, .xls"
-                        onChange={handleFileUpload}
-                        maxCount={1}
-                        showUploadList={false}
-                    >
-                        <Button style={{
-                            display: 'flex', 
-                            alignItems: 'center',
-                            gap: '12px', 
-                            padding: '13px 34px',
-                            fontSize: '16px',
-                            borderRadius: '6px',
-                            border: '1px solid #D6D3D0',
-                            background: '#FFF'}} icon={<FileSvg />}>Select files</Button>
-                    </Upload>
-                </Stack>
+                        : <Stack className={styles.uploadBox} verticalAlign="center">
+                            {
+                                error
+                                    ? <div style={{ display: 'flex', alignItems: 'center' }}><Error /> <div className={styles.subTitle} style={{ color: '#E0402E', marginLeft: '8px' }}>{error}</div></div>
+                                    : <div className={styles.subTitle}>*Please contain supplier company name</div>
+                            }
+                            <Upload
+                                beforeUpload={() => false}
+                                accept=".xlsx, .xls"
+                                onChange={handleFileUpload}
+                                maxCount={1}
+                                showUploadList={false}
+                            >
+                                <Button style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '13px 34px',
+                                    fontSize: '16px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #D6D3D0',
+                                    background: '#FFF'
+                                }} icon={<FileSvg />}>Select files</Button>
+                            </Upload>
+                            {
+                                fileWarning && <div style={{ display: 'flex', alignItems: 'center' }}><Error /> <div className={styles.subTitle} style={{ color: '#E0402E', marginLeft: '8px' }}>{fileWarning}</div></div>
+                            }
+                        </Stack>
 
                 }
-                
+
                 {
-                    showBtn && !error ? 
-                        <Button style={{ width: 140, marginTop: '32px', borderRadius: '6px',color: '#fff',
-                        background: '#00829B' }} onClick={() => setIsShowModal(true)}>Upload</Button> :
-                        <Button style={{ width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
-                        background: '#C4C4C4' }}>Upload</Button>
+                    showBtn && !error ? <> {
+                        fileWarning && <div style={{ display: 'flex', alignItems: 'center', color:'green'}}><Error /> <div className={styles.subTitle} style={{ color: 'rgb(219 155 22)', marginLeft: '8px' }}>{fileWarning}</div></div>
+                    }
+                        <Button style={{
+                            width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
+                            background: '#00829B'
+                        }} onClick={() => setIsShowModal(true)}>Upload</Button></>
+                        :
+                        <Button style={{
+                            width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
+                            background: '#C4C4C4'
+                        }}>Upload</Button>
                 }
 
-            </div>
-            <Modal open={isShowModal} closable={false} footer={null} width={500} style={{borderRadius: '6px', overflow: 'hidden', paddingBottom: 0}}>
-                <Stack verticalAlign="center" style={{alignItems: 'center', paddingTop: '64px', paddingBottom: '54px'}}>
+            </div>: <div style={{height: '100px',  paddingTop: '64px'}}>
+                <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold'}}>
+                  <div style={{marginRight: '10px', display: 'flex', alignItems: 'center'}}>
+                    <Viewhistory />
+                  </div>
+                  Submitted!
+                </p>
+                <p style={{fontSize: '14px', textAlign: 'center'}}>Submitted successfully! The request will be listed in some minutes.</p>
+                <Stack style={{  alignItems: 'center'}}>
+                <Button style={{
+                            width: 80, height: 42, marginTop: '2px', borderRadius: '6px', color: '#fff',
+                            background: '#00829B',alignItems: 'center'
+                        }} onClick={()=>window.location.href = webURL + "/sitepages/CollabHome.aspx" }>OK </Button></Stack>
+              </div>}
+            <Modal open={isShowModal} closable={false} footer={null} width={500} style={{ borderRadius: '6px', overflow: 'hidden', paddingBottom: 0 }}>
+                <Stack verticalAlign="center" style={{ alignItems: 'center', paddingTop: '64px', paddingBottom: '54px' }}>
                     <p>Are you sure you want to upload this file?</p>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '36px'}}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
                         <Button onClick={() => setIsShowModal(false)} style={{ width: 120, height: 42, marginTop: '32px', borderRadius: '6px' }}>Cancel</Button>
-                        <Button style={{ width: 120, height: 42, marginTop: '32px', borderRadius: '6px',color: '#fff',
-                        background: '#00829B' }} onClick={() => {
+                        <Button style={{
+                            width: 120, height: 42, marginTop: '32px', borderRadius: '6px', color: '#fff',
+                            background: '#00829B'
+                        }} onClick={() => {
                             setIsShowModal(false)
                             submitFunction()
                         }}>Yes</Button>
                     </div>
                 </Stack>
             </Modal>
+           
         </div>
     )
 
