@@ -16,3 +16,7 @@ export const packagingNeedsSelector = createSelector(
   featureStateSelector,
   (state: IPackagingState) => state?.packagingNeeds
 );
+export const supplierNameResultSelector = createSelector(
+  featureStateSelector,
+  (state: IPackagingState) => state?.supplierNameResult
+);

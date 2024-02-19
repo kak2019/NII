@@ -1,7 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IPackaging } from "../../model/packagingneed";
 import { RootState } from "../../store";
-import { fetchPackagingNeedsAction } from "./action";
+import {
+  fetchAllPackagingNeedsAction,
+  fetchPackagingNeedsAction,
+  fetchSupplierNameByParmaAction,
+} from "./action";
 
 export enum PackagingStatus {
   Idle,
@@ -12,11 +16,13 @@ export interface IPackagingState {
   packagingNeeds: IPackaging[];
   statue: PackagingStatus;
   message: string;
+  supplierNameResult: string;
 }
 const initialState: IPackagingState = {
   packagingNeeds: [],
   statue: PackagingStatus.Idle,
   message: "",
+  supplierNameResult: "",
 };
 export const packagingSlice = createSlice({
   name: "packaging",
@@ -24,6 +30,28 @@ export const packagingSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(fetchAllPackagingNeedsAction.pending, (state, action) => {
+        state.statue = PackagingStatus.Loading;
+      })
+      .addCase(fetchAllPackagingNeedsAction.fulfilled, (state, action) => {
+        state.statue = PackagingStatus.Idle;
+        state.packagingNeeds = action.payload as IPackaging[];
+      })
+      .addCase(fetchAllPackagingNeedsAction.rejected, (state, action) => {
+        state.statue = PackagingStatus.Failed;
+        state.message = action.error?.message;
+      })
+      .addCase(fetchSupplierNameByParmaAction.pending, (state, action) => {
+        state.statue = PackagingStatus.Loading;
+      })
+      .addCase(fetchSupplierNameByParmaAction.fulfilled, (state, action) => {
+        state.statue = PackagingStatus.Idle;
+        state.supplierNameResult = action.payload as string;
+      })
+      .addCase(fetchSupplierNameByParmaAction.rejected, (state, action) => {
+        state.statue = PackagingStatus.Failed;
+        state.message = action.error?.message;
+      })
       .addCase(fetchPackagingNeedsAction.pending, (state, action) => {
         state.statue = PackagingStatus.Loading;
       })
