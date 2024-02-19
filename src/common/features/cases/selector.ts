@@ -48,3 +48,11 @@ export const countryCodesSelector = createSelector(
   featureStateSelector,
   (state: ICaseState) => state?.countryCodes
 );
+export const userRolesSelector = createSelector(
+  featureStateSelector,
+  (state: ICaseState) => state?.userRoles
+);
+export const currentUserEmailSelector = createSelector(
+  featureStateSelector,
+  (state: ICaseState) => state?.currentUserEmail
+);

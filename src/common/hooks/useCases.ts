@@ -1,17 +1,23 @@
 import { useCallback } from "react";
-import { CaseItemIdChanged, CaseStatus } from "../features/cases/casesSlice";
+import {
+  CaseItemIdChanged,
+  CaseStatus,
+  CurrentUserEmailChanged,
+} from "../features/cases/casesSlice";
 import {
   consequensesSelector,
   contractFilesSelector,
   countryCodesSelector,
   currentCaseIdSelector,
   currentCaseSelector,
+  currentUserEmailSelector,
   isFetchingSelector,
   messageSelector,
   originalFilesSelector,
   packagingDataSelector,
   packagingNeedsSelector,
   receivingPlantSelector,
+  userRolesSelector,
 } from "../features/cases/selector";
 import { IConsequense } from "../model/consequense";
 import { INiiCaseItem } from "../model/niicase";
@@ -29,6 +35,7 @@ import {
   fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
   fetchReceivingPlantByCaseAction,
+  fetchUserGroupsAction,
   removePackagingNeedsByIdAction,
   uploadFileAction,
 } from "../features/cases/action";
@@ -50,20 +57,15 @@ type CasesOperators = [
   contractFiles: IFileInfo[],
   originalFiles: IFileInfo[],
   countryCodes: IOption[],
-  initialCaseForm: (Id: number) => void,
+  userRoles: string[],
+  currentUserEmail: string,
+  initialCaseForm: (Id: number, UserEmail: string) => void,
   changeCaseId: (Id: string) => void,
-  fetchCaseById: (Id: number) => void,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   editCase: (arg: { niiCase: any }) => Promise<number>,
-  fetchConsequensesByCase: (Id: number) => void,
-  fetchPackagingNeedsByCase: (CaseId: number) => void,
   editPackagingNeed: (arg: { Packaging: IPackaging }) => void,
   addPackagingNeed: (arg: { Packaging: IPackaging }) => void,
   removePackagingNeedsById: (Id: number) => void,
-  fetchReceivingPlantByCase: (Id: number) => void,
-  fetchPackagingData: () => void,
-  fetchContractFileById: (Id: number) => void,
-  fetchOriginalFileById: (Id: number) => void,
   uploadFile: (
     newFile: RcFile[],
     replace: boolean,
@@ -84,11 +86,14 @@ export const useCases = (): Readonly<CasesOperators> => {
   const contractFiles = useAppSelector(contractFilesSelector);
   const originalFiles = useAppSelector(originalFilesSelector);
   const countryCodes = useAppSelector(countryCodesSelector);
+  const userRoles = useAppSelector(userRolesSelector);
+  const currentUserEmail = useAppSelector(currentUserEmailSelector);
 
   const initialCaseForm = useCallback(
-    async (Id: number) => {
+    async (Id: number, UserEmail: string) => {
       const dispatchActions = async (): Promise<void> => {
         dispatch(CaseItemIdChanged(Id));
+        dispatch(CurrentUserEmailChanged(UserEmail));
         await dispatch(fetchByIdAction({ Id }));
         await dispatch(fetchConsequensesByCaseAction({ CaseId: Id }));
         await dispatch(fetchPackagingNeedsByCaseAction({ CaseId: Id }));
@@ -98,15 +103,9 @@ export const useCases = (): Readonly<CasesOperators> => {
         await dispatch(fetchOriginalFileByIdAction({ Id }));
         await dispatch(fetchPackagingDataAction());
         await dispatch(fetchCountryDataAction());
+        await dispatch(fetchUserGroupsAction({ userEmail: UserEmail }));
       };
       await dispatchActions();
-    },
-    [dispatch]
-  );
-  const fetchCaseById = useCallback(
-    (Id: number) => {
-      dispatch(CaseItemIdChanged(Id));
-      return dispatch(fetchByIdAction({ Id }));
     },
     [dispatch]
   );
@@ -128,20 +127,6 @@ export const useCases = (): Readonly<CasesOperators> => {
     },
     [dispatch]
   );
-  const fetchConsequensesByCase = useCallback(
-    (CaseId: number) => {
-      dispatch(CaseItemIdChanged(CaseId));
-      return dispatch(fetchConsequensesByCaseAction({ CaseId }));
-    },
-    [dispatch]
-  );
-  const fetchPackagingNeedsByCase = useCallback(
-    (CaseId: number) => {
-      dispatch(CaseItemIdChanged(CaseId));
-      return dispatch(fetchPackagingNeedsByCaseAction({ CaseId }));
-    },
-    [dispatch]
-  );
   const editPackagingNeed = useCallback(
     (arg: { Packaging: IPackaging }) => {
       return dispatch(editPackagingNeedAction(arg));
@@ -157,28 +142,6 @@ export const useCases = (): Readonly<CasesOperators> => {
   const removePackagingNeedsById = useCallback(
     (Id: number) => {
       return dispatch(removePackagingNeedsByIdAction({ Id }));
-    },
-    [dispatch]
-  );
-  const fetchReceivingPlantByCase = useCallback(
-    (CaseId: number) => {
-      dispatch(CaseItemIdChanged(CaseId));
-      return dispatch(fetchReceivingPlantByCaseAction({ CaseId }));
-    },
-    [dispatch]
-  );
-  const fetchPackagingData = useCallback(() => {
-    return dispatch(fetchPackagingDataAction());
-  }, [dispatch]);
-  const fetchContractFileById = useCallback(
-    (Id: number) => {
-      return dispatch(fetchContractFileByIdAction({ Id }));
-    },
-    [dispatch]
-  );
-  const fetchOriginalFileById = useCallback(
-    (Id: number) => {
-      return dispatch(fetchOriginalFileByIdAction({ Id }));
     },
     [dispatch]
   );
@@ -207,19 +170,14 @@ export const useCases = (): Readonly<CasesOperators> => {
     contractFiles,
     originalFiles,
     countryCodes,
+    userRoles,
+    currentUserEmail,
     initialCaseForm,
     changeCaseId,
-    fetchCaseById,
     editCase,
-    fetchConsequensesByCase,
-    fetchPackagingNeedsByCase,
     editPackagingNeed,
     addPackagingNeed,
     removePackagingNeedsById,
-    fetchReceivingPlantByCase,
-    fetchPackagingData,
-    fetchContractFileById,
-    fetchOriginalFileById,
     uploadFile,
   ];
 };

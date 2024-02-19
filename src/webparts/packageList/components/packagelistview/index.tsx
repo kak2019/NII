@@ -265,7 +265,7 @@ const PackageListView: React.FC = () => {
               <Col offset={1} span={4}>
                 Supplier Name
               </Col>
-              <Col span={5}>
+              <Col span={6}>
                 <Input
                   value={querySupplierName}
                   disabled={true}

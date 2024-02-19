@@ -1,56 +1,42 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import * as React from "react";
+import React, { useState, useEffect, memo } from "react";
+import { debounce } from "lodash";
 import { Input } from "antd";
+import styles from "../CaseForm.module.scss";
 
-interface DebouncedInputProps {
-  value: string;
-  onBlur: (value: string) => void;
-  readOnly: boolean;
-  bordered: boolean;
+interface Props {
+  onPackagingChange: (
+    e: number | string,
+    inputKey: React.Key,
+    field: string
+  ) => void;
+  defaultValue: string;
+  inputKey: React.Key;
+  field: string;
 }
 
-// Your debounce function here
-const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let timerId: ReturnType<typeof setTimeout>;
-  return (...args: any[]) => {
-    if (timerId) clearTimeout(timerId);
-    timerId = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
-};
+const DebouncedInputCommon: React.FC<Props> = memo(
+  ({ onPackagingChange, defaultValue, inputKey, field }) => {
+    const [inputValue, setInputValue] = useState(defaultValue);
 
-const DebouncedInput: React.FC<DebouncedInputProps> = ({
-  value,
-  onBlur,
-  readOnly,
-  bordered,
-}) => {
-  const [localValue, setLocalValue] = React.useState(value);
+    const debouncedSave = debounce((nextValue) => {
+      onPackagingChange(nextValue, inputKey, field);
+    }, 1000);
 
-  // Create a debounced version of onBlur
-  const debouncedOnBlur = React.useCallback(
-    debounce((value: string) => {
-      onBlur(value);
-    }, 1500),
-    [onBlur]
-  );
+    useEffect(() => {
+      debouncedSave(inputValue);
+      return debouncedSave.cancel;
+    }, [inputValue]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalValue(e.target.value);
-    debouncedOnBlur(e.target.value);
-  };
+    return (
+      <div>
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          className={styles.halfLength}
+        />
+      </div>
+    );
+  }
+);
 
-  return (
-    <Input
-      defaultValue={value}
-      onChange={handleChange}
-      readOnly={readOnly}
-      bordered={bordered}
-    />
-  );
-};
-
-export default DebouncedInput;
+export default DebouncedInputCommon;

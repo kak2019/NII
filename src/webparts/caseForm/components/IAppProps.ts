@@ -13,5 +13,9 @@ export interface IAppProps {
   selectedPackages: IPackaging[];
   removePackagingIds: number[];
   isEditableCommon: boolean;
+  isStatusEditable: boolean;
+  isContractEditable: boolean;
   isApprovalAllow: boolean;
+  isPackagingNeedsEditable: boolean;
+  userRoles: string[];
 }

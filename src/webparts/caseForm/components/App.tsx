@@ -21,6 +21,8 @@ export default memo(function App() {
     ,
     ,
     ,
+    ,
+    ,
     initialCaseForm,
     changeCaseId,
     ,
@@ -28,14 +30,9 @@ export default memo(function App() {
     ,
     ,
     ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
   ] = useCases();
+  const appContext = React.useContext(AppContext);
+  const isLoadingCase = isFetching === CaseStatus.Loading;
   const [initial, setInitial] = React.useState(false);
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -44,14 +41,13 @@ export default memo(function App() {
     }
     const params = new URLSearchParams(window.location.search);
     const id = params.get("caseid");
-    console.log(id);
     changeCaseId(id);
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     async function waitForData() {
       setInitial(true);
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        initialCaseForm(Number(id));
+        initialCaseForm(Number(id), appContext.context.pageContext.user.email);
         await delay(1000);
         break;
       }
@@ -60,8 +56,6 @@ export default memo(function App() {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     waitForData().catch(console.error);
   }, []);
-  const appContext = React.useContext(AppContext);
-  const isLoadingCase = isFetching === CaseStatus.Loading;
   return (
     <div className={styles.listWrapper}>
       <Row align="middle">

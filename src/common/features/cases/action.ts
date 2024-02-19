@@ -3,6 +3,7 @@ import { getSP } from "../../pnpjsConfig";
 import "@pnp/sp/webs";
 import "@pnp/sp/content-types";
 import "@pnp/sp/files";
+import "@pnp/sp/site-users/web";
 import "@pnp/sp/folders";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FeatureKey } from "../../featureKey";
@@ -483,7 +484,6 @@ const fetchOriginalFileById = async (arg: {
       .getFolderByServerRelativePath(`${CASECONST.LIBRARY_NAME}/${arg.Id}`)
       .files.expand("ListItemAllFields")()
       .then((files) => {
-        console.log(files);
         return files.filter(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (file: any) => file.ListItemAllFields.ContentTypeId === contractFileId
@@ -560,7 +560,6 @@ const fetchCountryData = async (): Promise<IOption[]> => {
       })
       .then((response) => {
         if (response.Row.length > 0) {
-          console.log(response);
           return response.Row.map(
             (item) =>
               ({
@@ -576,6 +575,29 @@ const fetchCountryData = async (): Promise<IOption[]> => {
   } catch (err) {
     console.log(err);
     return Promise.reject("Error when fetch Country Data");
+  }
+};
+const fetchUserGroups = async (arg: {
+  userEmail: string;
+}): Promise<string[]> => {
+  try {
+    const sp = spfi(getSP());
+    const result: string[] = [];
+    const user = await sp.web.ensureUser(arg.userEmail);
+    const userId = user.data.Id;
+    await sp.web.siteUsers
+      .getById(userId)
+      .groups()
+      .then((response) =>
+        response.map((o) => {
+          result.push(o.Title);
+        })
+      );
+    console.log(result);
+    return result;
+  } catch (err) {
+    console.log(err);
+    return Promise.reject("Error when fetch user's groups.");
   }
 };
 //Thunk function
@@ -630,4 +652,8 @@ export const uploadFileAction = createAsyncThunk(
 export const fetchCountryDataAction = createAsyncThunk(
   `${FeatureKey.CASES}/fetchCountryData`,
   fetchCountryData
+);
+export const fetchUserGroupsAction = createAsyncThunk(
+  `${FeatureKey.CASES}/fetchUserGroups`,
+  fetchUserGroups
 );

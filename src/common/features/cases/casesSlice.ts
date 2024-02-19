@@ -15,6 +15,7 @@ import {
   fetchPackagingDataAction,
   fetchPackagingNeedsByCaseAction,
   fetchReceivingPlantByCaseAction,
+  fetchUserGroupsAction,
   removePackagingNeedsByIdAction,
   uploadFileAction,
 } from "./action";
@@ -41,6 +42,8 @@ export interface ICaseState {
   contractFiles: IFileInfo[];
   originalFiles: IFileInfo[];
   countryCodes: IOption[];
+  userRoles: string[];
+  currentUserEmail: string;
 }
 
 // Define the initial state using that type
@@ -56,6 +59,8 @@ const initialState: ICaseState = {
   contractFiles: [],
   originalFiles: [],
   countryCodes: [],
+  userRoles: [],
+  currentUserEmail: "",
 };
 
 export const caseSlice = createSlice({
@@ -64,6 +69,9 @@ export const caseSlice = createSlice({
   reducers: {
     CaseItemIdChanged(state, action) {
       state.currentCaseId = action.payload;
+    },
+    CurrentUserEmailChanged(state, action) {
+      state.currentUserEmail = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -198,6 +206,16 @@ export const caseSlice = createSlice({
       })
       .addCase(fetchCountryDataAction.rejected, (state, action) => {
         state.statue = CaseStatus.Failed;
+      })
+      .addCase(fetchUserGroupsAction.pending, (state, action) => {
+        state.statue = CaseStatus.Loading;
+      })
+      .addCase(fetchUserGroupsAction.fulfilled, (state, action) => {
+        state.statue = CaseStatus.Idle;
+        state.userRoles = action.payload;
+      })
+      .addCase(fetchUserGroupsAction.rejected, (state, action) => {
+        state.statue = CaseStatus.Failed;
       });
   },
 });
@@ -214,7 +232,7 @@ export const CASECONST = Object.freeze({
   COUNTRY_LIST: "Country",
 });
 
-export const { CaseItemIdChanged } = caseSlice.actions;
+export const { CaseItemIdChanged, CurrentUserEmailChanged } = caseSlice.actions;
 // Other code such as selectors can use the imported `RootState` type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const selectCases = (state: RootState) => state.cases;

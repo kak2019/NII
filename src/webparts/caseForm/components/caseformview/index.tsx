@@ -26,10 +26,10 @@ import { IAppProps } from "../IAppProps";
 import * as moment from "moment";
 import { useCases } from "../../../../common/hooks/useCases";
 import { IPackaging } from "../../../../common/model/packagingneed";
-import DebouncedInput from "./debounceinput";
 import Card from "antd/lib/card/Card";
 import AppContext from "../../../../common/AppContext";
 import { Stack } from "office-ui-fabric-react";
+import DebouncedInputCommon from "./debounceinput";
 
 const CaseFormView: React.FC = () => {
   //#region interfaces
@@ -55,19 +55,14 @@ const CaseFormView: React.FC = () => {
     contractFiles,
     originalFiles,
     countryCodes,
+    userRoles,
+    currentUserEmail,
     initialCaseForm,
     ,
-    ,
     editCase,
-    ,
-    ,
     editPackagingNeed,
     addPackagingNeed,
     removePackagingNeedsById,
-    ,
-    ,
-    ,
-    ,
     uploadFile,
   ] = useCases();
   const editableStatus = [
@@ -75,6 +70,7 @@ const CaseFormView: React.FC = () => {
     "In Contract Sign Off Process",
     "Contract Submitted",
   ];
+  const currentUserRoles: string[] = JSON.parse(JSON.stringify(userRoles));
   const initialState: IAppProps = {
     currentCase: currentCase,
     packagingNeeds: packagingNeeds,
@@ -85,7 +81,22 @@ const CaseFormView: React.FC = () => {
     selectedPackages: [],
     removePackagingIds: [],
     isEditableCommon: editableStatus.indexOf(currentCase.Status) !== -1,
-    isApprovalAllow: currentCase.Status !== "Contract Submitted",
+    isStatusEditable:
+      (currentCase.Status === "Case Created" &&
+        currentUserRoles.indexOf("PE") !== -1) ||
+      (currentCase.Status === "In Contract Sign Off Process" &&
+        currentUserRoles.indexOf("Pack MD Master") !== -1),
+    isContractEditable:
+      ["In Contract Sign Off Process", "Contract Submitted"].indexOf(
+        currentCase.Status
+      ) !== -1 && currentUserRoles.indexOf("Pack MD Master") !== -1,
+    isApprovalAllow:
+      currentCase.Status === "Contract Submitted" &&
+      currentUserRoles.indexOf("GDL Team") !== -1,
+    isPackagingNeedsEditable:
+      editableStatus.indexOf(currentCase.Status) !== -1 ||
+      currentUserRoles.indexOf("Pack MD Master") !== -1,
+    userRoles: userRoles,
   };
   const yearOptions = [];
   for (let i = 2000; i <= new Date().getFullYear(); i++) {
@@ -228,14 +239,16 @@ const CaseFormView: React.FC = () => {
   };
   const onPackagingChange = (
     e: number | string,
-    key: React.Key,
+    inputKey: React.Key,
     field: string
   ): void => {
     const packagingDups: IPackaging[] = JSON.parse(
       JSON.stringify([...states.packagingNeeds])
     );
+    console.log(inputKey);
+    console.log(packagingDups);
     packagingDups
-      .filter((packagingDup) => packagingDup.key === key)
+      .filter((packagingDup) => packagingDup.key === inputKey)
       .forEach((item) => {
         switch (field) {
           case "Packaging": {
@@ -270,7 +283,10 @@ const CaseFormView: React.FC = () => {
           }
         }
       });
-    setStates({ ...states, packagingNeeds: packagingDups });
+    const newStates = { ...states, packagingNeeds: packagingDups };
+    if (JSON.stringify(states) !== JSON.stringify(newStates)) {
+      setStates(newStates);
+    }
   };
   const onAdd = (): void => {
     const packagingDup = [...states.packagingNeeds];
@@ -284,8 +300,12 @@ const CaseFormView: React.FC = () => {
     } else {
       packagingDup.push({
         key: 0,
+        Year: states.packageYear.toString(),
+        MasterID: states.currentCase.ID,
+        CaseID: states.currentCase.CaseID,
       });
     }
+    console.log(packagingDup);
     setStates({ ...states, packagingNeeds: packagingDup });
   };
   const onDelete = (): void => {
@@ -399,7 +419,7 @@ const CaseFormView: React.FC = () => {
       uploadFile(fileList, needReplace, originalFileUrl, currentCaseId);
     }
     await editCase({ niiCase: caseUpdate });
-    initialCaseForm(Number(currentCaseId));
+    initialCaseForm(Number(currentCaseId), currentUserEmail);
   };
   const onOpenModal = (type: string): void => {
     switch (type) {
@@ -492,11 +512,11 @@ const CaseFormView: React.FC = () => {
         return (
           <>
             <Row>
-              <DebouncedInput
-                value={record.Packaging}
-                readOnly={!states.packageEditable}
-                onBlur={(e) => onPackagingChange(e, record.key, "Packaging")}
-                bordered={states.packageEditable}
+              <DebouncedInputCommon
+                onPackagingChange={onPackagingChange}
+                defaultValue={record.Packaging}
+                inputKey={record.key}
+                field="Packaging"
               />
             </Row>
             {!!record.ErrorMessage && (
@@ -525,11 +545,15 @@ const CaseFormView: React.FC = () => {
             <InputNumber
               controls={false}
               value={record.YearlyDemand}
-              readOnly={!states.packageEditable}
+              readOnly={
+                !states.packageEditable || !states.isPackagingNeedsEditable
+              }
               onBlur={(e) =>
                 onPackagingChange(e.target.value, record.key, "YearlyDemand")
               }
-              bordered={states.packageEditable}
+              bordered={
+                states.packageEditable && states.isPackagingNeedsEditable
+              }
               min={1}
               precision={0}
             />
@@ -585,7 +609,7 @@ const CaseFormView: React.FC = () => {
                 Status:
               </Col>
               <Col span={7}>
-                {states.isEditableCommon && (
+                {states.isStatusEditable && (
                   <Select
                     onChange={onStatusChange}
                     defaultValue={states.currentCase.Status}
@@ -616,7 +640,7 @@ const CaseFormView: React.FC = () => {
                     ]}
                   />
                 )}
-                {!states.isEditableCommon && (
+                {!states.isStatusEditable && (
                   <span>{states.currentCase.Status}</span>
                 )}
               </Col>
@@ -648,6 +672,7 @@ const CaseFormView: React.FC = () => {
                         style={{
                           borderRadius: "6px",
                         }}
+                        disabled={!states.isContractEditable}
                       >
                         Click to Upload
                       </Button>
@@ -665,7 +690,7 @@ const CaseFormView: React.FC = () => {
                       </a>
                     </Col>
                     <Col span={4}>
-                      {states.isEditableCommon && (
+                      {states.isContractEditable && (
                         <Button
                           onClick={() => onOpenModal("removeFile")}
                           style={{
@@ -688,7 +713,7 @@ const CaseFormView: React.FC = () => {
               </Col>
               <Col span={7}>
                 <Radio.Group
-                  disabled={states.isApprovalAllow}
+                  disabled={!states.isApprovalAllow}
                   onChange={onApprovalChange}
                   value={states.currentCase.Approval}
                 >
@@ -1181,7 +1206,10 @@ const CaseFormView: React.FC = () => {
                       className={styles.iconPlus}
                       icon={<PlusOutlined rev={undefined} />}
                       onClick={onAdd}
-                      disabled={!states.packageEditable}
+                      disabled={
+                        !states.packageEditable ||
+                        !states.isPackagingNeedsEditable
+                      }
                     />
                     <Button
                       style={{
@@ -1190,7 +1218,10 @@ const CaseFormView: React.FC = () => {
                       className={styles.iconDelete}
                       icon={<DeleteOutlined rev={undefined} />}
                       onClick={() => onOpenModal("removePackagings")}
-                      disabled={!states.packageEditable}
+                      disabled={
+                        !states.packageEditable ||
+                        !states.isPackagingNeedsEditable
+                      }
                     />
                   </Col>
                 </Row>
