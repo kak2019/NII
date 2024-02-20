@@ -104,12 +104,12 @@ const getSubTableData = (arr: Array<{ [key in string]: any }>) => {
     return res
 }
 
-// 获取61-66
+// 获取61-72
 const getPackageData = (arr: Array<{ [key in string]: any }>) => {
     // @ts-ignore 
     const start = arr.findIndex(val => val.__rowNum__ === 59)
     // @ts-ignore eslint-disable-next-line
-    const end = arr.findIndex(val => val.__rowNum__ === 67)
+    const end = arr.findIndex(val => val.__rowNum__ === 72)
 
     return arr.slice(start + 1, end).map(val => {
         return { "Packaging": val['__EMPTY_1'], "Packaging Name": val.__EMPTY_2, "Yearly need": val.__EMPTY_3 }
@@ -129,12 +129,12 @@ function sanitize(input: string) {
     return sanitizedInput;
 }
 
-// 获取76-85
+// 获取79-101
 const getData2 = (arr: Array<{ [key in string]: any }>) => {
     // @ts-ignore 
-    const start = arr.findIndex(val => val.__rowNum__ === 74)
+    const start = arr.findIndex(val => val.__rowNum__ === 79)
     // @ts-ignore eslint-disable-next-line
-    const end = arr.findIndex(val => val.__rowNum__ === 86)
+    const end = arr.findIndex(val => val.__rowNum__ === 101)
 
     const table1 = arr.slice(start + 1, end).map(val => {
         return {
@@ -143,7 +143,7 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
             "Packaging Name": val['__EMPTY_4'],
             "Yearly need": val['Mandatory field'],
         }
-    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined)
+    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '' )
 
     // const table2 = arr.slice(start + 1, end).map(val => {
     //     return { 
@@ -187,7 +187,7 @@ export default memo(function App() {
 
         spParmaList.forEach(item=>{
             if(item['PARMANo']+"" ===json['Supplier parma code']+""){
-                setfileWarning("The Parma(" + json['Supplier parma code'] + ") is existed with Case ID:" + item['CaseID'] + ". create a new case for"+ json['Supplier parma code']+"?")
+                setfileWarning("The Parma(" + json['Supplier parma code'] + ") is existed with Case ID:" + item['CaseID'] + ". create a new case for "+ json['Supplier parma code']+"?")
                 console.log("item['PARMANo']",item['PARMANo'])
                 console.log("item['PARMANo']",item['CaseID'])
             }
@@ -358,55 +358,55 @@ export default memo(function App() {
         console.log(secItems)
         console.log('Packaging account no', secItems[3].__EMPTY_1)
         const request = {
-            PARMANo: String(items[3]?.__EMPTY_1),
+            PARMANo: items[3]?.__EMPTY_1&&String(items[3]?.__EMPTY_1),
             CompanyName: items[4]?.__EMPTY_1,
             //@ts-ignore
-            ASNStreet: String(items[items.findIndex(val => val.__rowNum__ === 10)]?.__EMPTY_1),//address[0]?.street,      //String(items[6]?.__EMPTY_2),
+            ASNStreet: items[items.findIndex(val => val.__rowNum__ === 10)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 10)]?.__EMPTY_1),//address[0]?.street,      //String(items[6]?.__EMPTY_2),
             //@ts-ignore
-            ASNPostCode: String(items[items.findIndex(val => val.__rowNum__ === 11)]?.__EMPTY_1),//String(address[0]?.postalCode),//String(items[7]?.__EMPTY_2),
+            ASNPostCode: items[items.findIndex(val => val.__rowNum__ === 11)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 11)]?.__EMPTY_1),//String(address[0]?.postalCode),//String(items[7]?.__EMPTY_2),
             //@ts-ignore
-            ASNCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 12)]?.__EMPTY_1),// String(address[0]?.countryCode),//String(items[8]?.__EMPTY_2),
+            ASNCountryCode: items[items.findIndex(val => val.__rowNum__ === 12)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 12)]?.__EMPTY_1),// String(address[0]?.countryCode),//String(items[8]?.__EMPTY_2),
             //@ts-ignore
-            ASNPhone: String(items[items.findIndex(val => val.__rowNum__ === 13)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[9]?.__EMPTY_2),
+            ASNPhone: items[items.findIndex(val => val.__rowNum__ === 13)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 13)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[9]?.__EMPTY_2),
             //Title:"111"
             //@ts-ignore
-            BilltoNo: String(items[items.findIndex(val => val.__rowNum__ === 16)]?.__EMPTY_1),
+            BilltoNo: items[items.findIndex(val => val.__rowNum__ === 16)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 16)]?.__EMPTY_1),
             //@ts-ignore
-            BillStreet: String(items[items.findIndex(val => val.__rowNum__ === 17)]?.__EMPTY_1),//address[1]?.street,//String(items[12]?.__EMPTY_2),
+            BillStreet: items[items.findIndex(val => val.__rowNum__ === 17)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 17)]?.__EMPTY_1),//address[1]?.street,//String(items[12]?.__EMPTY_2),
             //@ts-ignore
-            BillPostCode: String(items[items.findIndex(val => val.__rowNum__ === 18)]?.__EMPTY_1),//String(address[1]?.postalCode),//String(items[13]?.__EMPTY_2),
+            BillPostCode: items[items.findIndex(val => val.__rowNum__ === 18)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 18)]?.__EMPTY_1),//String(address[1]?.postalCode),//String(items[13]?.__EMPTY_2),
             //@ts-ignore
-            BillCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 19)]?.__EMPTY_1),//String(address[1]?.countryCode),//String(items[14]?.__EMPTY_2),
+            BillCountryCode: items[items.findIndex(val => val.__rowNum__ === 19)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 19)]?.__EMPTY_1),//String(address[1]?.countryCode),//String(items[14]?.__EMPTY_2),
             //@ts-ignore
-            BillPhone: String(items[items.findIndex(val => val.__rowNum__ === 20)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[15]?.__EMPTY_2),
+            BillPhone: items[items.findIndex(val => val.__rowNum__ === 20)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 20)]?.__EMPTY_1),// String(address[0]?.phoneNumber),//String(items[15]?.__EMPTY_2),
             //@ts-ignore
-            ShipToNo: String(items[items.findIndex(val => val.__rowNum__ === 23)]?.__EMPTY_1),//String(items[17]?.__EMPTY_1),
+            ShipToNo: items[items.findIndex(val => val.__rowNum__ === 23)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 23)]?.__EMPTY_1),//String(items[17]?.__EMPTY_1),
             //@ts-ignore
-            ShipStreet: String(items[items.findIndex(val => val.__rowNum__ === 24)]?.__EMPTY_1),//address[1]?.street,//String(items[18]?.__EMPTY_2),
+            ShipStreet: items[items.findIndex(val => val.__rowNum__ === 24)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 24)]?.__EMPTY_1),//address[1]?.street,//String(items[18]?.__EMPTY_2),
             ///@ts-ignore
-            ShipPostcode: String(items[items.findIndex(val => val.__rowNum__ === 25)]?.__EMPTY_1),//String(address[2]?.postalCode),//String(items[19]?.__EMPTY_2),
+            ShipPostcode: items[items.findIndex(val => val.__rowNum__ === 25)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 25)]?.__EMPTY_1),//String(address[2]?.postalCode),//String(items[19]?.__EMPTY_2),
             //@ts-ignore
-            ShipCountryCode: String(items[items.findIndex(val => val.__rowNum__ === 26)]?.__EMPTY_1),//String(address[2]?.countryCode),//String(items[20]?.__EMPTY_2),
+            ShipCountryCode: items[items.findIndex(val => val.__rowNum__ === 26)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 26)]?.__EMPTY_1),//String(address[2]?.countryCode),//String(items[20]?.__EMPTY_2),
             //@ts-ignore
-            ShipPhone: String(items[items.findIndex(val => val.__rowNum__ === 27)]?.__EMPTY_1),//String(address[2]?.phoneNumber),//String(items[21]?.__EMPTY_2),
+            ShipPhone: items[items.findIndex(val => val.__rowNum__ === 27)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 27)]?.__EMPTY_1),//String(address[2]?.phoneNumber),//String(items[21]?.__EMPTY_2),
             //@ts-ignore
-            VatNo: String(items[items.findIndex(val => val.__rowNum__ === 29)]?.__EMPTY_1),//String(getArrayKey(items, 'VAT No:')?.__EMPTY_1),//String(items[22]?.__EMPTY_2),
+            VatNo: items[items.findIndex(val => val.__rowNum__ === 29)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 29)]?.__EMPTY_1),//String(getArrayKey(items, 'VAT No:')?.__EMPTY_1),//String(items[22]?.__EMPTY_2),
             //@ts-ignore
-            GSDBID: String(items[items.findIndex(val => val.__rowNum__ === 30)]?.__EMPTY_1),//String(getArrayKey(items, 'GSDB ID:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
+            GSDBID: items[items.findIndex(val => val.__rowNum__ === 30)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 30)]?.__EMPTY_1),//String(getArrayKey(items, 'GSDB ID:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
             //@ts-ignore
-            ContractName: String(items[items.findIndex(val => val.__rowNum__ === 33)]?.__EMPTY_1),//String(getArrayKey(items, 'First and Last Name:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
+            ContractName: items[items.findIndex(val => val.__rowNum__ === 33)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 33)]?.__EMPTY_1),//String(getArrayKey(items, 'First and Last Name:')?.__EMPTY_1),//String(items[23]?.__EMPTY_2),
             //@ts-ignore
-            ContractEmail: String(items[items.findIndex(val => val.__rowNum__ === 34)]?.__EMPTY_1),//String(getArrayKey(items, 'E-mail:')?.__EMPTY_1),//String(items[25]?.__EMPTY_2),
+            ContractEmail: items[items.findIndex(val => val.__rowNum__ === 34)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 34)]?.__EMPTY_1),//String(getArrayKey(items, 'E-mail:')?.__EMPTY_1),//String(items[25]?.__EMPTY_2),
             //@ts-ignore
-            ContractPhoneno: String(items[items.findIndex(val => val.__rowNum__ === 35)]?.__EMPTY_1),//String(getArrayKey(items, 'Phone No:')?.__EMPTY_1),// String(items[26]?.__EMPTY_2),
+            ContractPhoneno: items[items.findIndex(val => val.__rowNum__ === 35)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 35)]?.__EMPTY_1),//String(getArrayKey(items, 'Phone No:')?.__EMPTY_1),// String(items[26]?.__EMPTY_2),
             //
             ReceivingJSON: JSON.stringify(getSubTableData(items)),
             //
-            Constatus: secItems[0]?.__EMPTY_1 !== "Y" ? "Yes" : "No",
-            ConPackagingAccno: String(secItems[2]?.__EMPTY_1),
-            ConCompanyName: String(secItems[3]?.__EMPTY_1),
-            ConCity: String(secItems[4]?.__EMPTY_1),
-            ConCountryCode: String(secItems[5]?.__EMPTY_1),
+            Constatus: secItems[0]?.__EMPTY_1 === "Y" ? "Yes" : "No",
+            ConPackagingAccno: secItems[2]?.__EMPTY_1 && String(secItems[2]?.__EMPTY_1),
+            ConCompanyName: secItems[3]?.__EMPTY_1 && String(secItems[3]?.__EMPTY_1),
+            ConCity: secItems[4]?.__EMPTY_1 && String(secItems[4]?.__EMPTY_1),
+            ConCountryCode: secItems[5]?.__EMPTY_1 && String(secItems[5]?.__EMPTY_1),
             //
             // 需要写一个JSON 存住 Excel 62-67 行 类似于ReceivingJSON:JSON.stringify(getSubTableData(items)),
             ConsequensesJSON: JSON.stringify(getPackageData(items)),
@@ -416,16 +416,16 @@ export default memo(function App() {
             //这个日期 要日月年, 看看怎么做 这个存的时候要日期格式 
             //RequestDate:moment(String(secItems[29]?.__EMPTY_1),"dd-MM-YYYY"),
             //@ts-ignore
-            RequestDate: moment(String(items[items.findIndex(val => val.__rowNum__ === 102)]?.__EMPTY_1), "dd-MM-YYYY"),
+            RequestDate: items[items.findIndex(val => val.__rowNum__ === 117)]?.__EMPTY_1 && moment(String(items[items.findIndex(val => val.__rowNum__ === 117)]?.__EMPTY_1), "dd-MM-YYYY"),
             //IssuCompName:String(secItems[31]?.__EMPTY_1),
             //@ts-ignore
-            IssuCompName: String(items[items.findIndex(val => val.__rowNum__ === 107)]?.__EMPTY_1),
+            IssuCompName: items[items.findIndex(val => val.__rowNum__ === 122)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 122)]?.__EMPTY_1),
             //@ts-ignore
-            IssuName: String(items[items.findIndex(val => val.__rowNum__ === 108)]?.__EMPTY_1),
+            IssuName: items[items.findIndex(val => val.__rowNum__ === 123)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 123)]?.__EMPTY_1),
             //@ts-ignore
-            IssuPhoneNo: String(items[items.findIndex(val => val.__rowNum__ === 109)]?.__EMPTY_1),
+            IssuPhoneNo: items[items.findIndex(val => val.__rowNum__ === 124)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 124)]?.__EMPTY_1),
             //@ts-ignore
-            IssuEmail: String(items[items.findIndex(val => val.__rowNum__ === 110)]?.__EMPTY_1),
+            IssuEmail: items[items.findIndex(val => val.__rowNum__ === 125)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 125)]?.__EMPTY_1),
 
 
         }
@@ -483,7 +483,7 @@ export default memo(function App() {
                     <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
                     <span style={{ marginLeft: '8px', color: '#00829B' }} ><a href={webURL + "/sitepages/CollabHome.aspx"} style={{ color: '#00829B', fontSize: "12px" }}>Return to home</a></span>
                 </Stack>
-                <div className={styles.title}>Create new case</div>
+                <div className={styles.title}>Create New Case</div>
                 <Stack horizontal horizontalAlign="space-between" style={{ marginBottom: '8px' }}>
                     <div className={styles.subTitle}>Upload an excel document</div>
                     {/* <div className={styles.subTitle}>*Invalid file case</div> */}
@@ -497,6 +497,7 @@ export default memo(function App() {
                                     setFile(null)
                                     setData([])
                                     setError('')
+                                    setfileWarning('')
                                 }} style={{
                                     marginLeft: '16px',
                                     display: 'flex',
