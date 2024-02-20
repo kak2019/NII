@@ -453,6 +453,19 @@ const CaseFormView: React.FC = () => {
       case "save": {
         const packagingNeedsDup = [...states.packagingNeeds];
         if (
+          states.currentCase.Status === "Contract Submitted" &&
+          fileList.length === 0 &&
+          !existFile
+        ) {
+          setModalDetail({
+            isShow: true,
+            message: "Please upload contract before saving",
+            type: "invalid",
+            isDataInvalid: true,
+          });
+          break;
+        }
+        if (
           packagingNeedsDup.filter((i) => !!i.ErrorMessage).length > 0 ||
           packagingNeedsDup.filter((i) => i.YearlyDemand === undefined).length >
             0 ||

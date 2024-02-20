@@ -5,8 +5,8 @@ import * as React from "react";
 import "antd/dist/antd.css";
 import styles from "../PackageList.module.scss";
 import { Button, Card, Col, Input, Row, message } from "antd";
-import { ExportOutlined } from "@ant-design/icons";
 import { Stack } from "@fluentui/react/lib/Stack";
+import excelIcon from "../../assets/icons8-excel-48.png";
 import { usePackagings } from "../../../../common/hooks/usePackagings";
 import {
   DetailsList,
@@ -241,18 +241,31 @@ const PackageListView: React.FC = () => {
   //#endregion
   return (
     <div>
-      <Row className={styles.title}>
-        <Col>Case Handling</Col>
-        <Col offset={18}>
+      <Row align={"middle"}>
+        <Col className={styles.title}>Case Handling</Col>
+        <Col offset={16}>
           <Button
             onClick={downloadCSV}
+            size="large"
             style={{
               borderRadius: "6px",
-              color: "#fff",
-              background: "#00829B",
+              fontWeight: 600,
+              background: "#D3D3D3",
+              color: "#4caf4f",
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            <ExportOutlined rev={undefined} />
+            <img
+              src={excelIcon}
+              style={{
+                width: "28px",
+                height: "28px",
+                display: "inline-block",
+                verticalAlign: "middle",
+              }}
+            />{" "}
+            Download
           </Button>
         </Col>
       </Row>
