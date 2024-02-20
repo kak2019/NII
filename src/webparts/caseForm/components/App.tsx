@@ -61,7 +61,7 @@ export default memo(function App() {
       <Row align="middle">
         <Col offset={2}>
           <a
-            href={`${appContext.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`}
+            href={`${appContext.context.pageContext.web.absoluteUrl}/SitePages/CollabHome.aspx`}
             style={{ color: "#00829B" }}
           >
             <ArrowLeftOutlined rev={undefined} />
