@@ -113,7 +113,7 @@ const getPackageData = (arr: Array<{ [key in string]: any }>) => {
 
     return arr.slice(start + 1, end).map(val => {
         return { "Packaging": val['__EMPTY_1'], "Packaging Name": val.__EMPTY_2, "Yearly need": val.__EMPTY_3 }
-    })
+    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '' )
 }
 
 function sanitize(input: string) {
@@ -138,10 +138,10 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
 
     const table1 = arr.slice(start + 1, end).map(val => {
         return {
-            "Packaging": val['UD-KMP'],
+            "Packaging": val.__EMPTY_2,
             "weekly need": val.__EMPTY,
-            "Packaging Name": val['__EMPTY_4'],
-            "Yearly need": val['Mandatory field'],
+            "Packaging Name": val.__EMPTY_3,
+            "Yearly need": val.__EMPTY_4,
         }
     }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '' )
 

@@ -160,6 +160,18 @@ export default memo(function App() {
             ),
         }, {
             key: 'column4',
+            name: 'Country',
+            ariaLabel: 'Column operations for File type, Press to sort on File type',
+            isIconOnly: false,
+            fieldName: 'ASNCountryCode',
+            minWidth: 60,
+            maxWidth: 120,
+            styles: colomnstyle,
+            // onRender: (item) => (
+            //     <span>{item.RequestDate ? moment(item.RequestDate).format("DD-MM-YYYY") : ""}</span>
+            // ),
+        },{
+            key: 'column4',
             name: 'Status',
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
@@ -241,12 +253,12 @@ export default memo(function App() {
 
     const datePickerStyles: Partial<IDatePickerStyles> = {
         // root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 260, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
-        textField: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 260, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        textField: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 260, marginRight: 30, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
         // fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none'} }
     }
 
     const datePickerTextStyles = {
-        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: 60, fontSize: '14px', height: 42, color: '#191919' },
+        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: 30, fontSize: '14px', height: 42, color: '#191919' },
         fieldGroup: { width: 260, border: 'none', background: 'none', '::after': { border: 'none' } }
     }
 
@@ -499,7 +511,7 @@ React.useEffect(()=>{
                     </Stack>
                     <Stack horizontal horizontalAlign="start" style={{ marginTop: 10, alignItems: 'center' }}>
                         <Label className={styles.formLabel}>Plan Start Date</Label>
-                        <Label className={styles.formLabel}>from</Label>
+                        <Label className={styles.formLabel}>From</Label>
                         <DatePicker
                             placeholder="Select a date..."
                             ariaLabel="Select a date"
@@ -513,7 +525,7 @@ React.useEffect(()=>{
                             onSelectDate={handleStart}
                             value={selectedDateFrom}
                         />
-                        <Label style={{ marginLeft: 20, marginRight: 20 }}>to</Label>
+                        <Label style={{ marginLeft: 10, marginRight: 10 }}>To</Label>
                         <DatePicker
                             placeholder="Select a date..."
                             ariaLabel="Select a date"
