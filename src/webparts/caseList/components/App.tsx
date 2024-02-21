@@ -207,7 +207,7 @@ export default memo(function App() {
                     }
                 }
                 return (
-                    <span style={{ color, backgroundColor, border, fontSize: '14px', padding: '5px 9px' }}>{item?.Status}</span>
+                    <span style={{ color, backgroundColor, border, fontSize: '14px', padding: '5px 9px', boxSizing: 'border-box', width: 140, display: 'block', textAlign: 'center' }}>{item?.Status}</span>
                 )
             },
         }]
@@ -253,19 +253,18 @@ export default memo(function App() {
 
     const datePickerStyles: Partial<IDatePickerStyles> = {
         // root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 260, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
-        textField: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 260, marginRight: 30, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        textField: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 120, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
         // fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none'} }
     }
 
     const datePickerTextStyles = {
-        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: 30, fontSize: '14px', height: 42, color: '#191919' },
-        fieldGroup: { width: 260, border: 'none', background: 'none', '::after': { border: 'none' } }
+        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: 60, fontSize: '14px', height: 42, color: '#191919' },
+        fieldGroup: { width: 120, border: 'none', background: 'none', '::after': { border: 'none' } }
     }
 
     const array: IDropdownOption[] = [];
     const Countryoptions: IDropdownOption[] = []
     const [countryoption, setcountryoption] = React.useState<IDropdownOption[]>([])
-    const [showInitData , setshowInitData] = React.useState(false)
     React.useEffect(() => {
         // const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
         //     ViewXml: `<View>
@@ -313,9 +312,6 @@ export default memo(function App() {
         }
         )
     }, [])
-React.useEffect(()=>{
-    initdata()
-},[showInitData])
 
 
     // 变量拼起来 空格会导致搜索不到
@@ -360,37 +356,39 @@ React.useEffect(()=>{
         console.log(typeof (query.current.end), query.current.end)
         setSelectedDateTo(date)
     }
-    function initdata(){
-        if(showInitData){
-    const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
-        ViewXml: `<View>
-                          <ViewFields>
-                            <FieldRef Name="CaseID"/>
-                            <FieldRef Name="PARMANo"/>
-                            <FieldRef Name="IssuName"/>
-                            <FieldRef Name="GSDBID"/>
-                            <FieldRef Name="RequestDate"/>
-                            <FieldRef Name="Status"/>
-                            <FieldRef Name="Created"/>
-                            <FieldRef Name="ASNCountryCode"/>
-                          </ViewFields>
-                       
-                        </View>`,
-        // <RowLimit>400</RowLimit>
-    }).then((response) => {
-        console.log("res", response)
-        if (response.Row.length > 0) {
-            allItems.current = response.Row
-            setItems(response.Row.sort((a,b)=>b.CaseID - a.CaseID));
-            setItemsCopy(response.Row)
+    function initdata(cb: Function){
+        if(allItems.current.length === 0){
+            const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
+                ViewXml: `<View>
+                                <ViewFields>
+                                    <FieldRef Name="CaseID"/>
+                                    <FieldRef Name="PARMANo"/>
+                                    <FieldRef Name="IssuName"/>
+                                    <FieldRef Name="GSDBID"/>
+                                    <FieldRef Name="RequestDate"/>
+                                    <FieldRef Name="Status"/>
+                                    <FieldRef Name="Created"/>
+                                    <FieldRef Name="ASNCountryCode"/>
+                                </ViewFields>
+                            
+                                </View>`,
+                // <RowLimit>400</RowLimit>
+            }).then((response) => {
+                console.log("res", response)
+                if (response.Row.length > 0) {
+                    allItems.current = response.Row
+                    setItems(response.Row.sort((a,b)=>b.CaseID - a.CaseID));
+                    setItemsCopy(response.Row)
+                    cb()
+                }
+            }
+
+            );
+        } else {
+            cb()
         }
     }
-
-    );
-}
-    }
     const handleSearch = () => {
-        setshowInitData(true)
         console.log("querryparma",query.current.parma)
         console.log("status",query.current.status)
         console.log("country",query.current.country)
@@ -423,7 +421,7 @@ React.useEffect(()=>{
         //     return condition
         // }))
         
-        setItems(allItems.current.filter(val => {
+        initdata(() => setItems(allItems.current.filter(val => {
             let condition = true
             if (textFieldValue) {
                 condition = condition && val.PARMANo === textFieldValue
@@ -448,7 +446,7 @@ React.useEffect(()=>{
             }
 
             return condition
-        }))
+        })))
     }
     console.log(items)
     function formatDate(date: Date): string {
@@ -525,7 +523,7 @@ React.useEffect(()=>{
                             onSelectDate={handleStart}
                             value={selectedDateFrom}
                         />
-                        <Label style={{ marginLeft: 10, marginRight: 10 }}>To</Label>
+                        <Label style={{ marginRight: 10 }}>To</Label>
                         <DatePicker
                             placeholder="Select a date..."
                             ariaLabel="Select a date"

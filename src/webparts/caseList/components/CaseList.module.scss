@@ -23,6 +23,7 @@
   &.teams {
     font-family: $ms-font-family-fallbacks;
   }
+  min-width: 100vw !important;
 }
 
 .header {
@@ -50,6 +51,7 @@
   border: 1px dashed #D6D3D0;
   background: #F8F7F6;
   gap: 16px;
+  
 }
 
 .formLabel {
