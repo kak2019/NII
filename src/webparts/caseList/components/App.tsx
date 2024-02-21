@@ -17,7 +17,7 @@ import "@pnp/sp/items/get-all";
 import { spfi } from "@pnp/sp";
 import { getSP } from '../../../common/pnpjsConfig'
 import { DatePicker, TextField, defaultDatePickerStrings } from '@fluentui/react';
-import { IDatePickerStyles, ITextFieldStyles, Icon} from "office-ui-fabric-react";
+import { IDatePickerStyles, ITextFieldStyles, Icon } from "office-ui-fabric-react";
 import "@pnp/sp/webs";
 // import { PrimaryButton } from "office-ui-fabric-react";
 import { mytoken } from "../CaseListWebPart";
@@ -26,6 +26,7 @@ import AppContext from "../../../common/AppContext";
 import styles from './CaseList.module.scss'
 import { Button, Pagination } from "antd";
 import type { PaginationProps } from "antd";
+import { fetchSupplierNameByParma } from "../assets/request";
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -170,7 +171,7 @@ export default memo(function App() {
             // onRender: (item) => (
             //     <span>{item.RequestDate ? moment(item.RequestDate).format("DD-MM-YYYY") : ""}</span>
             // ),
-        },{
+        }, {
             key: 'column4',
             name: 'Status',
             ariaLabel: 'Column operations for File type, Press to sort on File type',
@@ -278,7 +279,7 @@ export default memo(function App() {
         //                         <FieldRef Name="Created"/>
         //                         <FieldRef Name="ASNCountryCode"/>
         //                       </ViewFields>
-                           
+
         //                     </View>`,
         //     // <RowLimit>400</RowLimit>
         // }).then((response) => {
@@ -321,18 +322,27 @@ export default memo(function App() {
         query.current.parma = val
         setTextFieldValue(val)
         if (val) {
-            fetch('https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/GetParma/' + val, {
-                method: 'get',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + mytoken
-                }
-            }).then(res => res.json()).then(res => {
-                setSupplierName(res.internationalVersion.originalName)
-            }).catch(error => {
-                console.log(error)
-                setSupplierName("-")
-            })
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            fetchSupplierNameByParma({ ParmaNum: val }).
+                then(res => { console.log("resaa", res); setSupplierName(res) }).catch(error => {
+                    console.log(error)
+                    setSupplierName("-")
+                })
+            // fetch('https://app-shared-svc-ud-parma-dev.azurewebsites.net/api/GetParma/' + val, {
+            //     method: 'get',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': 'Bearer ' + mytoken
+            //     }
+            // }).then(res => res.json()).then(res => {
+            //     setSupplierName(res.internationalVersion.originalName)
+            // }).catch(error => {
+            //     console.log(error)
+            //     setSupplierName("-")
+            // })
+
+
+
         }
     }, 100)
 
@@ -356,8 +366,9 @@ export default memo(function App() {
         console.log(typeof (query.current.end), query.current.end)
         setSelectedDateTo(date)
     }
-    function initdata(cb: Function){
-        if(allItems.current.length === 0){
+
+    function initdata(cb: Function) {
+        if (allItems.current.length === 0) {
             const itemoption = sp.web.lists.getByTitle("Nii Cases").renderListDataAsStream({
                 ViewXml: `<View>
                                 <ViewFields>
@@ -377,7 +388,7 @@ export default memo(function App() {
                 console.log("res", response)
                 if (response.Row.length > 0) {
                     allItems.current = response.Row
-                    setItems(response.Row.sort((a,b)=>b.CaseID - a.CaseID));
+                    setItems(response.Row.sort((a, b) => b.CaseID - a.CaseID));
                     setItemsCopy(response.Row)
                     cb()
                 }
@@ -389,11 +400,11 @@ export default memo(function App() {
         }
     }
     const handleSearch = () => {
-        console.log("querryparma",query.current.parma)
-        console.log("status",query.current.status)
-        console.log("country",query.current.country)
-        console.log("start-end",query.current.start,query.current.end)
-        
+        console.log("querryparma", query.current.parma)
+        console.log("status", query.current.status)
+        console.log("country", query.current.country)
+        console.log("start-end", query.current.start, query.current.end)
+
         // setItems(allItems.current.filter(val => {
         //     let condition = true
         //     if (query.current.parma) {
@@ -420,7 +431,7 @@ export default memo(function App() {
 
         //     return condition
         // }))
-        
+
         initdata(() => setItems(allItems.current.filter(val => {
             let condition = true
             if (textFieldValue) {
@@ -468,7 +479,7 @@ export default memo(function App() {
         setSelectedDateFrom(null)
         setSelectedDateTo(null)
         setSupplierName('')
-        setItems(itemsCopy)
+        // setItems(itemsCopy)
     }
 
     return (
@@ -563,12 +574,12 @@ export default memo(function App() {
                         enterModalSelectionOnTouch={true}
 
                         checkButtonAriaLabel="select row"
-                        onRenderDetailsFooter={() => 
-                            items.length === 0 && 
-                                <Stack verticalAlign="center" style={{height: '500px', width: '100%', alignItems: 'center'}}>
-                                    <span style={{fontSize: '22px', fontWeight: 600}}>No data can be displayed</span>
-                                    <span style={{fontSize: '15px', marginTop: '14px'}}>Please enter valid criteria to search data</span>
-                                </Stack>
+                        onRenderDetailsFooter={() =>
+                            items.length === 0 &&
+                            <Stack verticalAlign="center" style={{ height: '500px', width: '100%', alignItems: 'center' }}>
+                                <span style={{ fontSize: '22px', fontWeight: 600 }}>No data can be displayed</span>
+                                <span style={{ fontSize: '15px', marginTop: '14px' }}>Please enter valid criteria to search data</span>
+                            </Stack>
                         }
                     />
                     <Stack horizontal horizontalAlign="center">
