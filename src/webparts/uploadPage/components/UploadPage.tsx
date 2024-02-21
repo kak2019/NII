@@ -6,6 +6,7 @@ import AppContext from "../../../common/AppContext";
 import { Provider } from "react-redux";
 import store from "../../../common/store";
 
+
 export default class UploadPage extends React.Component<IUploadPageProps, {}> {
   public render(): React.ReactElement<IUploadPageProps> {
     const { context} = this.props;
