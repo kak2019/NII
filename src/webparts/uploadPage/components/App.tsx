@@ -28,7 +28,7 @@ import FileSvg from '../assets/file'
 import Del from '../assets/delete'
 import Error from '../assets/error'
 import AppContext from "../../../common/AppContext";
-import  Viewhistory from '../assets/submit';
+import Viewhistory from '../assets/submit';
 // import * as moment from "moment";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
@@ -113,7 +113,7 @@ const getPackageData = (arr: Array<{ [key in string]: any }>) => {
 
     return arr.slice(start + 1, end).map(val => {
         return { "Packaging": val['__EMPTY_1'], "Packaging Name": val.__EMPTY_2, "Yearly need": val.__EMPTY_3 }
-    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '' )
+    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '')
 }
 
 function sanitize(input: string) {
@@ -143,7 +143,7 @@ const getData2 = (arr: Array<{ [key in string]: any }>) => {
             "Packaging Name": val.__EMPTY_3,
             "Yearly need": val.__EMPTY_4,
         }
-    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '' )
+    }).filter(val => val.Packaging !== 0 && val.Packaging !== undefined && val.Packaging !== '')
 
     // const table2 = arr.slice(start + 1, end).map(val => {
     //     return { 
@@ -185,16 +185,16 @@ export default memo(function App() {
         // if(!json['Supplier']) return '请输入Supplier'
         console.log(spParmaList.indexOf(json['Supplier parma code']))
 
-        spParmaList.forEach(item=>{
-            if(item['PARMANo']+"" ===json['Supplier parma code']+""){
-                setfileWarning("The Parma(" + json['Supplier parma code'] + ") is existed with Case ID:" + item['CaseID'] + ". create a new case for "+ json['Supplier parma code']+"?")
-                console.log("item['PARMANo']",item['PARMANo'])
-                console.log("item['PARMANo']",item['CaseID'])
+        spParmaList.forEach(item => {
+            if (item['PARMANo'] + "" === json['Supplier parma code'] + "") {
+                setfileWarning("The Parma(" + json['Supplier parma code'] + ") is existed with Case ID:" + item['CaseID'] + ". create a new case for " + json['Supplier parma code'] + "?")
+                console.log("item['PARMANo']", item['PARMANo'])
+                console.log("item['PARMANo']", item['CaseID'])
             }
-        
-        
+
+
         })
-        console.log("filewarning",fileWarning)
+        console.log("filewarning", fileWarning)
     }
     interface CaseItem {
         PARMANo: string;
@@ -228,12 +228,12 @@ export default memo(function App() {
                 const uniqueByPARMANo: { [key: string]: CaseItem } = {};
                 parmaNoList.forEach(item => {
                     const parmaNo = item.PARMANo;
-                    if (!uniqueByPARMANo[parmaNo]&& (parmaNo !=='undefined')) {
+                    if (!uniqueByPARMANo[parmaNo] && (parmaNo !== 'undefined')) {
                         uniqueByPARMANo[parmaNo] = item;
                     }
                 });
                 //@ts-ignore
-              const  uniparmaNoList =  Object.values(uniqueByPARMANo);
+                const uniparmaNoList = Object.values(uniqueByPARMANo);
                 //@ts-ignore
                 //const uniqueParmaNoList = Array.from(new Set(parmaNoList));
                 setspParmaList(uniparmaNoList)
@@ -248,6 +248,12 @@ export default memo(function App() {
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleFileUpload = (info: any) => {
+        // 重置状态
+        setItems([]);
+        setData({});
+        setError(null);
+        setFile(null); // 确保每次上传前文件状态都被重置
+        setShowBtn(false); // 根据需要可能还需要重置其他UI状态
         if (info.file) {
             const file = info.file
             if (!file) return;
@@ -358,7 +364,7 @@ export default memo(function App() {
         console.log(secItems)
         console.log('Packaging account no', secItems[3].__EMPTY_1)
         const request = {
-            PARMANo: items[3]?.__EMPTY_1&&String(items[3]?.__EMPTY_1),
+            PARMANo: items[3]?.__EMPTY_1 && String(items[3]?.__EMPTY_1),
             CompanyName: items[4]?.__EMPTY_1,
             //@ts-ignore
             ASNStreet: items[items.findIndex(val => val.__rowNum__ === 10)]?.__EMPTY_1 && String(items[items.findIndex(val => val.__rowNum__ === 10)]?.__EMPTY_1),//address[0]?.street,      //String(items[6]?.__EMPTY_2),
@@ -458,9 +464,9 @@ export default memo(function App() {
                     const finalRes = await sp.web.lists.getByTitle('Nii Case Library').items.getById(item.ID).update({
                         ContentTypeId: UploadFileContentTypeId
                     })
-                }).then(() => 
-                // window.location.href = webURL + "/sitepages/CollabHome.aspx"
-                setbuttonVisible(false)
+                }).then(() =>
+                    // window.location.href = webURL + "/sitepages/CollabHome.aspx"
+                    setbuttonVisible(false)
                 );
             //sp.web.lists.getByTitle("Nii Case Library").rootFolder.folders.add(folderName.toString());
         }).catch(err => console.log("err", err));
@@ -478,99 +484,99 @@ export default memo(function App() {
                 </Stack>
             </div> */}
             {
-          buttonvisible ?<div className={styles.content}>
-                <Stack horizontal>
-                    <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
-                    <span style={{ marginLeft: '8px', color: '#00829B' }} ><a href={webURL + "/sitepages/CollabHome.aspx"} style={{ color: '#00829B', fontSize: "12px" }}>Return to home</a></span>
-                </Stack>
-                <div className={styles.title}>Create New Case</div>
-                <Stack horizontal horizontalAlign="space-between" style={{ marginBottom: '8px' }}>
-                    <div className={styles.subTitle}>Upload an excel document</div>
-                    {/* <div className={styles.subTitle}>*Invalid file case</div> */}
-                </Stack>
-                {
-                    uploadFile
-                        ? <Stack className={styles.uploadBox} verticalAlign="center" style={{ alignItems: 'flex-start' }}>
-                            <Stack horizontal style={{ alignItems: 'center' }}>
-                                <div className={styles.subTitle}>{uploadFile.name}</div>
-                                <div onClick={() => {
-                                    setFile(null)
-                                    setData([])
-                                    setError('')
-                                    setfileWarning('')
-                                }} style={{
-                                    marginLeft: '16px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderRadius: '6px',
-                                    border: '1px solid #D6D3D0',
-                                    background: '#FFF',
-                                    padding: '13px',
-                                    cursor: 'pointer'
-                                }}><Del /></div>
+                buttonvisible ? <div className={styles.content}>
+                    <Stack horizontal>
+                        <Icon style={{ fontSize: "14px", color: '#00829B' }} iconName="Back" />
+                        <span style={{ marginLeft: '8px', color: '#00829B' }} ><a href={webURL + "/sitepages/CollabHome.aspx"} style={{ color: '#00829B', fontSize: "12px" }}>Return to home</a></span>
+                    </Stack>
+                    <div className={styles.title}>Create New Case</div>
+                    <Stack horizontal horizontalAlign="space-between" style={{ marginBottom: '8px' }}>
+                        <div className={styles.subTitle}>Upload an excel document</div>
+                        {/* <div className={styles.subTitle}>*Invalid file case</div> */}
+                    </Stack>
+                    {
+                        uploadFile
+                            ? <Stack className={styles.uploadBox} verticalAlign="center" style={{ alignItems: 'flex-start' }}>
+                                <Stack horizontal style={{ alignItems: 'center' }}>
+                                    <div className={styles.subTitle}>{uploadFile.name}</div>
+                                    <div onClick={() => {
+                                        setFile(null)
+                                        setData([])
+                                        setError('')
+                                        setfileWarning('')
+                                    }} style={{
+                                        marginLeft: '16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '6px',
+                                        border: '1px solid #D6D3D0',
+                                        background: '#FFF',
+                                        padding: '13px',
+                                        cursor: 'pointer'
+                                    }}><Del /></div>
+                                </Stack>
                             </Stack>
-                        </Stack>
-                        : <Stack className={styles.uploadBox} verticalAlign="center">
-                            {
-                                error
-                                    ? <div style={{ display: 'flex', alignItems: 'center' }}><Error /> <div className={styles.subTitle} style={{ color: '#E0402E', marginLeft: '8px' }}>{error}</div></div>
-                                    : <div className={styles.subTitle}>*Please contain supplier company name</div>
-                            }
-                            <Upload
-                                beforeUpload={() => false}
-                                accept=".xlsx, .xls"
-                                onChange={handleFileUpload}
-                                maxCount={1}
-                                showUploadList={false}
-                            >
-                                <Button style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px',
-                                    padding: '13px 34px',
-                                    fontSize: '16px',
-                                    borderRadius: '6px',
-                                    border: '1px solid #D6D3D0',
-                                    background: '#FFF'
-                                }} icon={<FileSvg />}>Select files</Button>
-                            </Upload>
-                            {
-                                fileWarning && <div style={{ display: 'flex', alignItems: 'center' }}><Error /> <div className={styles.subTitle} style={{ color: '#E0402E', marginLeft: '8px' }}>{fileWarning}</div></div>
-                            }
-                        </Stack>
+                            : <Stack className={styles.uploadBox} verticalAlign="center">
+                                {
+                                    error
+                                        ? <div style={{ display: 'flex', alignItems: 'center' }}><Error /> <div className={styles.subTitle} style={{ color: '#E0402E', marginLeft: '8px' }}>{error}</div></div>
+                                        : <div className={styles.subTitle}>*Please contain supplier company name</div>
+                                }
+                                <Upload
+                                    beforeUpload={() => false}
+                                    accept=".xlsx, .xls"
+                                    onChange={handleFileUpload}
+                                    maxCount={1}
+                                    showUploadList={false}
+                                >
+                                    <Button style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '13px 34px',
+                                        fontSize: '16px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #D6D3D0',
+                                        background: '#FFF'
+                                    }} icon={<FileSvg />}>Select files</Button>
+                                </Upload>
+                                {
+                                    fileWarning && <div style={{ display: 'flex', alignItems: 'center' }}><Error /> <div className={styles.subTitle} style={{ color: '#E0402E', marginLeft: '8px' }}>{fileWarning}</div></div>
+                                }
+                            </Stack>
 
-                }
-
-                {
-                    showBtn && !error ? <> {
-                        fileWarning && <div style={{ display: 'flex', alignItems: 'center', color:'green'}}><Error /> <div className={styles.subTitle} style={{ color: 'rgb(219 155 22)', marginLeft: '8px' }}>{fileWarning}</div></div>
                     }
-                        <Button style={{
-                            width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
-                            background: '#00829B'
-                        }} onClick={() => setIsShowModal(true)}>Upload</Button></>
-                        :
-                        <Button style={{
-                            width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
-                            background: '#C4C4C4'
-                        }}>Upload</Button>
-                }
 
-            </div>: <div style={{height: '100px',  paddingTop: '64px'}}>
-                <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold'}}>
-                  <div style={{marginRight: '10px', display: 'flex', alignItems: 'center'}}>
-                    <Viewhistory />
-                  </div>
-                  Submitted!
-                </p>
-                <p style={{fontSize: '14px', textAlign: 'center'}}>Submitted successfully! The request will be listed in some minutes.</p>
-                <Stack style={{  alignItems: 'center'}}>
-                <Button style={{
+                    {
+                        showBtn && !error ? <> {
+                            fileWarning && <div style={{ display: 'flex', alignItems: 'center', color: 'green' }}><Error /> <div className={styles.subTitle} style={{ color: 'rgb(219 155 22)', marginLeft: '8px' }}>{fileWarning}</div></div>
+                        }
+                            <Button style={{
+                                width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
+                                background: '#00829B'
+                            }} onClick={() => setIsShowModal(true)}>Upload</Button></>
+                            :
+                            <Button style={{
+                                width: 140, marginTop: '32px', borderRadius: '6px', color: '#fff',
+                                background: '#C4C4C4'
+                            }}>Upload</Button>
+                    }
+
+                </div> : <div style={{ height: '100px', paddingTop: '64px' }}>
+                    <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold' }}>
+                        <div style={{ marginRight: '10px', display: 'flex', alignItems: 'center' }}>
+                            <Viewhistory />
+                        </div>
+                        Submitted!
+                    </p>
+                    <p style={{ fontSize: '14px', textAlign: 'center' }}>Submitted successfully! The request will be listed in some minutes.</p>
+                    <Stack style={{ alignItems: 'center' }}>
+                        <Button style={{
                             width: 80, height: 42, marginTop: '2px', borderRadius: '6px', color: '#fff',
-                            background: '#00829B',alignItems: 'center'
-                        }} onClick={()=>window.location.href = webURL + "/sitepages/CollabHome.aspx" }>OK </Button></Stack>
-              </div>}
+                            background: '#00829B', alignItems: 'center'
+                        }} onClick={() => window.location.href = webURL + "/sitepages/CollabHome.aspx"}>OK </Button></Stack>
+                </div>}
             <Modal open={isShowModal} closable={false} footer={null} width={500} style={{ borderRadius: '6px', overflow: 'hidden', paddingBottom: 0 }}>
                 <Stack verticalAlign="center" style={{ alignItems: 'center', paddingTop: '64px', paddingBottom: '54px' }}>
                     <p>Are you sure you want to upload this file?</p>
@@ -586,7 +592,7 @@ export default memo(function App() {
                     </div>
                 </Stack>
             </Modal>
-           
+
         </div>
     )
 
