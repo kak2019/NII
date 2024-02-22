@@ -397,7 +397,7 @@ const CaseFormView: React.FC = () => {
         WeeklyDemand: item.WeeklyDemand,
         YearlyDemand: item.YearlyDemand,
         SupplierNo: states.currentCase.PARMANo,
-        SupplierName: states.currentCase.ConCompanyName,
+        SupplierName: states.currentCase.CompanyName,
       } as IPackaging;
     });
     packagingNeedsUpdate.forEach((packaging) => {
