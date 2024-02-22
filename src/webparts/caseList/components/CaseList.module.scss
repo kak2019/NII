@@ -23,7 +23,7 @@
   &.teams {
     font-family: $ms-font-family-fallbacks;
   }
-  min-width: 55vw !important;
+  // min-width: 55vw !important;
 }
 
 .header {
@@ -32,17 +32,21 @@
 }
 
 .content {
-  padding-top: 47px;
+  //padding-top: 47px;
+  padding-top: 7px;
   padding-left: 100px;
   padding-right: 100px;
-  margin-bottom: '24px'
+  //margin-bottom: '24px'
+  // margin-bottom: '6px'
 }
 
 .title {
   font-size: 28px;
   color:#000;
-  margin-top: 24px;
-  margin-bottom: 34PX;
+  //margin-top: 24px;
+  margin-top: 1px;
+ // margin-bottom: 34PX;
+  margin-bottom: '10px';
 }
 
 .contentBox {
@@ -50,7 +54,7 @@
   padding: 30px 32px 18px 38px;
   border: 1px dashed #D6D3D0;
   background: #F8F7F6;
-  gap: 16px;
+  gap: 1px;
   
 }
 

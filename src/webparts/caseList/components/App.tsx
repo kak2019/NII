@@ -81,6 +81,7 @@ export default memo(function App() {
                 backgroundColor: '#E9E9E9',
                 color: "black",
             }
+
         }
     }
     const columns: IColumn[] = [
@@ -90,8 +91,8 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'CaseID',
-            minWidth: 60,
-            maxWidth: 80,
+            minWidth: 50,
+            maxWidth: 50,
             styles: colomnstyle,
             onRender: (item) => (
                 <a href={webURL + "/sitepages/CaseForm.aspx?caseid=" + item.ID}>{item.CaseID}</a>
@@ -103,8 +104,8 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'PARMANo',
-            minWidth: 40,
-            maxWidth: 80,
+            minWidth: 50,
+            maxWidth: 50,
             styles: colomnstyle
             // onRender: (item: Iitem) => (
             //   <Text>{item.Material}</Text>
@@ -116,12 +117,14 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'CompanyName',
-            minWidth: 60,
-            maxWidth: 120,
-            styles: colomnstyle
-            // onRender: (item: Iitem) => (
-            //   <Text>{item.Material}</Text>
-            // ),
+            minWidth: 160,
+            maxWidth: 160,
+            styles: colomnstyle,
+            isMultiline: true, // 允许文本换行
+            isResizable: true, // 允许调整列宽
+            onRender: (item) => (
+                <div style={{ whiteSpace: 'normal' }}>{item.CompanyName}</div>
+              ),
         },
         {
             key: 'column4',
@@ -168,17 +171,20 @@ export default memo(function App() {
             minWidth: 60,
             maxWidth: 120,
             styles: colomnstyle,
-            // onRender: (item) => (
-            //     <span>{item.RequestDate ? moment(item.RequestDate).format("DD-MM-YYYY") : ""}</span>
-            // ),
+            isMultiline: true, // 允许文本换行
+            isResizable: true, // 允许调整列宽
+            onRender: (item) => (
+                <div style={{ whiteSpace: 'normal' }}>{item.ASNCountryCode}</div>
+              ),
+            
         }, {
             key: 'column4',
             name: 'Status',
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'Status',
-            minWidth: 140,
-            maxWidth: 160,
+            minWidth: 200,
+            maxWidth: 200,
             styles: colomnstyle,
             onRender: (item) => {
                 let color = '#fff'
@@ -208,7 +214,7 @@ export default memo(function App() {
                     }
                 }
                 return (
-                    <span style={{ color, backgroundColor, border, fontSize: '14px', padding: '5px 9px', boxSizing: 'border-box', width: 140, display: 'block', textAlign: 'center' }}>{item?.Status}</span>
+                    <span style={{ color, backgroundColor, border, fontSize: '14px', padding: '5px 9px', boxSizing: 'border-box', width: 200, display: 'block', textAlign: 'center' }}>{item?.Status}</span>
                 )
             },
         }]
@@ -243,23 +249,23 @@ export default memo(function App() {
     ];
 
     const dropdownStyles: Partial<IDropdownStyles> = {
-        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 230, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 230, marginRight: 60, fontSize: '14px', height: 30, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
         dropdown: { ':focus::after': { border: 'none' }, width: 230 },
         title: { border: 'none', background: 'none' }
     };
     const textStyles: Partial<ITextFieldStyles> = {
-        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 230, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 230, marginRight: 60, fontSize: '14px', height: 30, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
         fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none' } }
     }
 
     const datePickerStyles: Partial<IDatePickerStyles> = {
         // root: { background: '#fff', display: 'flex',flexShrink: 0, alignItems: 'center', width: 260, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
-        textField: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 120, marginRight: 60, fontSize: '14px', height: 42, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
+        textField: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', width: 120, marginRight: 60, fontSize: '14px', height: 30, color: '#191919', border: '1px solid #454545', borderRadius: '10px' },
         // fieldGroup: { border: 'none', background: 'none', '::after': { border: 'none'} }
     }
 
     const datePickerTextStyles = {
-        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: 60, fontSize: '14px', height: 42, color: '#191919' },
+        root: { background: '#fff', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: 60, fontSize: '14px', height: 30, color: '#191919' },
         fieldGroup: { width: 120, border: 'none', background: 'none', '::after': { border: 'none' } }
     }
 
@@ -483,6 +489,7 @@ export default memo(function App() {
         // setItems(itemsCopy)
     }
 
+
     return (
         <div className={styles.caseList}>
             <div className={styles.content}>
@@ -523,7 +530,7 @@ export default memo(function App() {
                         <Label className={styles.formLabel}>Plan Start Date</Label>
                         <Label className={styles.formLabel}>From</Label>
                         <DatePicker
-                            placeholder="Select a date..."
+                            // placeholder="Select a date..."
                             ariaLabel="Select a date"
                             styles={datePickerStyles}
                             textField={{
@@ -537,7 +544,7 @@ export default memo(function App() {
                         />
                         <Label style={{ marginRight: 10 }}>To</Label>
                         <DatePicker
-                            placeholder="Select a date..."
+                            // placeholder="Select a date..."
                             ariaLabel="Select a date"
                             styles={datePickerStyles}
                             textField={{
@@ -561,10 +568,18 @@ export default memo(function App() {
                     </Stack>
                 </Stack>
 
-                <Stack className={styles.contentBox} verticalAlign="center" style={{ marginTop: '24px' }}>
+                <Stack className={styles.contentBox} verticalAlign="center" style={{ marginTop: '16px' }}>
                     <DetailsList
                         items={items.slice(10 * (page - 1), 10 * (page - 1) + 9)}
-
+                        styles={{
+                            headerWrapper: [{
+                                selectors: {
+                                    '.ms-DetailsHeader': {
+                                        paddingTop: '0 !important', // 将 paddingTop 设置为 0
+                                    }
+                                }
+                            }]
+                        }}
                         columns={columns}
                         selectionMode={SelectionMode.none}
                         setKey="multiple"
