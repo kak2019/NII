@@ -119,7 +119,8 @@ export default memo(function App() {
 
             <div style={{
               height: '100%',
-              marginTop: '242px',
+              //marginTop: '242px',
+              marginTop: '202px',
               color: "white",
               fontSize: '65px',
               position: 'absolute',
@@ -129,7 +130,7 @@ export default memo(function App() {
             }}>Smart and Modern </div>
              <div style={{
               height: '100%',
-              marginTop: '302px',
+              marginTop: '262px',
               color: "white",
               fontSize: '65px',
               position: 'absolute',
