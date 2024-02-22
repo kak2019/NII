@@ -10,7 +10,7 @@ import styles from "./HomePage.module.scss";
 import Receive from "../assets/receive";
 import CaseList from '../assets/caseList';
 import PackagedList from '../assets/packagedList';
-// import "./App.css";
+import "./App.css";
 // import background from "../assets/Background.png"
 export default memo(function App() {
   const ctx = useContext(AppContext);

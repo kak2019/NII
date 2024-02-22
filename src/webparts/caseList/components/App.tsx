@@ -27,6 +27,7 @@ import styles from './CaseList.module.scss'
 import { Button, Pagination } from "antd";
 import type { PaginationProps } from "antd";
 import { fetchSupplierNameByParma } from "../assets/request";
+import "./App.css";
 // interface Iitem {
 //     "Case ID": string,
 //     "Parma": string,
@@ -593,7 +594,7 @@ export default memo(function App() {
                         checkButtonAriaLabel="select row"
                         onRenderDetailsFooter={() =>
                             items.length === 0 &&
-                            <Stack verticalAlign="center" style={{ height: '500px', width: '100%', alignItems: 'center' }}>
+                            <Stack verticalAlign='start' style={{ height: '500px', width: '100%', alignItems: 'center' }}>
                                 <span style={{ fontSize: '22px', fontWeight: 600 }}>No data can be displayed</span>
                                 <span style={{ fontSize: '15px', marginTop: '14px' }}>Please enter valid criteria to search data</span>
                             </Stack>

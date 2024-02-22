@@ -30,6 +30,7 @@ import Error from '../assets/error'
 import AppContext from "../../../common/AppContext";
 import Viewhistory from '../assets/submit';
 import HintIcon from "../assets/hinticon"
+import "./App.css";
 // import * as moment from "moment";
 // import helpers from "../../../config/Helpers";
 // 定义 Excel 文件中数据的类型
