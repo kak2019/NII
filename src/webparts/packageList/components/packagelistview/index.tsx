@@ -404,7 +404,7 @@ const PackageListView: React.FC = () => {
                           <Stack
                             verticalAlign="center"
                             style={{
-                              height: "500px",
+                              height: "200px",
                               width: "100%",
                               alignItems: "center",
                             }}
