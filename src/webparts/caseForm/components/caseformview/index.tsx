@@ -170,14 +170,14 @@ const CaseFormView: React.FC = () => {
       editable: false,
     },
     {
-      title: "WeeklyDemand",
+      title: "Weekly Demand",
       dataIndex: "WeeklyDemand",
       width: "25%",
       editable: false,
     },
 
     {
-      title: "YearlyDemand",
+      title: "Yearly Demand",
       dataIndex: "YearlyDemand",
       width: "25%",
       editable: true,
