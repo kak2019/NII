@@ -204,7 +204,6 @@ const CaseFormView: React.FC = () => {
   const appContext = React.useContext(AppContext);
   //#endregion
   //#region events
-
   const onTextChange = (
     e: string,
     field: keyof typeof states.currentCase
@@ -412,7 +411,7 @@ const CaseFormView: React.FC = () => {
     removePackagingIdsDup.forEach((id) => {
       removePackagingNeedsById(id);
     });
-    if (fileList.length > 0 || needReplace) {
+    if (fileList.length > 0) {
       const originalFileUrl =
         contractFiles.length > 0 ? contractFiles[0].ServerRelativeUrl : "";
       uploadFile(fileList, needReplace, originalFileUrl, currentCaseId);

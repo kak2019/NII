@@ -566,7 +566,7 @@ const fetchCountryData = async (): Promise<IOption[]> => {
                 value: item.Title,
                 label: item.Title,
               } as IOption)
-          );
+          ).sort((a, b) => a.label.localeCompare(b.label));
         } else {
           return [] as IOption[];
         }
