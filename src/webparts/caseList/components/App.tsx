@@ -90,7 +90,7 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'CaseID',
-            minWidth: 40,
+            minWidth: 60,
             maxWidth: 80,
             styles: colomnstyle,
             onRender: (item) => (
@@ -115,7 +115,7 @@ export default memo(function App() {
             name: 'Supplier Name',
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
-            fieldName: 'IssuName',
+            fieldName: 'CompanyName',
             minWidth: 60,
             maxWidth: 120,
             styles: colomnstyle
@@ -177,8 +177,8 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'Status',
-            minWidth: 60,
-            maxWidth: 80,
+            minWidth: 140,
+            maxWidth: 160,
             styles: colomnstyle,
             onRender: (item) => {
                 let color = '#fff'
@@ -380,6 +380,7 @@ export default memo(function App() {
                                     <FieldRef Name="Status"/>
                                     <FieldRef Name="Created"/>
                                     <FieldRef Name="ASNCountryCode"/>
+                                    <FieldRef Name="CompanyName"/>
                                 </ViewFields>
                             
                                 </View>`,

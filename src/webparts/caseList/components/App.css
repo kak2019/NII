@@ -1,6 +1,6 @@
 /*SharePoint workbench full width webpart*/
 #workbenchPageContent {
-    min-width: 100vw !important;
+    min-width: 60vw !important;
 }
  
 .CanvasComponent.LCS .Canvas--edit.Canvas--withLayout {
