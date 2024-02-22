@@ -312,7 +312,7 @@ export default memo(function App() {
                 for (let i = 0; i < response.Row.length; i++) {
                     Countryoptions.push({ key: response.Row[i].Title, text: response.Row[i].Title })
                 }
-                setcountryoption(Countryoptions)
+                setcountryoption(Countryoptions.sort((a, b) => a.text.localeCompare(b.text)))
                 console.log("array", Countryoptions);
                 console.log(itemoptionContry);
             }
@@ -411,6 +411,7 @@ export default memo(function App() {
         console.log("status", query.current.status)
         console.log("country", query.current.country)
         console.log("start-end", query.current.start, query.current.end)
+        setPage(1)
 
         // setItems(allItems.current.filter(val => {
         //     let condition = true
@@ -448,7 +449,7 @@ export default memo(function App() {
                 condition = condition && val.Status === selectedKey
             }
             if (selectedKeycontry) {
-                condition = condition && val.ASNCountryCode === selectedKeycontry.toUpperCase()
+                condition = condition && val.ASNCountryCode === selectedKeycontry  //.toUpperCase()
             }
             if (selectedDateFrom && selectedDateTo) {
                 const aa = moment(val.RequestDate, 'yyyy/MM/DD').isBetween(selectedDateFrom, selectedDateTo)
