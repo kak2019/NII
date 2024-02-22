@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import {
   isFetchingSelector,
   messageSelector,
+  packagingNeedsAllSelector,
   packagingNeedsSelector,
   supplierNameResultSelector,
 } from "../features/packagings/selector";
@@ -12,16 +13,25 @@ import {
   fetchPackagingNeedsAction,
   fetchSupplierNameByParmaAction,
 } from "../features/packagings/action";
-import { PackagingStatus } from "../features/packagings/packagingSlice";
+import {
+  ClearData,
+  PackagingStatus,
+} from "../features/packagings/packagingSlice";
 
 type PackagingsOperators = [
   isFetching: PackagingStatus,
   errorMessage: string,
   packagingNeeds: IPackaging[],
+  packagingNeedsAll: IPackaging[],
   supplierNameResult: string,
   fetchAllPackagingNeeds: () => void,
   fetchSupplierNameByParma: (ParmaNum: string) => void,
-  fetchAPackagingNeeds: (ParmaNum: string, Year: string, CaseID: string) => void
+  fetchAPackagingNeeds: (
+    ParmaNum: string,
+    Year: string,
+    CaseID: string
+  ) => void,
+  clearAllData: () => void
 ];
 
 export const usePackagings = (): Readonly<PackagingsOperators> => {
@@ -29,6 +39,7 @@ export const usePackagings = (): Readonly<PackagingsOperators> => {
   const isFetching = useAppSelector(isFetchingSelector);
   const errorMessage = useAppSelector(messageSelector);
   const packagingNeeds = useAppSelector(packagingNeedsSelector);
+  const packagingNeedsAll = useAppSelector(packagingNeedsAllSelector);
   const supplierNameResult = useAppSelector(supplierNameResultSelector);
 
   const fetchAllPackagingNeeds = useCallback(() => {
@@ -46,13 +57,18 @@ export const usePackagings = (): Readonly<PackagingsOperators> => {
     },
     [dispatch]
   );
+  const clearAllData = useCallback(() => {
+    return dispatch(ClearData());
+  }, [dispatch]);
   return [
     isFetching,
     errorMessage,
     packagingNeeds,
+    packagingNeedsAll,
     supplierNameResult,
     fetchAllPackagingNeeds,
     fetchSupplierNameByParma,
     fetchPackagingNeeds,
+    clearAllData,
   ];
 };

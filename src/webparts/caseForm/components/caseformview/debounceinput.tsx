@@ -12,10 +12,11 @@ interface Props {
   defaultValue: string;
   inputKey: React.Key;
   field: string;
+  readonly: boolean;
 }
 
 const DebouncedInputCommon: React.FC<Props> = memo(
-  ({ onPackagingChange, defaultValue, inputKey, field }) => {
+  ({ onPackagingChange, defaultValue, inputKey, field, readonly }) => {
     const [inputValue, setInputValue] = useState(defaultValue);
 
     const debouncedSave = debounce((nextValue) => {
@@ -33,6 +34,7 @@ const DebouncedInputCommon: React.FC<Props> = memo(
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           className={styles.halfLength}
+          readOnly={readonly}
         />
       </div>
     );

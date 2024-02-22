@@ -8,48 +8,45 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 const fetchAllPackagingNeeds = async (): Promise<IPackaging[]> => {
   const sp = spfi(getSP());
   try {
-    const result = await sp.web.lists
+    let items: IPackaging[] = [];
+    let pager = await sp.web.lists
       .getByTitle(PACKAGINGCONST.PACKAGING_LIST)
-      .renderListDataAsStream({
-        ViewXml: `<View>
-	                        <ViewFields>
-		                        <FieldRef Name="ID"/>
-		                        <FieldRef Name="CaseID"/>
-		                        <FieldRef Name="Packaging"/>
-                            <FieldRef Name="PackagingName"/>
-                            <FieldRef Name="SupplierNo"/>
-                            <FieldRef Name="SupplierName"/>
-                            <FieldRef Name="Year"/>
-                            <FieldRef Name="WeeklyDemand"/>
-                            <FieldRef Name="YearlyDemand"/>
-                            <FieldRef Name="MasterID"/>
-	                        </ViewFields>
-	                        <RowLimit>500000</RowLimit>
-                        </View>`,
-      })
-      .then((response) => {
-        if (response.Row.length > 0) {
-          return response.Row.map(
-            (item) =>
-              ({
-                key: item.ID,
-                ID: item.ID,
-                CaseID: item.CaseID,
-                Packaging: item.Packaging,
-                PackagingName: item.PackagingName,
-                WeeklyDemand: item.WeeklyDemand,
-                YearlyDemand: item.YearlyDemand,
-                SupplierNo: item.SupplierNo,
-                SupplierName: item.SupplierName,
-                MasterID: item.MasterID,
-                Year: item.Year,
-              } as IPackaging)
-          );
-        } else {
-          return [] as IPackaging[];
-        }
-      });
-    return result;
+      .items.select(
+        "ID",
+        "CaseID",
+        "Packaging",
+        "PackagingName",
+        "SupplierNo",
+        "SupplierName",
+        "Year",
+        "WeeklyDemand",
+        "YearlyDemand",
+        "MasterID"
+      )
+      .top(1000)
+      .getPaged();
+    while (pager.hasNext) {
+      const response = await pager.getNext();
+      items = items.concat(response.results);
+      pager = response;
+    }
+    const result = items.map(
+      (item) =>
+        ({
+          key: item.ID,
+          ID: item.ID,
+          CaseID: item.CaseID,
+          Packaging: item.Packaging,
+          PackagingName: item.PackagingName,
+          WeeklyDemand: item.WeeklyDemand,
+          YearlyDemand: item.YearlyDemand,
+          SupplierNo: item.SupplierNo,
+          SupplierName: item.SupplierName,
+          MasterID: item.MasterID,
+          Year: item.Year,
+        } as IPackaging)
+    );
+    return result.length > 0 ? result : ([] as IPackaging[]);
   } catch (err) {
     console.log(err);
     return Promise.reject("Error when fetch Packagings");
@@ -100,10 +97,10 @@ const fetchPackagingNeeds = async (arg: {
   const sp = spfi(getSP());
   const conditions = [];
   if (arg.ParmaNum) {
-    conditions.push(`<Contains>
+    conditions.push(`<Eq>
                         <FieldRef Name="SupplierNo"/>
                         <Value Type="Text">${arg.ParmaNum}</Value>
-                      </Contains>`);
+                      </Eq>`);
   }
   if (arg.Year) {
     conditions.push(`<Contains>
@@ -146,7 +143,7 @@ const fetchPackagingNeeds = async (arg: {
                             <FieldRef Name="YearlyDemand"/>
                             <FieldRef Name="MasterID"/>
 	                        </ViewFields>
-	                        <RowLimit>5000</RowLimit>
+	                        <RowLimit>500000</RowLimit>
                         </View>`,
       })
       .then((response) => {
