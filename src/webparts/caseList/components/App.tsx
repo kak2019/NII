@@ -132,8 +132,8 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'GSDBID',
-            minWidth: 60,
-            maxWidth: 80,
+            minWidth: 50,
+            maxWidth: 50,
             styles: colomnstyle
             // onRender: (item: Iitem) => (
             //   <Text>{item.Material}</Text>
@@ -144,8 +144,8 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'Created',
-            minWidth: 60,
-            maxWidth: 120,
+            minWidth: 90,
+            maxWidth: 90,
             styles: colomnstyle,
             onRender: (item) => (
                 <span>{item.Created ? moment(item.Created).format("DD-MM-YYYY") : ""}</span>
@@ -156,8 +156,8 @@ export default memo(function App() {
             ariaLabel: 'Column operations for File type, Press to sort on File type',
             isIconOnly: false,
             fieldName: 'RequestDate',
-            minWidth: 60,
-            maxWidth: 120,
+            minWidth: 80,
+            maxWidth: 80,
             styles: colomnstyle,
             onRender: (item) => (
                 <span>{item.RequestDate ? moment(item.RequestDate).format("DD-MM-YYYY") : ""}</span>
