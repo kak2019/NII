@@ -29,7 +29,19 @@ div[data-automation-id="CanvasControl"] {
 #contentBox {
     margin-left: 5px !important;
 }
+#workbenchCommandBar {
+    display: none !important;
+}
 
+#SuiteNavWrapper {
+    display: none !important;
+}
+#spCommandBar {
+    display: none !important;
+}
+#spSiteHeader {
+    display: none !important;
+}
 .disabled-style label {
     background-color: #ffffff !important;
 }
