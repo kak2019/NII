@@ -98,7 +98,7 @@ const CaseFormView: React.FC = () => {
     userRoles: userRoles,
   };
   const yearOptions = [];
-  for (let i = 2000; i <= new Date().getFullYear(); i++) {
+  for (let i = new Date().getFullYear(); i >= 2000; i--) {
     yearOptions.push({
       value: i,
       label: i.toString(),
