@@ -23,7 +23,7 @@ const fetchAllPackagingNeeds = async (): Promise<IPackaging[]> => {
         "YearlyDemand",
         "MasterID"
       )
-      .top(1000)
+      .top(100)
       .getPaged();
     while (pager.hasNext) {
       const response = await pager.getNext();
