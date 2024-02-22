@@ -23,13 +23,15 @@ const fetchAllPackagingNeeds = async (): Promise<IPackaging[]> => {
         "YearlyDemand",
         "MasterID"
       )
-      .top(100)
+      .top(3000)
       .getPaged();
+    items = items.concat(pager.results);
     while (pager.hasNext) {
       const response = await pager.getNext();
       items = items.concat(response.results);
       pager = response;
     }
+    console.log(items);
     const result = items.map(
       (item) =>
         ({
