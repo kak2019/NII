@@ -1,20 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react";
 import "antd/dist/antd.css";
 import styles from "../PackageList.module.scss";
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Input,
-  Modal,
-  Row,
-  Spin,
-  message,
-} from "antd";
+import { Alert, Button, Card, Col, Input, Row, Spin, message } from "antd";
 import { Stack } from "@fluentui/react/lib/Stack";
 import excelIcon from "../../assets/icons8-excel-48.png";
 import { usePackagings } from "../../../../common/hooks/usePackagings";
@@ -28,22 +15,22 @@ import {
 } from "@fluentui/react";
 import { IPackaging } from "../../../../common/model/packagingneed";
 import DebouncedInputParma from "./debounceinputparma";
-import LoadingModal from "./modalloading";
+import LoadingModal from "./Loadingmodal";
 
 const PackageListView: React.FC = () => {
   //#region interfaces
   //#endregion
   //#region fields
   const [
-    isFetching,
-    errorMessage,
+    ,
+    ,
     packagingNeeds,
     packagingNeedsAll,
     supplierNameResult,
     fetchAllPackagingNeeds,
     fetchSupplierNameByParma,
     fetchPackagingNeeds,
-    clearAllData,
+    ,
   ] = usePackagings();
   const [currentPackagingNeeds, setCurrentPackagingNeeds] = React.useState([]);
   const [listGroups, setListGroups] = React.useState([]);
@@ -114,7 +101,8 @@ const PackageListView: React.FC = () => {
   ];
   //#endregion
   //#region methods
-  function convertToCSV(objArray: any[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function convertToCSV(objArray: any[]): string {
     const array =
       typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
     let str = "";
@@ -141,7 +129,7 @@ const PackageListView: React.FC = () => {
     return str;
   }
   // Function to trigger download
-  function downloadCSV() {
+  function downloadCSV(): void {
     const csvData = new Blob([convertToCSV(packagingNeedsAll)], {
       type: "text/csv;charset=utf-8;",
     });
