@@ -1,6 +1,7 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
 .homePage {
+  // overflow: hidden;
   overflow: hidden;
   padding: 1em;
   color: "[theme:bodyText, default: #323130]";
@@ -17,7 +18,8 @@
 }
 
 .main {
-  height: calc(75vh - 90px);
+  //height: calc(75vh - 90px);
+  height: calc(85vh - 20px);
   background-image: url(../assets/Background.png);
   background-size: 100% 100%;
   background-repeat: no-repeat;
