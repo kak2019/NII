@@ -19,7 +19,7 @@
 
 .main {
   //height: calc(75vh - 90px);
-  height: calc(85vh - 20px);
+  height: calc(85vh - 40px);
   background-image: url(../assets/Background.png);
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -44,7 +44,7 @@
   margin-left: 9%;
   height: 100%;
   //padding-top: 66px;
-  padding-top: 44px;
+  padding-top: 55px;
   padding-left: 20px;
 }
 
@@ -83,7 +83,8 @@
   }
 }
 .section {
-  margin-bottom: 44px;
+  //margin-bottom: 44px;
+  margin-bottom: 33px;
 }
 .homePageButton{
   background-color:white;
