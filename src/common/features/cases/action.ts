@@ -258,7 +258,7 @@ const fetchPackagingNeedsByCase = async (arg: {
                             <FieldRef Name="YearlyDemand"/>
                             <FieldRef Name="MasterID"/>
 	                        </ViewFields>
-	                        <RowLimit>5000</RowLimit>
+	                        <RowLimit>500000</RowLimit>
                         </View>`,
       })
       .then((response) => {

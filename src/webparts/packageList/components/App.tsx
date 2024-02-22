@@ -9,8 +9,10 @@ import "./App.css";
 import styles from "./PackageList.module.scss";
 import { Col, Divider, Row } from "antd";
 import AppContext from "../../../common/AppContext";
+import { usePackagings } from "../../../common/hooks/usePackagings";
 
 export default memo(function App() {
+  const [, , , , , , , , clearAllData] = usePackagings();
   const appContext = React.useContext(AppContext);
   return (
     <>
@@ -20,6 +22,9 @@ export default memo(function App() {
             <a
               href={`${appContext.context.pageContext.web.absoluteUrl}/SitePages/CollabHome.aspx`}
               style={{ color: "#00829B" }}
+              onClick={(e) => {
+                clearAllData();
+              }}
             >
               <ArrowLeftOutlined rev={undefined} />
               <span>Return to home</span>

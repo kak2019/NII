@@ -82,10 +82,9 @@ const CaseFormView: React.FC = () => {
     removePackagingIds: [],
     isEditableCommon: editableStatus.indexOf(currentCase.Status) !== -1,
     isStatusEditable:
-      (currentCase.Status === "Case Created" &&
-        currentUserRoles.indexOf("PE") !== -1) ||
-      (currentCase.Status === "In Contract Sign Off Process" &&
-        currentUserRoles.indexOf("Pack MD Master") !== -1),
+      ["Case Created", "In Contract Sign Off Process"].indexOf(
+        currentCase.Status
+      ) !== -1 && currentUserRoles.indexOf("Pack MD Master") !== -1,
     isContractEditable:
       ["In Contract Sign Off Process", "Contract Submitted"].indexOf(
         currentCase.Status
@@ -530,6 +529,9 @@ const CaseFormView: React.FC = () => {
                 defaultValue={record.Packaging}
                 inputKey={record.key}
                 field="Packaging"
+                readonly={
+                  !states.packageEditable || !states.isPackagingNeedsEditable
+                }
               />
             </Row>
             {!!record.ErrorMessage && (

@@ -4,7 +4,17 @@
 import * as React from "react";
 import "antd/dist/antd.css";
 import styles from "../PackageList.module.scss";
-import { Button, Card, Col, Input, Row, message } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Input,
+  Modal,
+  Row,
+  Spin,
+  message,
+} from "antd";
 import { Stack } from "@fluentui/react/lib/Stack";
 import excelIcon from "../../assets/icons8-excel-48.png";
 import { usePackagings } from "../../../../common/hooks/usePackagings";
@@ -24,13 +34,15 @@ const PackageListView: React.FC = () => {
   //#endregion
   //#region fields
   const [
-    ,
-    ,
+    isFetching,
+    errorMessage,
     packagingNeeds,
+    packagingNeedsAll,
     supplierNameResult,
     fetchAllPackagingNeeds,
     fetchSupplierNameByParma,
     fetchPackagingNeeds,
+    clearAllData,
   ] = usePackagings();
   const [currentPackagingNeeds, setCurrentPackagingNeeds] = React.useState([]);
   const [listGroups, setListGroups] = React.useState([]);
@@ -40,6 +52,8 @@ const PackageListView: React.FC = () => {
   const [queryCaseID, setQueryCaseID] = React.useState("");
   const [dataKey, setDataKey] = React.useState(0);
   const [resetKey, setResetKey] = React.useState(Date.now().toString());
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isDownloading, setIsDownloading] = React.useState(false);
   const columns: IColumn[] = [
     {
       key: "CaseId",
@@ -122,10 +136,9 @@ const PackageListView: React.FC = () => {
     }
     return str;
   }
-
   // Function to trigger download
   function downloadCSV() {
-    const csvData = new Blob([convertToCSV(packagingNeeds)], {
+    const csvData = new Blob([convertToCSV(packagingNeedsAll)], {
       type: "text/csv;charset=utf-8;",
     });
     const csvURL = URL.createObjectURL(csvData);
@@ -134,6 +147,12 @@ const PackageListView: React.FC = () => {
     tempLink.setAttribute("download", "Packaging Needs");
     tempLink.click();
   }
+  React.useEffect(() => {
+    if (isDownloading) {
+      downloadCSV();
+      setIsDownloading(false);
+    }
+  }, [packagingNeedsAll]);
   //#endregion
   //#region events
   const onReset = (): void => {
@@ -209,14 +228,16 @@ const PackageListView: React.FC = () => {
     setListGroups(groupsTemp);
     setCurrentPackagingNeeds(packagingNeedsSortedAll);
     setDataKey((prevKey) => prevKey + 1);
+    setIsLoading(false);
   }, [packagingNeeds]);
-  const onViewAll = async (): Promise<void> => {
-    setQueryCaseID("");
-    setQueryParma("");
-    setQuerySupplierName("-");
-    setQueryYear("");
-    setResetKey(Date.now().toString());
-    fetchAllPackagingNeeds();
+  const onDownLoad = async (): Promise<void> => {
+    setIsDownloading(true);
+    if (packagingNeedsAll.length === 0) {
+      fetchAllPackagingNeeds();
+    } else {
+      downloadCSV();
+      setIsDownloading(false);
+    }
   };
   const onSearchPackagings = async (): Promise<void> => {
     if (queryParma.trim().length > 0 && querySupplierName === "-") {
@@ -231,6 +252,7 @@ const PackageListView: React.FC = () => {
       await message.warning("Please enter the search criteria first.");
       return;
     }
+    setIsLoading(true);
     const ParmaNum = queryParma.trim().length === 0 ? "" : queryParma;
     const Year = queryYear.trim().length === 0 ? "" : queryYear;
     const CaseID = queryCaseID.trim().length === 0 ? "" : queryCaseID;
@@ -243,38 +265,13 @@ const PackageListView: React.FC = () => {
     <div>
       <Row align={"middle"}>
         <Col className={styles.title}>Case Handling</Col>
-        <Col offset={16}>
-          <Button
-            onClick={downloadCSV}
-            size="large"
-            style={{
-              borderRadius: "6px",
-              fontWeight: 600,
-              background: "#D3D3D3",
-              color: "#4caf4f",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <img
-              src={excelIcon}
-              style={{
-                width: "28px",
-                height: "28px",
-                display: "inline-block",
-                verticalAlign: "middle",
-              }}
-            />{" "}
-            Download
-          </Button>
-        </Col>
       </Row>
       <Row className={styles.rowContent}>
         <Col span={24}>
           <Card bordered={false}>
             <Row className={styles.rowContent} align="middle">
               <Col span={2}>Parma</Col>
-              <Col span={3}>
+              <Col span={6}>
                 <DebouncedInputParma
                   defaultValue={queryParma}
                   onValueChange={onParmaChange}
@@ -288,7 +285,7 @@ const PackageListView: React.FC = () => {
             </Row>
             <Row className={styles.rowContent} align="middle">
               <Col span={2}>Year</Col>
-              <Col span={3}>
+              <Col span={6}>
                 <Input
                   style={{
                     borderRadius: "6px",
@@ -316,8 +313,11 @@ const PackageListView: React.FC = () => {
                   className={styles.buttonWrapper}
                   style={{
                     borderRadius: "6px",
+                    color: isLoading ? "#fff" : "black",
+                    background: isLoading ? "lightgrey" : "white",
                   }}
                   onClick={onReset}
+                  disabled={isLoading}
                 >
                   Reset
                 </Button>
@@ -328,24 +328,36 @@ const PackageListView: React.FC = () => {
                   style={{
                     borderRadius: "6px",
                     color: "#fff",
-                    background: "#00829B",
+                    background: isLoading ? "lightgrey" : "#00829B",
                   }}
                   onClick={onSearchPackagings}
+                  disabled={isLoading}
                 >
                   Search
                 </Button>
               </Col>
               <Col span={5}>
                 <Button
-                  className={styles.buttonWrapper}
+                  onClick={onDownLoad}
                   style={{
                     borderRadius: "6px",
-                    color: "#fff",
-                    background: "#00829B",
+                    fontWeight: 600,
+                    background: "White",
+                    color: "#4caf4f",
+                    display: "flex",
+                    alignItems: "center",
                   }}
-                  onClick={onViewAll}
                 >
-                  View all packaging
+                  <img
+                    src={excelIcon}
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                    }}
+                  />{" "}
+                  Download All
                 </Button>
               </Col>
             </Row>
@@ -357,67 +369,99 @@ const PackageListView: React.FC = () => {
           <Card bordered={false}>
             <Row>
               <Col span={24}>
-                <DetailsList
-                  key={dataKey}
-                  items={currentPackagingNeeds}
-                  columns={columns}
-                  groups={listGroups}
-                  compact={true}
-                  constrainMode={ConstrainMode.horizontalConstrained}
-                  selectionMode={SelectionMode.none}
-                  groupProps={{
-                    onRenderHeader: (props) => {
-                      if (props) {
-                        return (
-                          <GroupHeader
-                            {...props}
-                            onRenderTitle={(props) => {
-                              if (props) {
-                                return (
-                                  <span
-                                    style={{
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    {props.group.level === 0 && "Parma"}
-                                    {props.group.level === 1 && "Year"} (
-                                    {props.group.name})
-                                  </span>
-                                );
-                              }
-                              return null;
+                <div>
+                  <DetailsList
+                    key={dataKey}
+                    items={isLoading ? [] : currentPackagingNeeds}
+                    columns={columns}
+                    groups={isLoading ? [] : listGroups}
+                    compact={true}
+                    constrainMode={ConstrainMode.horizontalConstrained}
+                    selectionMode={SelectionMode.none}
+                    groupProps={{
+                      onRenderHeader: (props) => {
+                        if (props) {
+                          return (
+                            <GroupHeader
+                              {...props}
+                              onRenderTitle={(props) => {
+                                if (props) {
+                                  return (
+                                    <span
+                                      style={{
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      {props.group.level === 0 && "Parma"}
+                                      {props.group.level === 1 && "Year"} (
+                                      {props.group.name})
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                          );
+                        }
+                        return null;
+                      },
+                    }}
+                    onRenderDetailsFooter={() => (
+                      <>
+                        {!isLoading && currentPackagingNeeds.length === 0 && (
+                          <Stack
+                            verticalAlign="center"
+                            style={{
+                              height: "500px",
+                              width: "100%",
+                              alignItems: "center",
                             }}
-                          />
-                        );
-                      }
-                      return null;
-                    },
-                  }}
-                  onRenderDetailsFooter={() =>
-                    currentPackagingNeeds.length === 0 && (
-                      <Stack
-                        verticalAlign="center"
-                        style={{
-                          height: "500px",
-                          width: "100%",
-                          alignItems: "center",
-                        }}
-                      >
-                        <span style={{ fontSize: "22px", fontWeight: 600 }}>
-                          No data can be displayed
-                        </span>
-                        <span style={{ fontSize: "15px", marginTop: "14px" }}>
-                          Please enter valid criteria to search data
-                        </span>
-                      </Stack>
-                    )
-                  }
-                />
+                          >
+                            <span style={{ fontSize: "22px", fontWeight: 600 }}>
+                              No data can be displayed
+                            </span>
+                            <span
+                              style={{ fontSize: "15px", marginTop: "14px" }}
+                            >
+                              Please enter valid criteria to search data
+                            </span>
+                          </Stack>
+                        )}
+                        {isLoading && (
+                          <Spin tip="Loading..." className={styles.iconwrapper}>
+                            <Alert
+                              className={styles.alertStyle}
+                              message=""
+                              description=""
+                              type="info"
+                            />
+                          </Spin>
+                        )}
+                      </>
+                    )}
+                  />
+                </div>
               </Col>
             </Row>
           </Card>
         </Col>
       </Row>
+      <Modal
+        open={isDownloading}
+        closable={false}
+        footer={null}
+        width={500}
+        style={{ borderRadius: "6px", overflow: "hidden", paddingBottom: 0 }}
+      >
+        <Spin tip="Downloading..." className={styles.iconwrapper}>
+          <Alert
+            className={styles.alertStyle}
+            message=""
+            description=""
+            type="info"
+          />
+        </Spin>
+      </Modal>
     </div>
   );
 };

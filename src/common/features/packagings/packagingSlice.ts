@@ -14,12 +14,14 @@ export enum PackagingStatus {
 }
 export interface IPackagingState {
   packagingNeeds: IPackaging[];
+  packagingNeedsAll: IPackaging[];
   statue: PackagingStatus;
   message: string;
   supplierNameResult: string;
 }
 const initialState: IPackagingState = {
   packagingNeeds: [],
+  packagingNeedsAll: [],
   statue: PackagingStatus.Idle,
   message: "",
   supplierNameResult: "",
@@ -27,7 +29,12 @@ const initialState: IPackagingState = {
 export const packagingSlice = createSlice({
   name: "packaging",
   initialState,
-  reducers: {},
+  reducers: {
+    ClearData(state) {
+      state.packagingNeeds = [];
+      state.packagingNeedsAll = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllPackagingNeedsAction.pending, (state, action) => {
@@ -35,7 +42,7 @@ export const packagingSlice = createSlice({
       })
       .addCase(fetchAllPackagingNeedsAction.fulfilled, (state, action) => {
         state.statue = PackagingStatus.Idle;
-        state.packagingNeeds = action.payload as IPackaging[];
+        state.packagingNeedsAll = action.payload as IPackaging[];
       })
       .addCase(fetchAllPackagingNeedsAction.rejected, (state, action) => {
         state.statue = PackagingStatus.Failed;
@@ -70,7 +77,7 @@ export const PACKAGINGCONST = Object.freeze({
 });
 
 // eslint-disable-next-line no-empty-pattern
-export const {} = packagingSlice.actions;
+export const { ClearData } = packagingSlice.actions;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const selectPackagings = (state: RootState) => state.packagings;
 export const packagingsReducer = packagingSlice.reducer;
