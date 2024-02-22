@@ -264,13 +264,13 @@ const PackageListView: React.FC = () => {
   return (
     <div>
       <Row align={"middle"}>
-        <Col className={styles.title}>Case Handling</Col>
+        <Col className={styles.title}>Packaging List</Col>
       </Row>
       <Row className={styles.rowContent}>
         <Col span={24}>
           <Card bordered={false}>
             <Row className={styles.rowContent} align="middle">
-              <Col span={2}>Parma</Col>
+              <Col span={3}>Parma</Col>
               <Col span={6}>
                 <DebouncedInputParma
                   defaultValue={queryParma}
@@ -278,13 +278,13 @@ const PackageListView: React.FC = () => {
                   resetKey={resetKey}
                 />
               </Col>
-              <Col offset={1} span={4}>
+              <Col offset={2} span={3}>
                 Supplier Name
               </Col>
               <Col span={6}>{querySupplierName}</Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col span={2}>Year</Col>
+              <Col span={3}>Year</Col>
               <Col span={6}>
                 <Input
                   style={{
@@ -294,7 +294,7 @@ const PackageListView: React.FC = () => {
                   onChange={(e) => setQueryYear(e.target.value)}
                 />
               </Col>
-              <Col offset={1} span={4}>
+              <Col offset={2} span={3}>
                 Case ID
               </Col>
               <Col span={6}>
@@ -308,7 +308,7 @@ const PackageListView: React.FC = () => {
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col offset={13} span={3}>
+              <Col offset={14} span={3}>
                 <Button
                   className={styles.buttonWrapper}
                   style={{
@@ -336,7 +336,7 @@ const PackageListView: React.FC = () => {
                   Search
                 </Button>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <Button
                   onClick={onDownLoad}
                   style={{
