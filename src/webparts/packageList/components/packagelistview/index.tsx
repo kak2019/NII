@@ -28,6 +28,7 @@ import {
 } from "@fluentui/react";
 import { IPackaging } from "../../../../common/model/packagingneed";
 import DebouncedInputParma from "./debounceinputparma";
+import LoadingModal from "./modalloading";
 
 const PackageListView: React.FC = () => {
   //#region interfaces
@@ -128,7 +129,10 @@ const PackageListView: React.FC = () => {
         if (Object.prototype.hasOwnProperty.call(array[i], index)) {
           if (line !== "") line += ",";
           // Enclose field in double quotes and escape existing double quotes
-          const value = array[i][index].toString().replace(/"/g, '""');
+          const value =
+            array[i][index] === null
+              ? ""
+              : array[i][index].toString().replace(/"/g, '""');
           line += '"' + value + '"';
         }
       }
@@ -446,22 +450,7 @@ const PackageListView: React.FC = () => {
           </Card>
         </Col>
       </Row>
-      <Modal
-        open={isDownloading}
-        closable={false}
-        footer={null}
-        width={500}
-        style={{ borderRadius: "6px", overflow: "hidden", paddingBottom: 0 }}
-      >
-        <Spin tip="Downloading..." className={styles.iconwrapper}>
-          <Alert
-            className={styles.alertStyle}
-            message=""
-            description=""
-            type="info"
-          />
-        </Spin>
-      </Modal>
+      <LoadingModal isShow={isDownloading} />
     </div>
   );
 };
