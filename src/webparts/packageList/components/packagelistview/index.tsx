@@ -264,7 +264,7 @@ const PackageListView: React.FC = () => {
   return (
     <div>
       <Row align={"middle"}>
-        <Col className={styles.title}>Case Handling</Col>
+        <Col className={styles.title}>Packaging List</Col>
       </Row>
       <Row className={styles.rowContent}>
         <Col span={24}>
