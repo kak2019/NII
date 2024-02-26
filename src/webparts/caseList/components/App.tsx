@@ -96,7 +96,7 @@ export default memo(function App() {
             maxWidth: 50,
             styles: colomnstyle,
             onRender: (item) => (
-                <a href={webURL + "/sitepages/CaseForm.aspx?caseid=" + item.ID}>{item.CaseID}</a>
+                <a href={webURL + "/sitepages/CaseForm.aspx?caseid=" + item.ID} style={{textDecoration:'underline'}}>{item.CaseID}</a>
             ),
         },
         {

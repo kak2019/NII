@@ -1,3 +1,14 @@
+
+
+/*SharePoint workbench full width webpart*/
+#workbenchPageContent {
+    /* min-width: 100vw !important; */
+    display: flex !important;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%)
+}
+
 #workbenchCommandBar {
     display: none !important;
   }
