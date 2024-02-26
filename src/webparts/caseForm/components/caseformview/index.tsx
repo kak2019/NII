@@ -1315,7 +1315,7 @@ const CaseFormView: React.FC = () => {
                       format={dateFormat}
                       onChange={onRequestDateChange}
                       allowClear={false}
-                      disabled={!states.isEditableCommon}
+                      disabled={!states.isPackagingNeedsEditable}
                     />
                   </Col>
                 </Row>
