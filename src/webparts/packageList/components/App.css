@@ -16,7 +16,13 @@ div[data-automation-id="CanvasControl"] {
     margin: 0;
     padding: 0;
 }
-
+div[data-automation-id="CanvasZone"] {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    min-width: 1200px !important;
+    max-width: 1500px !important;
+    width: 70vw !important;
+}
 /*remove left navigation box from the SharePoint page*/
 #spLeftNav {
     display: none !important;

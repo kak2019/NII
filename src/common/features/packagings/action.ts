@@ -31,7 +31,6 @@ const fetchAllPackagingNeeds = async (): Promise<IPackaging[]> => {
       items = items.concat(response.results);
       pager = response;
     }
-    console.log(items);
     const result = items.map(
       (item) =>
         ({
@@ -116,6 +115,10 @@ const fetchPackagingNeeds = async (arg: {
                         <Value Type="Text">${arg.CaseID}</Value>
                       </Contains>`);
   }
+  conditions.push(`<Neq>
+                        <FieldRef Name="IsRejected"/>
+                        <Value Type="Text">yes</Value>
+                    </Neq>`);
   const whereClause = conditions.reduce((prevCondition, currentCondition) => {
     if (prevCondition === "") {
       return currentCondition;
@@ -144,6 +147,7 @@ const fetchPackagingNeeds = async (arg: {
                             <FieldRef Name="WeeklyDemand"/>
                             <FieldRef Name="YearlyDemand"/>
                             <FieldRef Name="MasterID"/>
+                            <FieldRef Name="IsRejected"/>
 	                        </ViewFields>
 	                        <RowLimit>500000</RowLimit>
                         </View>`,

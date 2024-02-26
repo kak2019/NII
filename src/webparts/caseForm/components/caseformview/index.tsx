@@ -30,6 +30,7 @@ import Card from "antd/lib/card/Card";
 import AppContext from "../../../../common/AppContext";
 import { Stack } from "office-ui-fabric-react";
 import DebouncedInputCommon from "./debounceinput";
+import TextArea from "antd/lib/input/TextArea";
 
 const CaseFormView: React.FC = () => {
   //#region interfaces
@@ -94,7 +95,12 @@ const CaseFormView: React.FC = () => {
       currentUserRoles.indexOf("GDL Team") !== -1,
     isPackagingNeedsEditable:
       editableStatus.indexOf(currentCase.Status) !== -1 ||
-      currentUserRoles.indexOf("Pack MD Master") !== -1,
+      (currentCase.Status === "Case Approved" &&
+        currentUserRoles.indexOf("Pack MD Master") !== -1),
+    isSaveDisable:
+      currentCase.Status === "Case Rejected" ||
+      (currentCase.Status === "Case Approved" &&
+        currentUserRoles.indexOf("Pack MD Master") === -1),
     userRoles: userRoles,
   };
   const yearOptions = [];
@@ -384,6 +390,7 @@ const CaseFormView: React.FC = () => {
       IssuName: currentCaseDup.IssuName,
       IssuPhoneNo: currentCaseDup.IssuPhoneNo,
       IssuEmail: currentCaseDup.IssuEmail,
+      GDLApprovalComment: currentCaseDup.GDLApprovalComment,
     };
     const packagingNeedsDup = [...states.packagingNeeds];
     const packagingNeedsUpdate = packagingNeedsDup.map((item) => {
@@ -617,9 +624,11 @@ const CaseFormView: React.FC = () => {
         <Col span={24}>
           <Card bordered={false}>
             <Row align="middle">
-              <Col span={5}>Case ID:</Col>
+              <Col span={5} className={styles.fontBold}>
+                Case ID:
+              </Col>
               <Col span={6}>{states.currentCase.CaseID}</Col>
-              <Col offset={1} span={5}>
+              <Col offset={1} span={5} className={styles.fontBold}>
                 Status:
               </Col>
               <Col span={7}>
@@ -660,9 +669,11 @@ const CaseFormView: React.FC = () => {
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col span={5}>Created By:</Col>
+              <Col span={5} className={styles.fontBold}>
+                Created By:
+              </Col>
               <Col span={6}>{states.currentCase.Author}</Col>
-              <Col offset={1} span={5}>
+              <Col offset={1} span={5} className={styles.fontBold}>
                 Sign-off Contract:
               </Col>
               <Col span={7}>
@@ -720,9 +731,11 @@ const CaseFormView: React.FC = () => {
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col span={5}>Creation Date:</Col>
+              <Col span={5} className={styles.fontBold}>
+                Creation Date:
+              </Col>
               <Col span={6}>{states.currentCase.Created}</Col>
-              <Col offset={1} span={5}>
+              <Col offset={1} span={5} className={styles.fontBold}>
                 Approval:
               </Col>
               <Col span={7}>
@@ -737,8 +750,10 @@ const CaseFormView: React.FC = () => {
               </Col>
             </Row>
             <Row className={styles.rowContent} align="middle">
-              <Col span={5}>Original Request Form:</Col>
-              <Col>
+              <Col span={5} className={styles.fontBold}>
+                Original Request Form:
+              </Col>
+              <Col span={6}>
                 {originalFiles.length > 0 && (
                   <a
                     href={originalFiles[0].ServerRelativeUrl}
@@ -748,6 +763,41 @@ const CaseFormView: React.FC = () => {
                   </a>
                 )}
               </Col>
+              {(currentCase.Status === "Case Approved" ||
+                currentCase.Status === "Case Rejected") && (
+                <>
+                  <Col offset={1} span={5} className={styles.fontBold}>
+                    Comments:
+                  </Col>
+
+                  <Col span={7}>
+                    {currentCase.GDLApprovalComment && (
+                      <span>{currentCase.GDLApprovalComment}</span>
+                    )}
+                    {!currentCase.GDLApprovalComment && <span>None</span>}
+                  </Col>
+                </>
+              )}
+              {currentCase.Status === "Contract Submitted" &&
+                (states.currentCase.Approval === 0 ||
+                  states.currentCase.Approval === 1) && (
+                  <>
+                    <Col offset={1} span={5}>
+                      Comments:
+                    </Col>
+                    <Col span={7}>
+                      <TextArea
+                        rows={2}
+                        placeholder="Please enter your comments"
+                        className={styles.inputStyle}
+                        defaultValue={states.currentCase.GDLApprovalComment}
+                        onChange={(e) => {
+                          onTextChange(e.target.value, "GDLApprovalComment");
+                        }}
+                      />
+                    </Col>
+                  </>
+                )}
             </Row>
           </Card>
         </Col>
@@ -1345,10 +1395,11 @@ const CaseFormView: React.FC = () => {
                   style={{
                     borderRadius: "6px",
                     color: "#fff",
-                    background: "#00829B",
+                    background: states.isSaveDisable ? "lightgrey" : "#00829B",
                   }}
                   className={styles.fixedWidth}
                   onClick={() => onOpenModal("save")}
+                  disabled={states.isSaveDisable}
                 >
                   Save
                 </Button>

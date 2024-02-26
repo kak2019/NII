@@ -37,4 +37,5 @@ export interface INiiCaseItem {
   IssuName?: string;
   IssuPhoneNo?: string;
   IssuEmail?: string;
+  GDLApprovalComment?: string;
 }

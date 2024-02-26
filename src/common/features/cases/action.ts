@@ -70,6 +70,7 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
                         <FieldRef Name="CaseID"/>
                         <FieldRef Name="Created"/>
                         <FieldRef Name="Author"/>
+                        <FieldRef Name="GDLApprovalComment"/>
                       </ViewFields>
                       <RowLimit>1</RowLimit>
                     </View>`,
@@ -155,6 +156,7 @@ const fetchById = async (arg: { Id: number }): Promise<INiiCaseItem> => {
             IssuName: response.Row[0].IssuName,
             IssuPhoneNo: response.Row[0].IssuPhoneNo,
             IssuEmail: response.Row[0].IssuEmail,
+            GDLApprovalComment: response.Row[0].GDLApprovalComment,
           } as INiiCaseItem;
         } else {
           return Promise.reject(new Error("Case not found"));

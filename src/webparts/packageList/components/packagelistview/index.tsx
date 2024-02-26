@@ -130,7 +130,19 @@ const PackageListView: React.FC = () => {
   }
   // Function to trigger download
   function downloadCSV(): void {
-    const csvData = new Blob([convertToCSV(packagingNeedsAll)], {
+    const downloadData = packagingNeedsAll.map((item) => {
+      return {
+        CaseID: item.CaseID,
+        Year: item.Year,
+        Packaging: item.Packaging,
+        PackagingName: item.PackagingName,
+        WeeklyDemand: item.WeeklyDemand,
+        YearlyDemand: item.YearlyDemand,
+        SupplierNo: item.SupplierNo,
+        SupplierName: item.SupplierName,
+      };
+    });
+    const csvData = new Blob([convertToCSV(downloadData)], {
       type: "text/csv;charset=utf-8;",
     });
     const csvURL = URL.createObjectURL(csvData);
@@ -177,10 +189,10 @@ const PackageListView: React.FC = () => {
         return 1;
       }
       if (a.Year < b.Year) {
-        return -1;
+        return 1;
       }
       if (a.Year > b.Year) {
-        return 1;
+        return -1;
       }
       return 0;
     });

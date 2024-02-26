@@ -17,5 +17,6 @@ export interface IAppProps {
   isContractEditable: boolean;
   isApprovalAllow: boolean;
   isPackagingNeedsEditable: boolean;
+  isSaveDisable: boolean;
   userRoles: string[];
 }

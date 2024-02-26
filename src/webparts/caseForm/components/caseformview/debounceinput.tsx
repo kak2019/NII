@@ -35,6 +35,7 @@ const DebouncedInputCommon: React.FC<Props> = memo(
           onChange={(e) => setInputValue(e.target.value)}
           className={styles.halfLength}
           readOnly={readonly}
+          bordered={!readonly}
         />
       </div>
     );
