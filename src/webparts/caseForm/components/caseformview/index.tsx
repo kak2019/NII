@@ -1330,7 +1330,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.IssuCompName}
-                      disabled={!states.isEditableCommon}
+                      disabled={!states.isPackagingNeedsEditable}
                       onChange={(e) => {
                         onTextChange(e.target.value, "IssuCompName");
                       }}
@@ -1343,7 +1343,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.IssuName}
-                      disabled={!states.isEditableCommon}
+                      disabled={!states.isPackagingNeedsEditable}
                       onChange={(e) => {
                         onTextChange(e.target.value, "IssuName");
                       }}
@@ -1356,7 +1356,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.IssuPhoneNo}
-                      disabled={!states.isEditableCommon}
+                      disabled={!states.isPackagingNeedsEditable}
                       onChange={(e) => {
                         onTextChange(e.target.value, "IssuPhoneNo");
                       }}
@@ -1369,7 +1369,7 @@ const CaseFormView: React.FC = () => {
                     <Input
                       className={styles.inputStyle}
                       defaultValue={states.currentCase.IssuEmail}
-                      disabled={!states.isEditableCommon}
+                      disabled={!states.isPackagingNeedsEditable}
                       onChange={(e) => {
                         onTextChange(e.target.value, "IssuEmail");
                       }}
