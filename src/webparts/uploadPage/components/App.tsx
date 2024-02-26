@@ -269,7 +269,11 @@ export default memo(function App() {
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
                     setItems(jsonData);
                     console.log("Json", jsonData)
-
+                    //@ts-ignore
+                    console.log("Json22", jsonData[jsonData.findIndex(val => val.__rowNum__ === 1)]["UD-KMP"])
+                    //@ts-ignore
+                    if(jsonData[jsonData.findIndex(val => val.__rowNum__ === 1)]["UD-KMP"] !=="NEW INPUT FOR PACKAGING NEED") {setError("Please upload a valid template.");return};
+                    
                     const json = {
                         //'Supplier parma code': getArrayKey(jsonData, 'Supplier parma code :')?.__EMPTY_1
                         //@ts-ignore
