@@ -44,7 +44,9 @@ div[data-automation-id="CanvasControl"] {
 #spSiteHeader {
     display: none !important;
 }
-
+#CommentsWrapper {
+    display: none !important;
+}
 .disabled-style label {
     background-color: #ffffff !important;
 }
