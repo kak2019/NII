@@ -459,7 +459,7 @@ export default memo(function App() {
                 // console.log("req",moment(val?.RequestDate,'MM-DD-YYYY'))
                 //condition = condition && !!val.RequestDate && moment(val.RequestDate).isBetween(query.current.start, query.current.end)
                 //condition = condition && !!val.RequestDate && moment(val?.RequestDate,'MM-DD-YYYY').isBetween(moment(query.current.start,'YYYY-DD-MM'), moment(query.current.end,'YYYY-DD-MM'))
-                condition = condition && !!val.RequestDate && moment(val?.RequestDate, "MM/DD/YYYY").isBetween(moment(selectedDateFrom, "DD-MM-YYYY"), moment(selectedDateTo, "DD-MM-YYYY"))
+                condition = condition && !!val.RequestDate && moment(val?.RequestDate, "MM/DD/YYYY").isBetween(moment(selectedDateFrom, "DD-MM-YYYY"), moment(selectedDateTo, "DD-MM-YYYY"),undefined, '[]')
             }
             if (selectedKey && selectedKey === 'All') {
                 setItems(itemsCopy)
@@ -572,7 +572,7 @@ export default memo(function App() {
 
                 <Stack className={styles.contentBox} verticalAlign="center" style={{ marginTop: '16px' }}>
                     <DetailsList
-                        items={items.slice(10 * (page - 1), 10 * (page - 1) + 9)}
+                        items={items.slice(10 * (page - 1), 10 * (page - 1) + 10)}
                         styles={{
                             headerWrapper: [{
                                 selectors: {

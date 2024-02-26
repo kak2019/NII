@@ -47,7 +47,7 @@ export default memo(function App() {
         <div className={styles.secondMask}/>
 
         <div className={styles.content}>
-          <div className={styles.title}>Applying logistics procedure</div>
+          <div className={styles.title}>UD Nii Tools</div>
             <Stack enableScopedSelectors styles={stackStyles}>
               <div className={styles.section}>
                 <Stack enableScopedSelectors horizontal horizontalAlign="start">

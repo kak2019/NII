@@ -506,6 +506,7 @@ export default memo(function App() {
                                         setData([])
                                         setError('')
                                         setfileWarning('')
+                                        setShowBtn(false)
                                     }} style={{
                                         marginLeft: '16px',
                                         display: 'flex',
